@@ -1,5 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Caveat } from 'next/font/google';
+
+const caveat = Caveat({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+});
 
 // Cleaner, more professional hand-drawn border
 const CleanHandDrawnBorder: React.FC<{ className?: string }> = ({ className }) => (
@@ -55,16 +61,13 @@ export const HandDrawnButtonV2: React.FC<HandDrawnButtonV2Props> = ({
   return (
     <button
       className={cn(
-        'relative px-8 py-3.5 font-medium transition-all duration-300',
+        'relative px-8 py-3.5 text-lg font-semibold transition-all duration-300',
         'hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]',
-        'group',
+        'group tracking-wide',
+        caveat.className,
         variants[variant],
         className
       )}
-      style={{
-        fontFamily: 'Permanent Marker, cursive',
-        letterSpacing: '0.02em',
-      }}
       {...props}
     >
       {/* Paper texture */}

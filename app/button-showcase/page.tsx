@@ -63,13 +63,13 @@ export default function ButtonShowcase() {
                 <span className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full">RECOMMENDED</span>
               </div>
               <p className="text-gray-600">
-                Refined hand-drawn borders with cleaner lines and Permanent Marker font. More professional tattoo shop vibes while maintaining organic character.
+                Refined hand-drawn borders with cleaner lines and casual Caveat font. Trendy, minimalist tattoo aesthetic with professional polish - perfect for the modern tattoo shop vibe.
               </p>
               <div className="mt-2 flex flex-wrap gap-2 text-sm">
                 <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full">Clean</span>
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Professional</span>
-                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Hand-drawn Font</span>
-                <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full">Authentic</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Trendy</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Casual Handwriting</span>
+                <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full">Modern</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-4">
