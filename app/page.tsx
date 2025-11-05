@@ -24,7 +24,7 @@ export default function Home() {
 
         {/* Top Left - Flower */}
         <div
-          className="absolute top-12 left-12 opacity-30 transition-transform"
+          className="absolute top-12 left-12 opacity-30"
           style={{ transform: `translateY(${scrollY * 0.15}px)` }}
         >
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" className="text-indigo-400">
@@ -42,7 +42,7 @@ export default function Home() {
 
         {/* Top Right - Bird */}
         <div
-          className="absolute top-24 right-24 opacity-25 transition-transform"
+          className="absolute top-24 right-24 opacity-25"
           style={{ transform: `translateY(${scrollY * 0.25}px)` }}
         >
           <svg width="100" height="60" viewBox="0 0 100 60" fill="none" stroke="currentColor" className="text-purple-400">
@@ -55,7 +55,7 @@ export default function Home() {
 
         {/* Top Center - Paper Plane */}
         <div
-          className="absolute top-32 left-1/3 opacity-20 transition-transform"
+          className="absolute top-32 left-1/3 opacity-20"
           style={{ transform: `translateY(${scrollY * 0.2}px)` }}
         >
           <svg width="70" height="70" viewBox="0 0 70 70" fill="none" stroke="currentColor" className="text-pink-400">
@@ -67,7 +67,7 @@ export default function Home() {
 
         {/* Right Middle - Smiley Face */}
         <div
-          className="absolute right-16 top-1/3 opacity-30 transition-transform"
+          className="absolute right-16 top-1/3 opacity-30"
           style={{ transform: `translateY(${scrollY * 0.1}px)` }}
         >
           <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-yellow-500">
@@ -80,7 +80,7 @@ export default function Home() {
 
         {/* Bottom Left - Small Flower */}
         <div
-          className="absolute bottom-32 left-24 opacity-25 transition-transform"
+          className="absolute bottom-32 left-24 opacity-25"
           style={{ transform: `translateY(${scrollY * -0.1}px)` }}
         >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-400">
@@ -94,7 +94,7 @@ export default function Home() {
 
         {/* Bottom Right - Star/Sparkle */}
         <div
-          className="absolute bottom-40 right-32 opacity-20 transition-transform"
+          className="absolute bottom-40 right-32 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.15}px)` }}
         >
           <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-purple-400">
@@ -107,7 +107,7 @@ export default function Home() {
 
         {/* Left Middle - Heart */}
         <div
-          className="absolute left-20 top-1/2 opacity-25 transition-transform"
+          className="absolute left-20 top-1/2 opacity-25"
           style={{ transform: `translateY(${scrollY * 0.18}px)` }}
         >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-pink-400">
@@ -117,7 +117,7 @@ export default function Home() {
 
         {/* Top Right Corner - Butterfly */}
         <div
-          className="absolute top-16 right-1/4 opacity-20 transition-transform"
+          className="absolute top-16 right-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * 0.22}px)` }}
         >
           <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-indigo-400">
@@ -133,7 +133,7 @@ export default function Home() {
 
         {/* Bottom Center - Leaf */}
         <div
-          className="absolute bottom-20 left-1/2 opacity-25 transition-transform"
+          className="absolute bottom-20 left-1/2 opacity-25"
           style={{ transform: `translateY(${scrollY * -0.12}px)` }}
         >
           <svg width="40" height="70" viewBox="0 0 40 70" fill="none" stroke="currentColor" className="text-green-400">
@@ -144,7 +144,7 @@ export default function Home() {
 
         {/* Right Bottom - Moon */}
         <div
-          className="absolute bottom-24 right-1/4 opacity-20 transition-transform"
+          className="absolute bottom-24 right-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.18}px)` }}
         >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-300">
@@ -154,7 +154,7 @@ export default function Home() {
 
         {/* Left Bottom - Sun */}
         <div
-          className="absolute bottom-1/3 left-1/4 opacity-20 transition-transform"
+          className="absolute bottom-1/3 left-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.08}px)` }}
         >
           <svg width="55" height="55" viewBox="0 0 55 55" fill="none" stroke="currentColor" className="text-yellow-400">
