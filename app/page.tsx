@@ -22,96 +22,106 @@ export default function Home() {
       <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden">
         {/* Scattered Tattoo Decorations with Parallax */}
 
-        {/* Top Left - Flower */}
+        {/* Top Left - Bird */}
         <div
           className="absolute top-12 left-12 opacity-30"
           style={{ transform: `translateY(${scrollY * 0.15}px)` }}
         >
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" className="text-indigo-400">
-            <circle cx="40" cy="40" r="8" strokeWidth="1.5" />
-            <ellipse cx="40" cy="25" rx="6" ry="10" strokeWidth="1.5" />
-            <ellipse cx="55" cy="40" rx="10" ry="6" strokeWidth="1.5" />
-            <ellipse cx="40" cy="55" rx="6" ry="10" strokeWidth="1.5" />
-            <ellipse cx="25" cy="40" rx="10" ry="6" strokeWidth="1.5" />
-            <ellipse cx="50" cy="30" rx="7" ry="9" strokeWidth="1.5" transform="rotate(45 50 30)" />
-            <ellipse cx="50" cy="50" rx="7" ry="9" strokeWidth="1.5" transform="rotate(-45 50 50)" />
-            <ellipse cx="30" cy="50" rx="7" ry="9" strokeWidth="1.5" transform="rotate(45 30 50)" />
-            <ellipse cx="30" cy="30" rx="7" ry="9" strokeWidth="1.5" transform="rotate(-45 30 30)" />
+          <svg width="80" height="60" viewBox="0 0 80 60" fill="none" stroke="currentColor" className="text-indigo-400">
+            <path d="M 10 35 Q 20 20, 40 30 Q 60 20, 70 35" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 40 30 L 40 45" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="35" cy="28" r="1.5" fill="currentColor" />
+            <path d="M 30 20 Q 35 15, 40 18" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Top Right - Bird */}
+        {/* Top Right - Bird of Paradise */}
         <div
           className="absolute top-24 right-24 opacity-25"
           style={{ transform: `translateY(${scrollY * 0.25}px)` }}
         >
-          <svg width="100" height="60" viewBox="0 0 100 60" fill="none" stroke="currentColor" className="text-purple-400">
-            <path d="M10 30 Q 20 20, 35 25 Q 50 28, 65 25 Q 80 20, 90 30" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M35 25 L 30 15 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M65 25 L 70 15 L 65 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="38" cy="24" r="1" fill="currentColor" />
+          <svg width="70" height="80" viewBox="0 0 70 80" fill="none" stroke="currentColor" className="text-purple-400">
+            <path d="M 35 20 Q 45 10, 55 15 L 50 25 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 35 20 Q 45 15, 55 20 L 48 28 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 35 20 Q 42 18, 50 25 L 45 32 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <ellipse cx="35" cy="35" rx="8" ry="12" strokeWidth="1.5" />
+            <path d="M 35 47 L 35 65" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 30 58 L 35 62 L 40 58" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           </svg>
         </div>
 
-        {/* Top Center - Paper Plane */}
+        {/* Top Center - Paper Airplane */}
         <div
           className="absolute top-32 left-1/3 opacity-20"
           style={{ transform: `translateY(${scrollY * 0.2}px)` }}
         >
-          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" stroke="currentColor" className="text-pink-400">
-            <path d="M15 55 L 55 15 L 35 35 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M55 15 L 35 35 L 40 55 L 45 40 L 55 15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <line x1="35" y1="35" x2="25" y2="45" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-pink-400">
+            <path d="M 10 50 L 50 10 L 30 28 L 10 50 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 50 10 L 30 28 L 32 48" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="30" y1="28" x2="20" y2="38" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Right Middle - Smiley Face */}
+        {/* Right Middle - Skull */}
         <div
           className="absolute right-16 top-1/3 opacity-30"
           style={{ transform: `translateY(${scrollY * 0.1}px)` }}
         >
-          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-yellow-500">
-            <circle cx="30" cy="30" r="25" strokeWidth="1.5" />
-            <circle cx="22" cy="25" r="2" fill="currentColor" />
-            <circle cx="38" cy="25" r="2" fill="currentColor" />
-            <path d="M 20 35 Q 30 42, 40 35" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="60" height="70" viewBox="0 0 60 70" fill="none" stroke="currentColor" className="text-gray-400">
+            <ellipse cx="30" cy="28" rx="18" ry="20" strokeWidth="1.5" />
+            <circle cx="22" cy="25" r="4" strokeWidth="1.5" />
+            <circle cx="38" cy="25" r="4" strokeWidth="1.5" />
+            <path d="M 26 35 L 26 38 M 30 35 L 30 38 M 34 35 L 34 38" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 20 48 L 20 58 L 26 58 L 26 48" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M 34 48 L 34 58 L 40 58 L 40 48" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M 22 42 Q 30 45, 38 42" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Bottom Left - Small Flower */}
+        {/* Bottom Left - Ghost */}
         <div
           className="absolute bottom-32 left-24 opacity-25"
           style={{ transform: `translateY(${scrollY * -0.1}px)` }}
         >
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-400">
-            <circle cx="25" cy="25" r="4" strokeWidth="1" />
-            <circle cx="25" cy="15" r="5" strokeWidth="1" />
-            <circle cx="35" cy="25" r="5" strokeWidth="1" />
-            <circle cx="25" cy="35" r="5" strokeWidth="1" />
-            <circle cx="15" cy="25" r="5" strokeWidth="1" />
+          <svg width="60" height="70" viewBox="0 0 60 70" fill="none" stroke="currentColor" className="text-indigo-400">
+            <path d="M 15 25 Q 15 10, 30 10 Q 45 10, 45 25 L 45 60 L 40 55 L 35 60 L 30 55 L 25 60 L 20 55 L 15 60 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="23" cy="25" r="2" fill="currentColor" />
+            <circle cx="37" cy="25" r="2" fill="currentColor" />
+            <path d="M 25 32 Q 30 35, 35 32" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Bottom Right - Star/Sparkle */}
+        {/* Bottom Right - Balloon Dog */}
         <div
           className="absolute bottom-40 right-32 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.15}px)` }}
         >
-          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-purple-400">
-            <line x1="30" y1="10" x2="30" y2="50" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="10" y1="30" x2="50" y2="30" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="17" y1="17" x2="43" y2="43" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="43" y1="17" x2="17" y2="43" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-purple-400">
+            <circle cx="15" cy="20" r="8" strokeWidth="1.5" />
+            <circle cx="35" cy="15" r="7" strokeWidth="1.5" />
+            <ellipse cx="28" cy="35" rx="12" ry="10" strokeWidth="1.5" />
+            <circle cx="50" cy="25" r="6" strokeWidth="1.5" />
+            <line x1="20" y1="45" x2="20" y2="55" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="36" y1="45" x2="36" y2="55" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 40 35 Q 48 35, 50 30" strokeWidth="1.5" strokeLinecap="round" fill="none" />
           </svg>
         </div>
 
-        {/* Left Middle - Heart */}
+        {/* Left Middle - Alien */}
         <div
           className="absolute left-20 top-1/2 opacity-25"
           style={{ transform: `translateY(${scrollY * 0.18}px)` }}
         >
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-pink-400">
-            <path d="M 25 40 C 25 40, 10 30, 10 20 C 10 15, 12 12, 16 12 C 20 12, 23 15, 25 18 C 27 15, 30 12, 34 12 C 38 12, 40 15, 40 20 C 40 30, 25 40, 25 40 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="60" height="70" viewBox="0 0 60 70" fill="none" stroke="currentColor" className="text-green-400">
+            <ellipse cx="30" cy="30" rx="20" ry="25" strokeWidth="1.5" />
+            <ellipse cx="22" cy="28" rx="6" ry="9" strokeWidth="1.5" />
+            <ellipse cx="38" cy="28" rx="6" ry="9" strokeWidth="1.5" />
+            <circle cx="22" cy="28" r="3" fill="currentColor" />
+            <circle cx="38" cy="28" r="3" fill="currentColor" />
+            <line x1="30" y1="35" x2="30" y2="40" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 25 45 L 35 45" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 12 50 Q 15 58, 20 62" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 48 50 Q 45 58, 40 62" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
@@ -120,53 +130,59 @@ export default function Home() {
           className="absolute top-16 right-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * 0.22}px)` }}
         >
-          <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-indigo-400">
-            <ellipse cx="25" cy="20" rx="12" ry="15" strokeWidth="1.5" />
-            <ellipse cx="25" cy="40" rx="10" ry="12" strokeWidth="1.5" />
-            <ellipse cx="45" cy="20" rx="12" ry="15" strokeWidth="1.5" />
-            <ellipse cx="45" cy="40" rx="10" ry="12" strokeWidth="1.5" />
+          <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-pink-500">
+            <path d="M 35 15 Q 25 10, 18 18 Q 15 25, 20 32 Q 25 35, 35 30" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 35 15 Q 45 10, 52 18 Q 55 25, 50 32 Q 45 35, 35 30" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 35 30 Q 30 35, 28 42 Q 28 48, 35 50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 35 30 Q 40 35, 42 42 Q 42 48, 35 50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             <line x1="35" y1="10" x2="35" y2="50" strokeWidth="1.5" />
-            <line x1="35" y1="8" x2="32" y2="2" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="35" y1="8" x2="38" y2="2" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="35" y1="8" x2="32" y2="3" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="35" y1="8" x2="38" y2="3" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Bottom Center - Leaf */}
+        {/* Bottom Center - Matchstick Cross */}
         <div
           className="absolute bottom-20 left-1/2 opacity-25"
           style={{ transform: `translateY(${scrollY * -0.12}px)` }}
         >
-          <svg width="40" height="70" viewBox="0 0 40 70" fill="none" stroke="currentColor" className="text-green-400">
-            <path d="M 20 65 Q 20 40, 35 25 Q 25 30, 20 20 Q 15 30, 5 25 Q 20 40, 20 65" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 20 20 L 20 65" strokeWidth="1" />
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-orange-400">
+            <line x1="15" y1="15" x2="45" y2="45" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="45" y1="15" x2="15" y2="45" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="15" cy="15" r="3" strokeWidth="1.5" fill="currentColor" className="text-red-400" />
+            <circle cx="45" cy="15" r="3" strokeWidth="1.5" fill="currentColor" className="text-red-400" />
+            <circle cx="15" cy="45" r="3" strokeWidth="1.5" fill="currentColor" className="text-red-400" />
+            <circle cx="45" cy="45" r="3" strokeWidth="1.5" fill="currentColor" className="text-red-400" />
           </svg>
         </div>
 
-        {/* Right Bottom - Moon */}
+        {/* Right Bottom - Playing Cards */}
         <div
           className="absolute bottom-24 right-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.18}px)` }}
         >
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-300">
-            <path d="M 30 10 A 15 15 0 1 0 30 40 A 12 12 0 1 1 30 10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="60" height="70" viewBox="0 0 60 70" fill="none" stroke="currentColor" className="text-red-500">
+            <rect x="10" y="15" width="30" height="45" rx="3" strokeWidth="1.5" />
+            <path d="M 25 28 L 20 35 L 30 35 Z" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M 25 48 L 30 41 L 20 41 Z" strokeWidth="1.5" strokeLinejoin="round" />
+            <rect x="20" y="10" width="30" height="45" rx="3" strokeWidth="1.5" className="text-gray-700" />
+            <circle cx="35" cy="25" r="3" strokeWidth="1.5" />
+            <circle cx="35" cy="45" r="3" strokeWidth="1.5" />
           </svg>
         </div>
 
-        {/* Left Bottom - Sun */}
+        {/* Left Bottom - Dice */}
         <div
           className="absolute bottom-1/3 left-1/4 opacity-20"
           style={{ transform: `translateY(${scrollY * -0.08}px)` }}
         >
-          <svg width="55" height="55" viewBox="0 0 55 55" fill="none" stroke="currentColor" className="text-yellow-400">
-            <circle cx="27.5" cy="27.5" r="10" strokeWidth="1.5" />
-            <line x1="27.5" y1="5" x2="27.5" y2="12" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="27.5" y1="43" x2="27.5" y2="50" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="5" y1="27.5" x2="12" y2="27.5" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="43" y1="27.5" x2="50" y2="27.5" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="12" y1="12" x2="17" y2="17" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="38" y1="38" x2="43" y2="43" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="38" y1="17" x2="43" y2="12" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="12" y1="43" x2="17" y2="38" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-indigo-500">
+            <rect x="15" y="15" width="25" height="25" rx="3" strokeWidth="1.5" transform="rotate(-15 27.5 27.5)" />
+            <circle cx="23" cy="23" r="1.5" fill="currentColor" transform="rotate(-15 27.5 27.5)" />
+            <circle cx="27" cy="27" r="1.5" fill="currentColor" transform="rotate(-15 27.5 27.5)" />
+            <circle cx="31" cy="31" r="1.5" fill="currentColor" transform="rotate(-15 27.5 27.5)" />
+            <circle cx="23" cy="31" r="1.5" fill="currentColor" transform="rotate(-15 27.5 27.5)" />
+            <circle cx="31" cy="23" r="1.5" fill="currentColor" transform="rotate(-15 27.5 27.5)" />
           </svg>
         </div>
 
