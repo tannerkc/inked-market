@@ -1,81 +1,159 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { Permanent_Marker } from "next/font/google";
+
+const permanentMarker = Permanent_Marker({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export default function Home() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-block">
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                  Coming Soon
-                </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Discover Your Next
-                <span className="text-indigo-600"> Tattoo Artist</span>
-              </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Connect with talented tattoo artists and professional studios.
-                Browse portfolios, read reviews, and book your next piece of art.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
-                  <Link href="/discover">Explore Artists</Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="#features">Learn More</Link>
-                </Button>
-              </div>
-              <div className="flex items-center gap-8 pt-4">
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">10K+</p>
-                  <p className="text-sm text-gray-600">Artists</p>
-                </div>
-                <div className="w-px h-12 bg-gray-300" />
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">5K+</p>
-                  <p className="text-sm text-gray-600">Studios</p>
-                </div>
-                <div className="w-px h-12 bg-gray-300" />
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">50K+</p>
-                  <p className="text-sm text-gray-600">Designs</p>
-                </div>
-              </div>
+      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Scattered Tattoo Decorations with Parallax */}
+
+        {/* Top Left - Bird */}
+        <div
+          className="absolute top-12 left-12 opacity-30"
+          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+        >
+          <img src="/tattoos/bird-svgrepo-com.svg" alt="Bird" width="80" height="80" className="text-indigo-400" />
+        </div>
+
+        {/* Top Right - Bird of Paradise */}
+        <div
+          className="absolute top-24 right-24 opacity-25"
+          style={{ transform: `translateY(${scrollY * 0.25}px)` }}
+        >
+          <img src="/tattoos/bird-of-paradise-svgrepo-com.svg" alt="Bird of Paradise" width="70" height="80" />
+        </div>
+
+        {/* Top Center - Paper Airplane */}
+        <div
+          className="absolute top-32 left-1/3 opacity-20"
+          style={{ transform: `translateY(${scrollY * 0.2}px)` }}
+        >
+          <img src="/tattoos/paper-airplane-svgrepo-com.svg" alt="Paper Airplane" width="60" height="60" />
+        </div>
+
+        {/* Right Middle - Skull */}
+        <div
+          className="absolute right-16 top-1/3 opacity-30"
+          style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+        >
+          <img src="/tattoos/skull-emoji-smiley-svgrepo-com.svg" alt="Skull" width="60" height="70" />
+        </div>
+
+        {/* Bottom Left - Ghost */}
+        <div
+          className="absolute bottom-32 left-24 opacity-25"
+          style={{ transform: `translateY(${scrollY * -0.1}px)` }}
+        >
+          <img src="/tattoos/ghost-svgrepo-com.svg" alt="Ghost" width="60" height="70" />
+        </div>
+
+        {/* Bottom Right - Balloon Dog */}
+        <div
+          className="absolute bottom-40 right-32 opacity-20"
+          style={{ transform: `translateY(${scrollY * -0.15}px)` }}
+        >
+          <img src="/tattoos/balloon-dog-svgrepo-com.svg" alt="Balloon Dog" width="70" height="60" />
+        </div>
+
+        {/* Left Middle - Alien */}
+        <div
+          className="absolute left-20 top-1/2 opacity-25"
+          style={{ transform: `translateY(${scrollY * 0.18}px)` }}
+        >
+          <img src="/tattoos/alien-svgrepo-com.svg" alt="Alien" width="60" height="70" />
+        </div>
+
+        {/* Top Right Corner - Butterfly */}
+        <div
+          className="absolute top-16 right-1/4 opacity-20"
+          style={{ transform: `translateY(${scrollY * 0.22}px)` }}
+        >
+          <img src="/tattoos/butterfly-svgrepo-com.svg" alt="Butterfly" width="70" height="60" />
+        </div>
+
+        {/* Bottom Center - Matchstick Cross */}
+        <div
+          className="absolute bottom-20 left-1/2 opacity-25"
+          style={{ transform: `translateY(${scrollY * -0.12}px)` }}
+        >
+          <img src="/tattoos/matchstick-cross-svgrepo-com.svg" alt="Matchstick Cross" width="60" height="60" />
+        </div>
+
+        {/* Right Bottom - Playing Cards */}
+        <div
+          className="absolute bottom-24 right-1/4 opacity-20"
+          style={{ transform: `translateY(${scrollY * -0.18}px)` }}
+        >
+          <img src="/tattoos/cards-svgrepo-com.svg" alt="Playing Cards" width="60" height="70" />
+        </div>
+
+        {/* Left Bottom - Mushroom */}
+        <div
+          className="absolute bottom-1/3 left-1/4 opacity-20"
+          style={{ transform: `translateY(${scrollY * -0.08}px)` }}
+        >
+          <img src="/tattoos/mushroom-svgrepo-com.svg" alt="Mushroom" width="60" height="60" />
+        </div>
+
+        {/* Center Content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="inline-block">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                Coming Soon
+              </span>
             </div>
-            <div className="relative">
-              <div className="aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-400 to-purple-600 shadow-2xl">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg
-                    className="w-48 h-48 text-white/20"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
-                </div>
+            <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight ${permanentMarker.className}`}>
+              Discover Your Next
+              <span className="text-indigo-600"> Tattoo Artist</span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+              Connect with talented tattoo artists and professional studios.
+              Browse portfolios, read reviews, and book your next piece of art.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button size="lg" asChild>
+                <Link href="/discover">Explore Artists</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="#features">Learn More</Link>
+              </Button>
+            </div>
+            <div className="flex items-center justify-center gap-8 pt-8">
+              <div>
+                <p className="text-3xl font-bold text-gray-900">10K+</p>
+                <p className="text-sm text-gray-600">Artists</p>
               </div>
-              {/* Floating Cards */}
-              <div className="absolute -left-4 top-1/4 bg-white p-4 rounded-xl shadow-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full" />
-                  <div>
-                    <p className="text-sm font-semibold">Top Rated</p>
-                    <div className="flex items-center gap-1">
-                      <svg
-                        className="w-4 h-4 text-yellow-400 fill-current"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span className="text-sm font-medium">4.9</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="w-px h-12 bg-gray-300" />
+              <div>
+                <p className="text-3xl font-bold text-gray-900">5K+</p>
+                <p className="text-sm text-gray-600">Studios</p>
+              </div>
+              <div className="w-px h-12 bg-gray-300" />
+              <div>
+                <p className="text-3xl font-bold text-gray-900">50K+</p>
+                <p className="text-sm font-bold text-gray-600">Designs</p>
               </div>
             </div>
           </div>
