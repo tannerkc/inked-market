@@ -3,6 +3,7 @@
 import React from 'react';
 import {
   HandDrawnButton,
+  HandDrawnButtonV2,
   FlashSheetButton,
   StampButton,
   RibbonButton,
@@ -49,6 +50,33 @@ export default function ButtonShowcase() {
               <HandDrawnButton variant="primary">Explore Artists</HandDrawnButton>
               <HandDrawnButton variant="secondary">Learn More</HandDrawnButton>
               <HandDrawnButton variant="outline">Get Started</HandDrawnButton>
+            </div>
+          </section>
+
+          {/* 1b. Hand-Drawn Outline Style V2 - Professional */}
+          <section className="bg-white rounded-2xl p-8 shadow-sm border-2 border-indigo-200">
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  1b. Hand-Drawn V2 - Professional Edition ⭐
+                </h2>
+                <span className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full">RECOMMENDED</span>
+              </div>
+              <p className="text-gray-600">
+                Refined hand-drawn borders with cleaner lines and Permanent Marker font. More professional tattoo shop vibes while maintaining organic character.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2 text-sm">
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full">Clean</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Professional</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Hand-drawn Font</span>
+                <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full">Authentic</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <HandDrawnButtonV2 variant="primary">Explore Artists</HandDrawnButtonV2>
+              <HandDrawnButtonV2 variant="secondary">Learn More</HandDrawnButtonV2>
+              <HandDrawnButtonV2 variant="outline">Get Started</HandDrawnButtonV2>
+              <HandDrawnButtonV2 variant="dark">Book Now</HandDrawnButtonV2>
             </div>
           </section>
 
@@ -223,6 +251,10 @@ export default function ButtonShowcase() {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center gap-3">
                 <HandDrawnButton variant="primary">Hand-Drawn</HandDrawnButton>
               </div>
+              <div className="bg-indigo-500/30 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center gap-3 border-2 border-white/40">
+                <HandDrawnButtonV2 variant="primary">Hand-Drawn V2</HandDrawnButtonV2>
+                <span className="text-xs font-bold text-white">⭐ NEW</span>
+              </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center gap-3">
                 <FlashSheetButton>Flash Sheet</FlashSheetButton>
               </div>
@@ -256,7 +288,7 @@ export default function ButtonShowcase() {
               <div className="border-l-4 border-green-500 pl-4">
                 <h3 className="font-bold text-gray-900 mb-2">✅ Best for Primary CTAs</h3>
                 <ul className="space-y-1 text-gray-600">
-                  <li>• Hand-Drawn Outline (versatile)</li>
+                  <li>• <strong>Hand-Drawn V2 ⭐ (RECOMMENDED)</strong></li>
                   <li>• Flash Sheet Cards (on-brand)</li>
                   <li>• Bold Traditional Frame (accessible)</li>
                 </ul>
@@ -264,9 +296,9 @@ export default function ButtonShowcase() {
               <div className="border-l-4 border-blue-500 pl-4">
                 <h3 className="font-bold text-gray-900 mb-2">🎨 Best for Brand Identity</h3>
                 <ul className="space-y-1 text-gray-600">
+                  <li>• <strong>Hand-Drawn V2 (professional tattoo vibes)</strong></li>
                   <li>• Flash Sheet Cards (nostalgic)</li>
                   <li>• Traditional Banner Ribbon (iconic)</li>
-                  <li>• Fine Line Minimalist (modern)</li>
                 </ul>
               </div>
               <div className="border-l-4 border-purple-500 pl-4">

@@ -1,4 +1,5 @@
 export { HandDrawnButton } from './hand-drawn-button';
+export { HandDrawnButtonV2 } from './hand-drawn-button-v2';
 export { FlashSheetButton } from './flash-sheet-button';
 export { StampButton } from './stamp-button';
 export { RibbonButton } from './ribbon-button';
