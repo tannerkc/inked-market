@@ -5,81 +5,181 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-block">
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                  Coming Soon
-                </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Discover Your Next
-                <span className="text-indigo-600"> Tattoo Artist</span>
-              </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Connect with talented tattoo artists and professional studios.
-                Browse portfolios, read reviews, and book your next piece of art.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
-                  <Link href="/discover">Explore Artists</Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="#features">Learn More</Link>
-                </Button>
-              </div>
-              <div className="flex items-center gap-8 pt-4">
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">10K+</p>
-                  <p className="text-sm text-gray-600">Artists</p>
-                </div>
-                <div className="w-px h-12 bg-gray-300" />
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">5K+</p>
-                  <p className="text-sm text-gray-600">Studios</p>
-                </div>
-                <div className="w-px h-12 bg-gray-300" />
-                <div>
-                  <p className="text-3xl font-bold text-gray-900">50K+</p>
-                  <p className="text-sm text-gray-600">Designs</p>
-                </div>
-              </div>
+      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Scattered Tattoo Decorations */}
+
+        {/* Top Left - Flower */}
+        <div className="absolute top-12 left-12 opacity-30 animate-float" style={{ animationDelay: '0s' }}>
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" className="text-indigo-400">
+            <circle cx="40" cy="40" r="8" strokeWidth="1.5" />
+            <ellipse cx="40" cy="25" rx="6" ry="10" strokeWidth="1.5" />
+            <ellipse cx="55" cy="40" rx="10" ry="6" strokeWidth="1.5" />
+            <ellipse cx="40" cy="55" rx="6" ry="10" strokeWidth="1.5" />
+            <ellipse cx="25" cy="40" rx="10" ry="6" strokeWidth="1.5" />
+            <ellipse cx="50" cy="30" rx="7" ry="9" strokeWidth="1.5" transform="rotate(45 50 30)" />
+            <ellipse cx="50" cy="50" rx="7" ry="9" strokeWidth="1.5" transform="rotate(-45 50 50)" />
+            <ellipse cx="30" cy="50" rx="7" ry="9" strokeWidth="1.5" transform="rotate(45 30 50)" />
+            <ellipse cx="30" cy="30" rx="7" ry="9" strokeWidth="1.5" transform="rotate(-45 30 30)" />
+          </svg>
+        </div>
+
+        {/* Top Right - Bird */}
+        <div className="absolute top-24 right-24 opacity-25 animate-float" style={{ animationDelay: '1s' }}>
+          <svg width="100" height="60" viewBox="0 0 100 60" fill="none" stroke="currentColor" className="text-purple-400">
+            <path d="M10 30 Q 20 20, 35 25 Q 50 28, 65 25 Q 80 20, 90 30" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M35 25 L 30 15 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M65 25 L 70 15 L 65 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="38" cy="24" r="1" fill="currentColor" />
+          </svg>
+        </div>
+
+        {/* Top Center - Paper Plane */}
+        <div className="absolute top-32 left-1/3 opacity-20 animate-float" style={{ animationDelay: '2s' }}>
+          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" stroke="currentColor" className="text-pink-400">
+            <path d="M15 55 L 55 15 L 35 35 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M55 15 L 35 35 L 40 55 L 45 40 L 55 15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="35" y1="35" x2="25" y2="45" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Right Middle - Smiley Face */}
+        <div className="absolute right-16 top-1/3 opacity-30 animate-float" style={{ animationDelay: '0.5s' }}>
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-yellow-500">
+            <circle cx="30" cy="30" r="25" strokeWidth="1.5" />
+            <circle cx="22" cy="25" r="2" fill="currentColor" />
+            <circle cx="38" cy="25" r="2" fill="currentColor" />
+            <path d="M 20 35 Q 30 42, 40 35" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Bottom Left - Small Flower */}
+        <div className="absolute bottom-32 left-24 opacity-25 animate-float" style={{ animationDelay: '1.5s' }}>
+          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-400">
+            <circle cx="25" cy="25" r="4" strokeWidth="1" />
+            <circle cx="25" cy="15" r="5" strokeWidth="1" />
+            <circle cx="35" cy="25" r="5" strokeWidth="1" />
+            <circle cx="25" cy="35" r="5" strokeWidth="1" />
+            <circle cx="15" cy="25" r="5" strokeWidth="1" />
+          </svg>
+        </div>
+
+        {/* Bottom Right - Star/Sparkle */}
+        <div className="absolute bottom-40 right-32 opacity-20 animate-float" style={{ animationDelay: '2.5s' }}>
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-purple-400">
+            <line x1="30" y1="10" x2="30" y2="50" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="10" y1="30" x2="50" y2="30" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="17" y1="17" x2="43" y2="43" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="43" y1="17" x2="17" y2="43" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Left Middle - Heart */}
+        <div className="absolute left-20 top-1/2 opacity-25 animate-float" style={{ animationDelay: '3s' }}>
+          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-pink-400">
+            <path d="M 25 40 C 25 40, 10 30, 10 20 C 10 15, 12 12, 16 12 C 20 12, 23 15, 25 18 C 27 15, 30 12, 34 12 C 38 12, 40 15, 40 20 C 40 30, 25 40, 25 40 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+
+        {/* Top Right Corner - Butterfly */}
+        <div className="absolute top-16 right-1/4 opacity-20 animate-float" style={{ animationDelay: '1.8s' }}>
+          <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-indigo-400">
+            <ellipse cx="25" cy="20" rx="12" ry="15" strokeWidth="1.5" />
+            <ellipse cx="25" cy="40" rx="10" ry="12" strokeWidth="1.5" />
+            <ellipse cx="45" cy="20" rx="12" ry="15" strokeWidth="1.5" />
+            <ellipse cx="45" cy="40" rx="10" ry="12" strokeWidth="1.5" />
+            <line x1="35" y1="10" x2="35" y2="50" strokeWidth="1.5" />
+            <line x1="35" y1="8" x2="32" y2="2" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="35" y1="8" x2="38" y2="2" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Bottom Center - Leaf */}
+        <div className="absolute bottom-20 left-1/2 opacity-25 animate-float" style={{ animationDelay: '2.2s' }}>
+          <svg width="40" height="70" viewBox="0 0 40 70" fill="none" stroke="currentColor" className="text-green-400">
+            <path d="M 20 65 Q 20 40, 35 25 Q 25 30, 20 20 Q 15 30, 5 25 Q 20 40, 20 65" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 20 20 L 20 65" strokeWidth="1" />
+          </svg>
+        </div>
+
+        {/* Right Bottom - Moon */}
+        <div className="absolute bottom-24 right-1/4 opacity-20 animate-float" style={{ animationDelay: '3.5s' }}>
+          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-300">
+            <path d="M 30 10 A 15 15 0 1 0 30 40 A 12 12 0 1 1 30 10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+
+        {/* Left Bottom - Sun */}
+        <div className="absolute bottom-1/3 left-1/4 opacity-20 animate-float" style={{ animationDelay: '0.8s' }}>
+          <svg width="55" height="55" viewBox="0 0 55 55" fill="none" stroke="currentColor" className="text-yellow-400">
+            <circle cx="27.5" cy="27.5" r="10" strokeWidth="1.5" />
+            <line x1="27.5" y1="5" x2="27.5" y2="12" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="27.5" y1="43" x2="27.5" y2="50" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="5" y1="27.5" x2="12" y2="27.5" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="43" y1="27.5" x2="50" y2="27.5" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="12" y1="12" x2="17" y2="17" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="38" y1="38" x2="43" y2="43" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="38" y1="17" x2="43" y2="12" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="12" y1="43" x2="17" y2="38" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Center Content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="inline-block">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                Coming Soon
+              </span>
             </div>
-            <div className="relative">
-              <div className="aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-400 to-purple-600 shadow-2xl">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg
-                    className="w-48 h-48 text-white/20"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
-                </div>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              Discover Your Next
+              <span className="text-indigo-600"> Tattoo Artist</span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+              Connect with talented tattoo artists and professional studios.
+              Browse portfolios, read reviews, and book your next piece of art.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button size="lg" asChild>
+                <Link href="/discover">Explore Artists</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="#features">Learn More</Link>
+              </Button>
+            </div>
+            <div className="flex items-center justify-center gap-8 pt-8">
+              <div>
+                <p className="text-3xl font-bold text-gray-900">10K+</p>
+                <p className="text-sm text-gray-600">Artists</p>
               </div>
-              {/* Floating Cards */}
-              <div className="absolute -left-4 top-1/4 bg-white p-4 rounded-xl shadow-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full" />
-                  <div>
-                    <p className="text-sm font-semibold">Top Rated</p>
-                    <div className="flex items-center gap-1">
-                      <svg
-                        className="w-4 h-4 text-yellow-400 fill-current"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span className="text-sm font-medium">4.9</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="w-px h-12 bg-gray-300" />
+              <div>
+                <p className="text-3xl font-bold text-gray-900">5K+</p>
+                <p className="text-sm text-gray-600">Studios</p>
+              </div>
+              <div className="w-px h-12 bg-gray-300" />
+              <div>
+                <p className="text-3xl font-bold text-gray-900">50K+</p>
+                <p className="text-sm font-bold text-gray-600">Designs</p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Add CSS animation */}
+        <style jsx>{`
+          @keyframes float {
+            0%, 100% {
+              transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+              transform: translateY(-20px) rotate(5deg);
+            }
+          }
+          .animate-float {
+            animation: float 6s ease-in-out infinite;
+          }
+        `}</style>
       </section>
 
       {/* Features Section */}
