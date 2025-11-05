@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { Permanent_Marker } from "next/font/google";
+
+const permanentMarker = Permanent_Marker({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
@@ -118,7 +124,7 @@ export default function Home() {
                 Coming Soon
               </span>
             </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+            <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight ${permanentMarker.className}`}>
               Discover Your Next
               <span className="text-indigo-600"> Tattoo Artist</span>
             </h1>
