@@ -7,7 +7,7 @@ const caveat = Caveat({
   subsets: ['latin'],
 });
 
-// Cleaner, more professional hand-drawn border
+// Cleaner, more professional hand-drawn border with hover thickening
 const CleanHandDrawnBorder: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={className}
@@ -17,7 +17,7 @@ const CleanHandDrawnBorder: React.FC<{ className?: string }> = ({ className }) =
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Smoother, more controlled organic path */}
+    {/* Smoother, more controlled organic path - thickens on hover like fresh ink */}
     <path
       d="M3,4 Q25,2.5 50,3 T100,3.5 Q150,3 175,3.5 T197,4.5 L197,55.5 Q175,57 150,56.5 T100,56 Q50,56.5 25,57 T3,55.5 Z"
       stroke="currentColor"
@@ -26,6 +26,7 @@ const CleanHandDrawnBorder: React.FC<{ className?: string }> = ({ className }) =
       strokeLinecap="round"
       strokeLinejoin="round"
       vectorEffect="non-scaling-stroke"
+      className="transition-all duration-300 group-hover:stroke-[3.5]"
     />
   </svg>
 );
@@ -62,7 +63,9 @@ export const HandDrawnButtonV2: React.FC<HandDrawnButtonV2Props> = ({
     <button
       className={cn(
         'relative px-8 py-3.5 text-lg font-semibold transition-all duration-300',
-        'hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]',
+        // Tattoo machine buzz effect on hover
+        'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:animate-[tattoo-buzz_0.15s_ease-in-out_infinite]',
+        'active:shadow-[0_0_10px_rgba(99,102,241,0.2)]',
         'group tracking-wide',
         caveat.className,
         variants[variant],
@@ -73,14 +76,32 @@ export const HandDrawnButtonV2: React.FC<HandDrawnButtonV2Props> = ({
       {/* Paper texture */}
       <PaperTexture />
 
-      {/* Hand-drawn border */}
-      <CleanHandDrawnBorder className="text-current opacity-90 group-hover:opacity-100 transition-opacity" />
+      {/* Hand-drawn border - thickens on hover like fresh ink application */}
+      <CleanHandDrawnBorder className="text-current opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
 
-      {/* Subtle inner glow on hover */}
+      {/* Fresh ink glow effect - mimics the shine of fresh tattoo ink */}
       <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300 rounded-lg pointer-events-none" />
 
+      {/* Radial glow that sweeps across like fresh ink catching light */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-lg overflow-hidden"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 70%)',
+        }}
+      />
+
       {/* Button text */}
-      <span className="relative z-10 inline-block">{children}</span>
+      <span className="relative z-10 inline-block group-hover:drop-shadow-sm">{children}</span>
+
+      {/* Tattoo machine buzz animation */}
+      <style jsx>{`
+        @keyframes tattoo-buzz {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(-0.5px, 0.5px); }
+          50% { transform: translate(0.5px, -0.5px); }
+          75% { transform: translate(-0.5px, -0.5px); }
+        }
+      `}</style>
     </button>
   );
 };
