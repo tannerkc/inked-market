@@ -2,16 +2,31 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Scattered Tattoo Decorations */}
+        {/* Scattered Tattoo Decorations with Parallax */}
 
         {/* Top Left - Flower */}
-        <div className="absolute top-12 left-12 opacity-30 animate-float" style={{ animationDelay: '0s' }}>
+        <div
+          className="absolute top-12 left-12 opacity-30 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+        >
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" className="text-indigo-400">
             <circle cx="40" cy="40" r="8" strokeWidth="1.5" />
             <ellipse cx="40" cy="25" rx="6" ry="10" strokeWidth="1.5" />
@@ -26,7 +41,10 @@ export default function Home() {
         </div>
 
         {/* Top Right - Bird */}
-        <div className="absolute top-24 right-24 opacity-25 animate-float" style={{ animationDelay: '1s' }}>
+        <div
+          className="absolute top-24 right-24 opacity-25 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.25}px)` }}
+        >
           <svg width="100" height="60" viewBox="0 0 100 60" fill="none" stroke="currentColor" className="text-purple-400">
             <path d="M10 30 Q 20 20, 35 25 Q 50 28, 65 25 Q 80 20, 90 30" strokeWidth="1.5" strokeLinecap="round" />
             <path d="M35 25 L 30 15 L 35 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -36,7 +54,10 @@ export default function Home() {
         </div>
 
         {/* Top Center - Paper Plane */}
-        <div className="absolute top-32 left-1/3 opacity-20 animate-float" style={{ animationDelay: '2s' }}>
+        <div
+          className="absolute top-32 left-1/3 opacity-20 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.2}px)` }}
+        >
           <svg width="70" height="70" viewBox="0 0 70 70" fill="none" stroke="currentColor" className="text-pink-400">
             <path d="M15 55 L 55 15 L 35 35 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M55 15 L 35 35 L 40 55 L 45 40 L 55 15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -45,7 +66,10 @@ export default function Home() {
         </div>
 
         {/* Right Middle - Smiley Face */}
-        <div className="absolute right-16 top-1/3 opacity-30 animate-float" style={{ animationDelay: '0.5s' }}>
+        <div
+          className="absolute right-16 top-1/3 opacity-30 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+        >
           <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-yellow-500">
             <circle cx="30" cy="30" r="25" strokeWidth="1.5" />
             <circle cx="22" cy="25" r="2" fill="currentColor" />
@@ -55,7 +79,10 @@ export default function Home() {
         </div>
 
         {/* Bottom Left - Small Flower */}
-        <div className="absolute bottom-32 left-24 opacity-25 animate-float" style={{ animationDelay: '1.5s' }}>
+        <div
+          className="absolute bottom-32 left-24 opacity-25 transition-transform"
+          style={{ transform: `translateY(${scrollY * -0.1}px)` }}
+        >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-400">
             <circle cx="25" cy="25" r="4" strokeWidth="1" />
             <circle cx="25" cy="15" r="5" strokeWidth="1" />
@@ -66,7 +93,10 @@ export default function Home() {
         </div>
 
         {/* Bottom Right - Star/Sparkle */}
-        <div className="absolute bottom-40 right-32 opacity-20 animate-float" style={{ animationDelay: '2.5s' }}>
+        <div
+          className="absolute bottom-40 right-32 opacity-20 transition-transform"
+          style={{ transform: `translateY(${scrollY * -0.15}px)` }}
+        >
           <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" className="text-purple-400">
             <line x1="30" y1="10" x2="30" y2="50" strokeWidth="1.5" strokeLinecap="round" />
             <line x1="10" y1="30" x2="50" y2="30" strokeWidth="1.5" strokeLinecap="round" />
@@ -76,14 +106,20 @@ export default function Home() {
         </div>
 
         {/* Left Middle - Heart */}
-        <div className="absolute left-20 top-1/2 opacity-25 animate-float" style={{ animationDelay: '3s' }}>
+        <div
+          className="absolute left-20 top-1/2 opacity-25 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.18}px)` }}
+        >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-pink-400">
             <path d="M 25 40 C 25 40, 10 30, 10 20 C 10 15, 12 12, 16 12 C 20 12, 23 15, 25 18 C 27 15, 30 12, 34 12 C 38 12, 40 15, 40 20 C 40 30, 25 40, 25 40 Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
 
         {/* Top Right Corner - Butterfly */}
-        <div className="absolute top-16 right-1/4 opacity-20 animate-float" style={{ animationDelay: '1.8s' }}>
+        <div
+          className="absolute top-16 right-1/4 opacity-20 transition-transform"
+          style={{ transform: `translateY(${scrollY * 0.22}px)` }}
+        >
           <svg width="70" height="60" viewBox="0 0 70 60" fill="none" stroke="currentColor" className="text-indigo-400">
             <ellipse cx="25" cy="20" rx="12" ry="15" strokeWidth="1.5" />
             <ellipse cx="25" cy="40" rx="10" ry="12" strokeWidth="1.5" />
@@ -96,7 +132,10 @@ export default function Home() {
         </div>
 
         {/* Bottom Center - Leaf */}
-        <div className="absolute bottom-20 left-1/2 opacity-25 animate-float" style={{ animationDelay: '2.2s' }}>
+        <div
+          className="absolute bottom-20 left-1/2 opacity-25 transition-transform"
+          style={{ transform: `translateY(${scrollY * -0.12}px)` }}
+        >
           <svg width="40" height="70" viewBox="0 0 40 70" fill="none" stroke="currentColor" className="text-green-400">
             <path d="M 20 65 Q 20 40, 35 25 Q 25 30, 20 20 Q 15 30, 5 25 Q 20 40, 20 65" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M 20 20 L 20 65" strokeWidth="1" />
@@ -104,14 +143,20 @@ export default function Home() {
         </div>
 
         {/* Right Bottom - Moon */}
-        <div className="absolute bottom-24 right-1/4 opacity-20 animate-float" style={{ animationDelay: '3.5s' }}>
+        <div
+          className="absolute bottom-24 right-1/4 opacity-20 transition-transform"
+          style={{ transform: `translateY(${scrollY * -0.18}px)` }}
+        >
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" className="text-indigo-300">
             <path d="M 30 10 A 15 15 0 1 0 30 40 A 12 12 0 1 1 30 10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
 
         {/* Left Bottom - Sun */}
-        <div className="absolute bottom-1/3 left-1/4 opacity-20 animate-float" style={{ animationDelay: '0.8s' }}>
+        <div
+          className="absolute bottom-1/3 left-1/4 opacity-20 transition-transform"
+          style={{ transform: `translateY(${scrollY * -0.08}px)` }}
+        >
           <svg width="55" height="55" viewBox="0 0 55 55" fill="none" stroke="currentColor" className="text-yellow-400">
             <circle cx="27.5" cy="27.5" r="10" strokeWidth="1.5" />
             <line x1="27.5" y1="5" x2="27.5" y2="12" strokeWidth="1.5" strokeLinecap="round" />
@@ -167,21 +212,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* Add CSS animation */}
-        <style jsx>{`
-          @keyframes float {
-            0%, 100% {
-              transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-              transform: translateY(-20px) rotate(5deg);
-            }
-          }
-          .animate-float {
-            animation: float 6s ease-in-out infinite;
-          }
-        `}</style>
       </section>
 
       {/* Features Section */}
