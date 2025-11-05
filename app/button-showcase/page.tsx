@@ -63,16 +63,16 @@ export default function ButtonShowcase() {
                 <span className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full">RECOMMENDED</span>
               </div>
               <p className="text-gray-600 mb-3">
-                Refined hand-drawn borders with casual Caveat font. Features creative tattoo-themed hover effects that bring the design to life.
+                Refined hand-drawn borders with casual Caveat font. Features creative tattoo-inspired animations that feel like watching an artist at work.
               </p>
               <p className="text-sm text-gray-500 italic mb-2">
-                ✨ Hover to experience: Tattoo machine buzz vibration • Border thickening (fresh ink effect) • Radial glow (shiny fresh ink)
+                ✨ Hover to experience: Border redraw animation (tracing the stencil) • Scribble fill effect (tattoo shading) • Subtle ink darkening
               </p>
               <div className="mt-2 flex flex-wrap gap-2 text-sm">
-                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full">Clean</span>
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full">Animated</span>
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Trendy</span>
                 <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Casual Handwriting</span>
-                <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full">Interactive</span>
+                <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full">Creative</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-4">
