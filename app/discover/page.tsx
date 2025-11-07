@@ -86,15 +86,15 @@ const mockArtists = [
 
 export default function DiscoverPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-22">
       {/* Header Section */}
-      <section className="bg-gradient-to-br from-indigo-600 to-purple-700 py-16">
+      <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-black mb-4">
               Discover Your Perfect Artist
             </h1>
-            <p className="text-xl text-indigo-100">
+            <p className="text-xl text-indigo-800">
               Browse our curated collection of verified tattoo artists and
               studios. Find the perfect match for your next piece.
             </p>
