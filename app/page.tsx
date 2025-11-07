@@ -25,7 +25,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center overflow-hidden pt-22">
         {/* Scattered Tattoo Decorations with Parallax */}
 
         {/* Top Left - Bird */}
