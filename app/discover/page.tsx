@@ -86,92 +86,135 @@ const mockArtists = [
 
 export default function DiscoverPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-22">
-      {/* Header Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-black mb-4">
-              Discover Your Perfect Artist
-            </h1>
-            <p className="text-xl text-indigo-800">
-              Browse our curated collection of verified tattoo artists and
-              studios. Find the perfect match for your next piece.
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section with Gradient */}
+      <section className="relative overflow-hidden pt-24 pb-20 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-pink-200/30 to-purple-200/30 rounded-full blur-3xl" />
+        </div>
 
-          {/* Search Bar */}
-          <div className="mt-8 max-w-2xl">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by style, location, or artist name..."
-                className="w-full px-6 py-4 pr-12 rounded-lg shadow-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
-                disabled
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <svg
-                  className="w-6 h-6 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-medium text-indigo-600 mb-6 shadow-sm">
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              Discover Verified Artists
             </div>
-            <p className="text-sm text-indigo-200 mt-2">
-              Search functionality coming soon
+
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
+              Find Your Perfect
+              <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Tattoo Artist
+              </span>
+            </h1>
+
+            <p className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Browse our curated collection of verified tattoo artists and studios.
+              Discover talent that matches your style.
             </p>
+
+            {/* Modern Search Bar */}
+            <div className="max-w-2xl mx-auto">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                <div className="relative flex items-center bg-white rounded-2xl shadow-xl shadow-gray-200/50 overflow-hidden">
+                  <div className="pl-6 text-gray-400">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by style, location, or artist name..."
+                    className="flex-1 px-6 py-5 text-gray-900 placeholder-gray-400 focus:outline-none text-lg"
+                    disabled
+                  />
+                  <button
+                    disabled
+                    className="m-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mt-3 flex items-center justify-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                Search coming soon
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Filters Section - Coming Soon */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-3 overflow-x-auto">
-            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Filters:
+      {/* Filters Section */}
+      <section className="sticky top-16 z-10 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+            <span className="text-sm font-semibold text-gray-700 whitespace-nowrap mr-2">
+              Filter by:
             </span>
-            {["All Styles", "Location", "Price Range", "Availability"].map(
-              (filter) => (
-                <button
-                  key={filter}
-                  disabled
-                  className="px-4 py-2 rounded-full text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap opacity-50 cursor-not-allowed"
-                >
-                  {filter}
-                </button>
-              )
-            )}
-            <span className="text-xs text-gray-500 whitespace-nowrap">
-              (Coming Soon)
-            </span>
+            {[
+              { name: "All Styles", icon: "✨" },
+              { name: "Location", icon: "📍" },
+              { name: "Price Range", icon: "💰" },
+              { name: "Availability", icon: "📅" }
+            ].map((filter) => (
+              <button
+                key={filter.name}
+                disabled
+                className="group px-5 py-2.5 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 bg-white hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <span>{filter.icon}</span>
+                {filter.name}
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Studios Section */}
-      <section className="py-12">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-end justify-between mb-10">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Featured Studios
-              </h2>
-              <p className="text-gray-600 mt-1">
-                Professional tattoo studios near you
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-1 h-8 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full" />
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  Featured Studios
+                </h2>
+              </div>
+              <p className="text-gray-600 text-lg ml-4">
+                Professional tattoo studios with verified portfolios
               </p>
             </div>
+            <button className="hidden sm:flex items-center gap-2 px-6 py-3 text-indigo-600 hover:text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-all group">
+              View all
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {mockShops.map((shop) => (
               <ProfileCard
                 key={shop.id}
@@ -191,17 +234,26 @@ export default function DiscoverPage() {
       </section>
 
       {/* Artists Section */}
-      <section className="py-12 bg-white">
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-end justify-between mb-10">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Featured Artists
-              </h2>
-              <p className="text-gray-600 mt-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-1 h-8 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full" />
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  Featured Artists
+                </h2>
+              </div>
+              <p className="text-gray-600 text-lg ml-4">
                 Talented artists ready to bring your vision to life
               </p>
             </div>
+            <button className="hidden sm:flex items-center gap-2 px-6 py-3 text-purple-600 hover:text-purple-700 font-semibold rounded-xl hover:bg-purple-50 transition-all group">
+              View all
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -223,13 +275,19 @@ export default function DiscoverPage() {
         </div>
       </section>
 
-      {/* Coming Soon Section */}
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-6">
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-8">
               <svg
-                className="w-8 h-8 text-indigo-600"
+                className="w-10 h-10 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -238,30 +296,27 @@ export default function DiscoverPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              More Features Coming Soon
+
+            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+              More Amazing Features Coming Soon
             </h3>
-            <p className="text-gray-600 mb-6">
-              We're working on advanced search filters, real-time availability,
-              booking system, and much more to help you find your perfect artist.
+
+            <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Advanced search filters, real-time availability, instant booking,
+              portfolio galleries, and much more to revolutionize how you find your perfect artist.
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium">
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Platform in Development
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-medium border border-white/30">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                Platform in Active Development
+              </div>
             </div>
           </div>
         </div>
