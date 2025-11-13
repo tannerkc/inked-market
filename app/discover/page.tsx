@@ -172,21 +172,17 @@ export default function DiscoverPage() {
             <span className="text-sm font-semibold text-gray-700 whitespace-nowrap mr-2">
               Filter by:
             </span>
-            {[
-              { name: "All Styles", icon: "✨" },
-              { name: "Location", icon: "📍" },
-              { name: "Price Range", icon: "💰" },
-              { name: "Availability", icon: "📅" }
-            ].map((filter) => (
-              <button
-                key={filter.name}
-                disabled
-                className="group px-5 py-2.5 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 bg-white hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <span>{filter.icon}</span>
-                {filter.name}
-              </button>
-            ))}
+            {["All Styles", "Location", "Price Range", "Availability"].map(
+              (filter) => (
+                <button
+                  key={filter}
+                  disabled
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 bg-white hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {filter}
+                </button>
+              )
+            )}
           </div>
         </div>
       </section>
@@ -276,18 +272,12 @@ export default function DiscoverPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
-        </div>
-
-        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-2xl mb-8">
               <svg
-                className="w-10 h-10 text-white"
+                className="w-10 h-10 text-indigo-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -301,17 +291,17 @@ export default function DiscoverPage() {
               </svg>
             </div>
 
-            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
               More Amazing Features Coming Soon
             </h3>
 
-            <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
               Advanced search filters, real-time availability, instant booking,
               portfolio galleries, and much more to revolutionize how you find your perfect artist.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-medium border border-white/30">
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-medium border border-indigo-200">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
