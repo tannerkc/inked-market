@@ -59,88 +59,127 @@ export default async function ShopPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Cover Image */}
-      <div className="relative h-72 bg-gray-900">
-        <Image
-          src={mockShop.coverImage}
-          alt={mockShop.name}
-          fill
-          className="object-cover opacity-80"
-          priority
-        />
-      </div>
+      {/* Hero Section */}
+      <div className="relative h-[500px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <Image
+            src={mockShop.coverImage}
+            alt={mockShop.name}
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+        </div>
 
-      {/* Profile Header */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-end gap-6 -mt-16 pb-6">
-            <div className="relative w-32 h-32 rounded-xl border-4 border-white shadow-lg overflow-hidden bg-white flex-shrink-0">
-              <Image
-                src={mockShop.profileImage}
-                alt={mockShop.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {mockShop.name}
-                </h1>
-                {mockShop.verified && (
-                  <svg
-                    className="w-7 h-7 text-indigo-600 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
+        {/* Hero Content */}
+        <div className="relative h-full container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-end h-full pb-12">
+            <div className="flex flex-col md:flex-row md:items-end gap-8">
+              {/* Profile Image */}
+              <div className="relative w-40 h-40 rounded-2xl overflow-hidden ring-4 ring-white/20 shadow-2xl flex-shrink-0 backdrop-blur-sm">
+                <Image
+                  src={mockShop.profileImage}
+                  alt={mockShop.name}
+                  fill
+                  className="object-cover"
+                />
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-                <div className="flex items-center gap-1">
-                  <svg
-                    className="w-4 h-4 text-yellow-400 fill-current"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  <span className="font-medium text-gray-900">
-                    {mockShop.rating.toFixed(1)}
-                  </span>
-                  <span>({mockShop.reviewCount} reviews)</span>
+              {/* Shop Info */}
+              <div className="flex-1 min-w-0 pb-2">
+                <div className="flex items-start gap-3 mb-3">
+                  <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                    {mockShop.name}
+                  </h1>
+                  {mockShop.verified && (
+                    <div className="flex-shrink-0 mt-2">
+                      <svg
+                        className="w-8 h-8 text-blue-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-                <span>•</span>
-                <span>
-                  {mockShop.location.city}, {mockShop.location.state}
-                </span>
-              </div>
 
-              <div className="flex flex-wrap gap-2">
-                {mockShop.specialties.map((specialty) => (
-                  <span
-                    key={specialty}
-                    className="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full"
+                <p className="text-lg text-white/90 mb-4 max-w-2xl">
+                  {mockShop.description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-6 text-sm text-white/80 mb-6">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-yellow-400 fill-current"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="font-semibold text-white">
+                      {mockShop.rating.toFixed(1)}
+                    </span>
+                    <span>({mockShop.reviewCount} reviews)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-white/70"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <span>
+                      {mockShop.location.city}, {mockShop.location.state}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {mockShop.specialties.map((specialty) => (
+                    <span
+                      key={specialty}
+                      className="px-4 py-1.5 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-full border border-white/20"
+                    >
+                      {specialty}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    className="bg-white text-slate-900 hover:bg-white/90 font-semibold px-6 py-2.5 h-auto shadow-lg"
+                    disabled
                   >
-                    {specialty}
-                  </span>
-                ))}
+                    Book Appointment
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-2 border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold px-6 py-2.5 h-auto backdrop-blur-sm"
+                    disabled
+                  >
+                    Message
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="flex gap-3 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none" disabled>
-                Book Appointment
-              </Button>
-              <Button variant="outline" className="flex-1 sm:flex-none" disabled>
-                Message
-              </Button>
             </div>
           </div>
         </div>
