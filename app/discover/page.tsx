@@ -166,10 +166,10 @@ export default function DiscoverPage() {
       </section>
 
       {/* Filters Section */}
-      <section className="sticky top-16 z-10 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
+      <section className="sticky top-12 z-10 ">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-            <span className="text-sm font-semibold text-gray-700 whitespace-nowrap mr-2">
+            <span className="text-sm font-semibold text-gray-700 whitespace-nowrap mr-2 border-1 border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-xl px-5 py-2.5">
               Filter by:
             </span>
             {["All Styles", "Location", "Price Range", "Availability"].map(
@@ -177,7 +177,7 @@ export default function DiscoverPage() {
                 <button
                   key={filter}
                   disabled
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 bg-white hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-700 border-1 border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-all whitespace-nowrap disabled:bg-gray/60 disabled:cursor-not-allowed"
                 >
                   {filter}
                 </button>
