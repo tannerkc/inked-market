@@ -32,10 +32,11 @@ export default function ArtistPlanPage() {
       <Eyebrow text="Last Step" color="red" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Choose", font: "pirata" },
-          { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Plan", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "rye" },
+          { text: "Plan", font: "cook", color: "text-ink-red" },
         ]}
       />
       <Subtitle text="Start free or go Pro for independent visibility. Upgrade anytime." className="mb-5" />

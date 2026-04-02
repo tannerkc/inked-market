@@ -28,10 +28,11 @@ export default function ArtistProfilePage() {
       <Eyebrow text="Almost There" color="red" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Show", font: "limelight" },
-          { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Work", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "rye" },
+          { text: "Work", font: "cook", color: "text-ink-red" },
         ]}
       />
       <Subtitle text="Pick your styles and add some portfolio work. You can always add more later from your dashboard." className="mb-6" />

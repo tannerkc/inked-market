@@ -10,10 +10,11 @@ export default function StudioSignupPage() {
       <Eyebrow text="Studio Account" color="rust" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Create", font: "pirata" },
-          { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Account", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "rye" },
+          { text: "Account", font: "cook", color: "text-ink-rust" },
         ]}
       />
       <Subtitle text="Set up your studio's presence on Inked Market." className="mb-6" />

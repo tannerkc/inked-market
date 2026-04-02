@@ -30,11 +30,12 @@ export default function StudioSetupPage() {
       <Eyebrow text="Almost There" color="rust" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Set", font: "pirata" },
           { text: "Up", font: "rye" },
-          { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Studio", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "limelight" },
+          { text: "Studio", font: "cook", color: "text-ink-rust" },
         ]}
       />
       <Subtitle text="Create your studio's listing or claim an existing one. Takes under 5 minutes." className="mb-6" />

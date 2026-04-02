@@ -11,6 +11,7 @@ export default function CustomerSignupPage() {
       <Eyebrow text="Almost There" color="sage" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Create", font: "pirata" },
           { text: "Your", font: "rye" },

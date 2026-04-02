@@ -10,10 +10,11 @@ export default function ArtistSignupPage() {
       <Eyebrow text="Artist Account" color="red" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Create", font: "pirata" },
-          { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Account", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "rye" },
+          { text: "Account", font: "cook", color: "text-ink-red" },
         ]}
       />
       <Subtitle text="Set up your artist profile and start getting discovered." className="mb-6" />

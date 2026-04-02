@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { bebasNeue, pirataOne, rye, limelight, permanentMarker, unifrakturCook } from "@/lib/fonts";
 
 type FontName = "pirata" | "rye" | "limelight" | "marker" | "cook";
-type HeadlineSize = "md" | "lg" | "xl";
+type HeadlineSize = "sm" | "md" | "lg" | "xl";
 
 interface HeadlineWord {
   text: string;
@@ -29,6 +29,7 @@ const fontMap: Record<FontName, string> = {
 };
 
 const sizeMap: Record<HeadlineSize, string> = {
+  sm: "text-[30px] sm:text-4xl",
   md: "text-4xl sm:text-5xl",
   lg: "text-5xl sm:text-6xl lg:text-8xl",
   xl: "text-5xl sm:text-6xl lg:text-7xl",

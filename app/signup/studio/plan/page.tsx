@@ -28,10 +28,11 @@ export default function StudioPlanPage() {
       <Eyebrow text="Last Step" color="rust" />
       <Headline
         variant="mixed"
+        size="sm"
         words={[
           { text: "Choose", font: "pirata" },
-          { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Plan", font: "cook", color: "text-ink-black" },
+          { text: "Your", font: "rye" },
+          { text: "Plan", font: "cook", color: "text-ink-rust" },
         ]}
       />
       <Subtitle text="All plans include a marketplace presence. Upgrade for full customization." className="mb-5" />
