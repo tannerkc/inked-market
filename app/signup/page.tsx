@@ -1,6 +1,8 @@
-// app/signup/page.tsx
 import Link from "next/link";
-import { StepEyebrow, MixedHeadline, TypeCard } from "@/components/signup";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Headline } from "@/components/ui/headline";
+import { Subtitle } from "@/components/ui/subtitle";
+import { TypeCard } from "@/components/signup";
 
 function SearchIcon() {
   return (
@@ -29,9 +31,10 @@ function HouseIcon() {
 export default function SignupPage() {
   return (
     <div className="text-center pointer-events-none">
-      <StepEyebrow text="Get Inked" color="red" />
+      <Eyebrow text="Get Inked" color="red" />
 
-      <MixedHeadline
+      <Headline
+        variant="mixed"
         words={[
           { text: "Join", font: "pirata" },
           { text: "The", font: "marker", color: "text-ink-red" },
@@ -39,9 +42,7 @@ export default function SignupPage() {
         ]}
       />
 
-      <p className="text-sm text-ink-black/35 leading-relaxed mb-8">
-        Choose your path. You can always change this later.
-      </p>
+      <Subtitle text="Choose your path. You can always change this later." className="mb-8" />
 
       <div className="flex flex-col gap-2.5 pointer-events-auto">
         <TypeCard

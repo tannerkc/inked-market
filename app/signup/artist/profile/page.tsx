@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Headline } from "@/components/ui/headline";
+import { Subtitle } from "@/components/ui/subtitle";
 import {
   ProgressBar,
-  StepEyebrow,
-  MixedHeadline,
   StylePicker,
   IgImportCard,
   PhotoUploadGrid,
@@ -24,19 +25,16 @@ export default function ArtistProfilePage() {
     <div className="text-center">
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      <StepEyebrow text="Almost There" color="red" />
-
-      <MixedHeadline
+      <Eyebrow text="Almost There" color="red" />
+      <Headline
+        variant="mixed"
         words={[
           { text: "Show", font: "limelight" },
           { text: "Your", font: "marker", color: "text-ink-red" },
           { text: "Work", font: "cook" },
         ]}
       />
-
-      <p className="text-sm text-ink-black/35 leading-relaxed mb-6">
-        Pick your styles and add some portfolio work. You can always add more later from your dashboard.
-      </p>
+      <Subtitle text="Pick your styles and add some portfolio work. You can always add more later from your dashboard." className="mb-6" />
 
       <div className="text-left mb-5">
         <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-black/25 mb-2 px-1">

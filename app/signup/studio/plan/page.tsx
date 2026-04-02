@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Headline } from "@/components/ui/headline";
+import { Subtitle } from "@/components/ui/subtitle";
 import {
   ProgressBar,
-  StepEyebrow,
-  MixedHeadline,
   BillingToggle,
   SignupTierCard,
 } from "@/components/signup";
@@ -24,19 +25,16 @@ export default function StudioPlanPage() {
     <div className="text-center">
       <ProgressBar currentStep={4} totalSteps={4} />
 
-      <StepEyebrow text="Last Step" color="rust" />
-
-      <MixedHeadline
+      <Eyebrow text="Last Step" color="rust" />
+      <Headline
+        variant="mixed"
         words={[
           { text: "Choose", font: "pirata" },
           { text: "Your", font: "marker", color: "text-ink-rust" },
           { text: "Plan", font: "cook" },
         ]}
       />
-
-      <p className="text-sm text-ink-black/35 leading-relaxed mb-5">
-        All plans include a marketplace presence. Upgrade for full customization.
-      </p>
+      <Subtitle text="All plans include a marketplace presence. Upgrade for full customization." className="mb-5" />
 
       <BillingToggle isAnnual={isAnnual} onChange={setIsAnnual} className="mb-5" />
 

@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ProgressBar,
-  StepEyebrow,
-  MixedHeadline,
-  StylePicker,
-} from "@/components/signup";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Headline } from "@/components/ui/headline";
+import { Subtitle } from "@/components/ui/subtitle";
+import { ProgressBar, StylePicker } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { studioSpecialtyOptions } from "@/lib/data/signup-styles";
@@ -29,9 +27,9 @@ export default function StudioSetupPage() {
     <div className="text-center">
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      <StepEyebrow text="Almost There" color="rust" />
-
-      <MixedHeadline
+      <Eyebrow text="Almost There" color="rust" />
+      <Headline
+        variant="mixed"
         words={[
           { text: "Set", font: "pirata" },
           { text: "Up", font: "rye" },
@@ -39,10 +37,7 @@ export default function StudioSetupPage() {
           { text: "Studio", font: "cook" },
         ]}
       />
-
-      <p className="text-sm text-ink-black/35 leading-relaxed mb-6">
-        Create your studio&apos;s listing or claim an existing one. Takes under 5 minutes.
-      </p>
+      <Subtitle text="Create your studio's listing or claim an existing one. Takes under 5 minutes." className="mb-6" />
 
       <div className="flex gap-2.5 mb-5">
         <div className="flex-1 p-4 rounded-[14px] border border-ink-rust bg-ink-rust/[0.03] text-center">
