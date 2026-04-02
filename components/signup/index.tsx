@@ -7,3 +7,5 @@ export { AuthForm } from "./auth-form";
 export { StylePicker } from "./style-picker";
 export { IgImportCard } from "./ig-import-card";
 export { PhotoUploadGrid } from "./photo-upload-grid";
+export { BillingToggle } from "./billing-toggle";
+export { SignupTierCard } from "./signup-tier-card";
