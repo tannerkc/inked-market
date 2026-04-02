@@ -21,7 +21,7 @@ const StepEyebrow = React.forwardRef<HTMLParagraphElement, StepEyebrowProps>(
     <p
       ref={ref}
       className={cn(
-        `${permanentMarker.className} text-xs tracking-[0.25em] uppercase -rotate-2 inline-block mb-3`,
+        `${permanentMarker.className} text-xs tracking-[0.25em] uppercase -rotate-2 inline-block mb-2`,
         colorMap[color],
         className
       )}

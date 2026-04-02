@@ -4,9 +4,7 @@ export default function ArtistSignupPage() {
   return (
     <div className="text-center">
       <ProgressBar currentStep={2} totalSteps={4} />
-      <div className="mb-5">
-        <StepEyebrow text="Artist Account" color="red" />
-      </div>
+      <StepEyebrow text="Artist Account" color="red" />
       <MixedHeadline
         words={[
           { text: "Create", font: "pirata" },

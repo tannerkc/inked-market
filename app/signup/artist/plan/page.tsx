@@ -28,9 +28,7 @@ export default function ArtistPlanPage() {
     <div className="text-center">
       <ProgressBar currentStep={4} totalSteps={4} />
 
-      <div className="mb-5">
-        <StepEyebrow text="Last Step" color="red" />
-      </div>
+      <StepEyebrow text="Last Step" color="red" />
 
       <MixedHeadline
         words={[

@@ -5,9 +5,7 @@ export default function CustomerSignupPage() {
   return (
     <div className="text-center">
       <ProgressBar currentStep={2} totalSteps={2} />
-      <div className="mb-5">
-        <StepEyebrow text="Almost There" color="sage" />
-      </div>
+      <StepEyebrow text="Almost There" color="sage" />
       <MixedHeadline
         words={[
           { text: "Create", font: "pirata" },

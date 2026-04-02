@@ -24,9 +24,7 @@ export default function ArtistProfilePage() {
     <div className="text-center">
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      <div className="mb-5">
-        <StepEyebrow text="Almost There" color="red" />
-      </div>
+      <StepEyebrow text="Almost There" color="red" />
 
       <MixedHeadline
         words={[

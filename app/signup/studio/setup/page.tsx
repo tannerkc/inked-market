@@ -29,9 +29,7 @@ export default function StudioSetupPage() {
     <div className="text-center">
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      <div className="mb-5">
-        <StepEyebrow text="Almost There" color="rust" />
-      </div>
+      <StepEyebrow text="Almost There" color="rust" />
 
       <MixedHeadline
         words={[

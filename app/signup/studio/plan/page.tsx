@@ -24,9 +24,7 @@ export default function StudioPlanPage() {
     <div className="text-center">
       <ProgressBar currentStep={4} totalSteps={4} />
 
-      <div className="mb-5">
-        <StepEyebrow text="Last Step" color="rust" />
-      </div>
+      <StepEyebrow text="Last Step" color="rust" />
 
       <MixedHeadline
         words={[

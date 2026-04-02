@@ -4,9 +4,7 @@ export default function StudioSignupPage() {
   return (
     <div className="text-center">
       <ProgressBar currentStep={2} totalSteps={4} />
-      <div className="mb-5">
-        <StepEyebrow text="Studio Account" color="rust" />
-      </div>
+      <StepEyebrow text="Studio Account" color="rust" />
       <MixedHeadline
         words={[
           { text: "Create", font: "pirata" },

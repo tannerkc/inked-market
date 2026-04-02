@@ -29,9 +29,7 @@ function HouseIcon() {
 export default function SignupPage() {
   return (
     <div className="text-center pointer-events-none">
-      <div className="mb-6">
-        <StepEyebrow text="Get Inked" color="red" />
-      </div>
+      <StepEyebrow text="Get Inked" color="red" />
 
       <MixedHeadline
         words={[
