@@ -5,3 +5,5 @@ export { TypeCard } from "./type-card";
 export { MixedHeadline } from "./mixed-headline";
 export { AuthForm } from "./auth-form";
 export { StylePicker } from "./style-picker";
+export { IgImportCard } from "./ig-import-card";
+export { PhotoUploadGrid } from "./photo-upload-grid";
