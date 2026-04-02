@@ -114,7 +114,7 @@ export default function LoginPage() {
             { text: "In", font: "rye" },
             { text: "To", font: "limelight" },
             { text: "The", font: "marker", color: "text-ink-red" },
-            { text: "Scene", font: "cook" },
+            { text: "Scene", font: "cook", color: "text-ink-black" },
           ]}
         />
 

@@ -31,7 +31,7 @@ export default function ArtistProfilePage() {
         words={[
           { text: "Show", font: "limelight" },
           { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Work", font: "cook" },
+          { text: "Work", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="Pick your styles and add some portfolio work. You can always add more later from your dashboard." className="mb-6" />

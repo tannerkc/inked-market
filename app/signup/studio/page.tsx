@@ -13,7 +13,7 @@ export default function StudioSignupPage() {
         words={[
           { text: "Create", font: "pirata" },
           { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Account", font: "cook" },
+          { text: "Account", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="Set up your studio's presence on Inked Market." className="mb-6" />

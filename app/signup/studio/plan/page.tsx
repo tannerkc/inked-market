@@ -31,7 +31,7 @@ export default function StudioPlanPage() {
         words={[
           { text: "Choose", font: "pirata" },
           { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Plan", font: "cook" },
+          { text: "Plan", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="All plans include a marketplace presence. Upgrade for full customization." className="mb-5" />

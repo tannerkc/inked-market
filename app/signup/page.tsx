@@ -38,7 +38,7 @@ export default function SignupPage() {
         words={[
           { text: "Join", font: "pirata" },
           { text: "The", font: "marker", color: "text-ink-red" },
-          { text: "Scene", font: "cook" },
+          { text: "Scene", font: "cook", color: "text-ink-black" },
         ]}
       />
 

@@ -34,7 +34,7 @@ export default function StudioSetupPage() {
           { text: "Set", font: "pirata" },
           { text: "Up", font: "rye" },
           { text: "Your", font: "marker", color: "text-ink-rust" },
-          { text: "Studio", font: "cook" },
+          { text: "Studio", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="Create your studio's listing or claim an existing one. Takes under 5 minutes." className="mb-6" />

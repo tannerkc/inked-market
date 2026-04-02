@@ -35,7 +35,7 @@ export default function ArtistPlanPage() {
         words={[
           { text: "Choose", font: "pirata" },
           { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Plan", font: "cook" },
+          { text: "Plan", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="Start free or go Pro for independent visibility. Upgrade anytime." className="mb-5" />

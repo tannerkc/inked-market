@@ -13,7 +13,7 @@ export default function ArtistSignupPage() {
         words={[
           { text: "Create", font: "pirata" },
           { text: "Your", font: "marker", color: "text-ink-red" },
-          { text: "Account", font: "cook" },
+          { text: "Account", font: "cook", color: "text-ink-black" },
         ]}
       />
       <Subtitle text="Set up your artist profile and start getting discovered." className="mb-6" />
