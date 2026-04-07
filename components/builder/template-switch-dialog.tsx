@@ -1,0 +1,107 @@
+"use client";
+
+import React, { useCallback, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { templates } from "@/lib/data/templates";
+import type { TemplateSlug } from "@/lib/types/builder";
+
+interface TemplateSwitchDialogProps {
+  isOpen: boolean;
+  targetTemplate: TemplateSlug | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export function TemplateSwitchDialog({
+  isOpen,
+  targetTemplate,
+  onConfirm,
+  onCancel,
+}: TemplateSwitchDialogProps) {
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onCancel();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onCancel]);
+
+  // Close on backdrop click
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        onCancel();
+      }
+    },
+    [onCancel],
+  );
+
+  if (!isOpen || !targetTemplate) return null;
+
+  const tmpl = templates[targetTemplate];
+
+  return (
+    <div
+      className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center"
+      onClick={handleBackdropClick}
+    >
+      <div
+        className={cn(
+          "w-[420px] rounded-2xl bg-[#111] border border-[#2a2a2a] shadow-2xl p-6",
+          "animate-in fade-in zoom-in-95 duration-200",
+        )}
+      >
+        {/* Title */}
+        <h2 className="text-[16px] font-semibold text-[#ededed]">
+          Switch Template?
+        </h2>
+
+        {/* Body */}
+        <p className="mt-3 text-[13px] leading-relaxed text-[#888]">
+          Switching to{" "}
+          <span className="font-semibold text-[#ededed]">{tmpl.name}</span> will
+          reset your layout choices to the new template&apos;s defaults. Your
+          color and font customizations will be preserved.
+        </p>
+
+        {/* Color preview dots */}
+        <div className="flex items-center gap-2 mt-4">
+          <span
+            className="w-4 h-4 rounded-full border border-[#333]"
+            style={{ backgroundColor: tmpl.previewAccent }}
+          />
+          <span
+            className="w-4 h-4 rounded-full border border-[#333]"
+            style={{ backgroundColor: tmpl.previewBg }}
+          />
+          <span
+            className="w-4 h-4 rounded-full border border-[#333]"
+            style={{ backgroundColor: "#555" }}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 mt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 text-[13px] font-medium text-[#888] border border-[#333] rounded-lg hover:text-[#ededed] hover:border-[#555] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="px-4 py-2 text-[13px] font-medium text-white bg-[#FF3333] rounded-lg hover:bg-[#e62e2e] transition-colors"
+          >
+            Switch Template
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,11 @@
+export { DetailHero } from "./detail-hero";
+export { ReviewPanel } from "./review-panel";
+export { SocialLinks } from "./social-links";
+export { FooterCta } from "./footer-cta";
+export { ImageGallery } from "./image-gallery";
+export { VerifiedBadge } from "./verified-badge";
+export { WidgetPanel, WidgetLabel, WidgetHeading } from "./widget-panel";
+export { IssueLabel } from "./issue-label";
+export { SplitName } from "./split-name";
+export { BioQuote } from "./bio-quote";
+export { MetaRow, MetaItem, MetaHighlight } from "./meta-row";

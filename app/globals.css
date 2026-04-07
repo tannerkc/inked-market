@@ -3,13 +3,66 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --ink-black: #0A0A0A;
+  --ink-cream: #F5F0EB;
+  --ink-red: #FF3333;
+  --ink-rust: #C1440E;
+  --ink-sage: #6B7C5E;
+  --ink-parchment-light: #FAF3E8;
+  --ink-parchment-dark: #F0E8DE;
+  --ink-black-raised: #0e0e0e;
+  --ink-black-sunken: #0c0c0c;
+  --pill-inset: 6px;
+  --pill-btn-px: 16px;
+  --pill-btn-py: 6px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink-black: var(--ink-black);
+  --color-ink-cream: var(--ink-cream);
+  --color-ink-red: var(--ink-red);
+  --color-ink-rust: var(--ink-rust);
+  --color-ink-sage: var(--ink-sage);
+  --color-ink-parchment-light: var(--ink-parchment-light);
+  --color-ink-parchment-dark: var(--ink-parchment-dark);
+  --color-ink-black-raised: var(--ink-black-raised);
+  --color-ink-black-sunken: var(--ink-black-sunken);
+  --spacing-pill-inset: var(--pill-inset);
+  --spacing-pill-btn-px: var(--pill-btn-px);
+  --spacing-pill-btn-py: var(--pill-btn-py);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Curated Chaos utilities */
+.film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.text-glow-red {
+  text-shadow: 0 0 30px color-mix(in srgb, var(--ink-red) 20%, transparent);
+}
+
+.shadow-ink-red-glow {
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--ink-red) 20%, transparent);
+}
+
+.bg-ink-red-glow-top {
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--ink-red) 5%, transparent) 0%, transparent 70%);
+}
+
+.bg-ink-red-glow-cta {
+  background: radial-gradient(ellipse at center top, color-mix(in srgb, var(--ink-red) 6%, transparent) 0%, transparent 70%);
+}
+
+.shadow-ink-cream-glow {
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ink-cream) 50%, transparent);
+}
+
+.shadow-ink-sage-glow {
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ink-sage) 50%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +70,17 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+/* Manual theme toggle overrides (takes precedence over OS preference) */
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 html {
@@ -27,4 +91,27 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Builder animations */
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes flyout-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }

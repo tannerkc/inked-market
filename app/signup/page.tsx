@@ -66,7 +66,7 @@ export default function SignupPage() {
           icon={<HouseIcon />}
           iconColor="rust"
           title="Studio Owner"
-          description="List your shop, manage artists, attract new clients"
+          description="List your studio, manage artists, attract new clients"
           features={["Listing", "Team", "Analytics"]}
         />
       </div>

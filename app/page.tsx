@@ -10,7 +10,7 @@ import { IconBox } from "@/components/ui/icon-box";
 import { DrawingCanvas } from "@/components/hero/drawing-canvas";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { ZineSpread } from "@/components/discover/zine-spread";
-import { mockArtists, mockShops } from "@/lib/data/discover";
+import { mockArtists, mockStudios } from "@/lib/data/discover";
 import { useEffect, useState } from "react";
 import { Permanent_Marker, Bebas_Neue, Pirata_One, Limelight, Rye, Abril_Fatface, UnifrakturCook } from "next/font/google";
 
@@ -239,7 +239,7 @@ export default function Home() {
 
             <FeatureCard
               title="Verified Studios"
-              description="Real shops, real artists, no BS. Every studio is verified for safety and quality."
+              description="Real studios, real artists, no BS. Every studio is verified for safety and quality."
               icon={featureIcons.verified}
               accentColor="sage"
             />
@@ -253,7 +253,7 @@ export default function Home() {
 
             <FeatureCard
               title="Save Inspo"
-              description="Bookmark artists, flash, and shops. Build your mood board."
+              description="Bookmark artists, flash, and studios. Build your mood board."
               icon={featureIcons.bookmark}
               accentColor="red"
             />
@@ -347,18 +347,18 @@ export default function Home() {
         )}
 
         {/* Spread 2: Featured studio, reversed, dark */}
-        {mockShops[1] && (
+        {mockStudios[1] && (
           <ZineSpread
-            id={mockShops[1].id}
-            type="shop"
-            name={mockShops[1].name}
-            image={mockShops[1].image}
-            location={mockShops[1].location}
-            rating={mockShops[1].rating}
-            reviewCount={mockShops[1].reviewCount}
-            description={mockShops[1].description ?? ""}
-            specialties={mockShops[1].specialties}
-            badges={mockShops[1].badges}
+            id={mockStudios[1].id}
+            type="studio"
+            name={mockStudios[1].name}
+            image={mockStudios[1].image}
+            location={mockStudios[1].location}
+            rating={mockStudios[1].rating}
+            reviewCount={mockStudios[1].reviewCount}
+            description={mockStudios[1].description ?? ""}
+            specialties={mockStudios[1].specialties}
+            badges={mockStudios[1].badges}
             reverse
             panelVariant="dark"
             sectionLabel="Studio Feature"
@@ -379,7 +379,7 @@ export default function Home() {
               <div className="flex-1 h-px bg-ink-black/[0.08]" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
-              {[...mockArtists.slice(2), ...mockShops.slice(2)].slice(0, 4).map((item) => (
+              {[...mockArtists.slice(2), ...mockStudios.slice(2)].slice(0, 4).map((item) => (
                 <Link
                   key={`${item.name}-${item.id}`}
                   href={`/artists/${item.id}`}

@@ -21,14 +21,8 @@ export const tattooStyleLabels: Record<TattooStyle, string> = {
 export const tattooStyleOptions = Object.values(tattooStyleLabels);
 
 export const studioSpecialtyOptions = [
-  "Traditional",
-  "Realism",
-  "Fine Line",
-  "Japanese",
-  "Blackwork",
+  ...Object.values(tattooStyleLabels),
   "Color Work",
   "Custom Design",
   "Cover-Ups",
-  "Walk-Ins",
-  "Piercing",
 ];

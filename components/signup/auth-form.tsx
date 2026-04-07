@@ -33,6 +33,10 @@ interface AuthFormProps {
   emailPlaceholder?: string;
   ctaLabel: string;
   onBack?: string;
+  onSubmit?: (data: { email: string; password: string; name?: string }) => void;
+  defaultEmail?: string;
+  defaultPassword?: string;
+  defaultName?: string;
   className?: string;
 }
 
@@ -41,14 +45,21 @@ export function AuthForm({
   emailPlaceholder = "your@email.com",
   ctaLabel,
   onBack,
+  onSubmit,
+  defaultEmail = "",
+  defaultPassword = "",
+  defaultName = "",
   className,
 }: AuthFormProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState(defaultEmail);
+  const [password, setPassword] = useState(defaultPassword);
+  const [name, setName] = useState(defaultName);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (onSubmit && email && password) {
+      onSubmit({ email, password, name: name || undefined });
+    }
   };
 
   return (

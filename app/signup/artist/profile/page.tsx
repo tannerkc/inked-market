@@ -13,11 +13,14 @@ import {
 } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { tattooStyleOptions } from "@/lib/data/signup-styles";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function ArtistProfilePage() {
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const { updateSignupProgress, signupProgress } = useAuth();
+  const [selectedStyles, setSelectedStyles] = useState<string[]>(signupProgress.styles || []);
 
   const handleComplete = () => {
+    updateSignupProgress({ styles: selectedStyles });
     window.location.href = "/signup/artist/plan";
   };
 
@@ -76,6 +79,7 @@ export default function ArtistProfilePage() {
 
       <Link
         href="/signup/artist"
+        onClick={() => updateSignupProgress({ styles: selectedStyles })}
         className="block text-center font-mono text-[10px] tracking-[0.15em] uppercase text-ink-black/25 hover:text-ink-black/45 transition-colors pt-3"
       >
         &larr; Back

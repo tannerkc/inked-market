@@ -25,7 +25,7 @@ export interface SocialLinks {
   website?: string;
 }
 
-export interface Shop extends BaseEntity {
+export interface Studio extends BaseEntity {
   name: string;
   description: string;
   bio: string;
@@ -40,7 +40,7 @@ export interface Shop extends BaseEntity {
   rating: number;
   reviewCount: number;
   verified: boolean;
-  artistIds: string[]; // IDs of artists working at this shop
+  artistIds: string[]; // IDs of artists working at this studio
   openHours?: {
     [key: string]: { open: string; close: string; closed?: boolean };
   };
@@ -51,7 +51,7 @@ export interface Artist extends BaseEntity {
   bio: string;
   profileImage: string;
   coverImage?: string;
-  shopId?: string; // Optional - artist might be independent
+  studioId?: string; // Optional - artist might be independent
   specialties: string[];
   styles: TattooStyle[];
   portfolioImages: PortfolioImage[];
@@ -95,7 +95,7 @@ export interface Customer extends BaseEntity {
   profileImage?: string;
   bio?: string;
   location?: Partial<Location>;
-  savedShopIds: string[];
+  savedStudioIds: string[];
   savedArtistIds: string[];
   savedDesignIds: string[];
   preferences?: {
@@ -109,8 +109,8 @@ export interface Review extends BaseEntity {
   authorId: string;
   authorName: string;
   authorImage?: string;
-  targetId: string; // Shop or Artist ID
-  targetType: 'shop' | 'artist';
+  targetId: string; // Studio or Artist ID
+  targetType: 'studio' | 'artist';
   rating: number;
   title: string;
   content: string;
@@ -142,7 +142,7 @@ export interface DiscoverFilters {
   specialties?: string[];
   rating?: number;
   verified?: boolean;
-  type?: 'shops' | 'artists' | 'all';
+  type?: 'studios' | 'artists' | 'all';
 }
 
 export interface PaginatedResponse<T> {
@@ -164,4 +164,233 @@ export interface CardProps {
   badge?: string;
   rating?: number;
   reviewCount?: number;
+}
+
+// Dashboard types
+export interface ChecklistItem {
+  id: string;
+  label: string;
+  completed: boolean;
+  skippedLabel?: string;
+}
+
+export interface DashboardStat {
+  label: string;
+  value: string | number;
+  empty?: boolean;
+}
+
+export interface DashboardData {
+  name: string;
+  subtitle?: string;
+  avatarUrl?: string;
+  tags: string[];
+  accentColor: "indigo" | "amber";
+  stats: DashboardStat[];
+  checklist: ChecklistItem[];
+  onboardingTitle: string;
+  onboardingSubtitle: string;
+}
+
+// Availability types
+export interface TimeSlot {
+  start: string;
+  end: string;
+}
+
+export interface DayAvailability {
+  enabled: boolean;
+  slots: TimeSlot[];
+}
+
+export interface WeeklyAvailability {
+  [day: string]: DayAvailability;
+}
+
+// Affiliation types
+export type AffiliationStatus = "pending-invite" | "pending-request" | "active";
+
+export interface Affiliation {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  status: AffiliationStatus;
+  role: "artist" | "studio";
+  styles?: string[];
+}
+
+// Studio service flags (operational capabilities, not tattoo styles)
+export type StudioService = "walk-ins" | "piercing";
+
+// Dashboard quick action type
+export interface QuickAction {
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  onClick?: () => void;
+  iconBgClass?: string;
+  iconBorderClass?: string;
+}
+
+// Settings types
+
+export type TierSlug = "liner" | "shader" | "magnum";
+export type BillingCycle = "monthly" | "annual";
+export type BillingStatus = "active" | "cancelled" | "draft";
+
+export interface NotificationPreferences {
+  marketing: boolean;
+  platformUpdates: boolean;
+  // Artist
+  bookingRequests?: boolean;
+  studioInvitations?: boolean;
+  // Studio
+  artistApplications?: boolean;
+  // Artist + Studio
+  bookingAlerts?: boolean;
+  reviewAlerts?: boolean;
+  // Customer
+  savedArtistUpdates?: boolean;
+  bookingConfirmations?: boolean;
+}
+
+export interface PrivacyPreferences {
+  showInSearch: boolean;
+  allowMessages: boolean;
+  // Artist
+  showAvailability?: boolean;
+  showAffiliation?: boolean;
+  portfolioVisibility?: "public" | "followers";
+  // Studio
+  showBusinessHours?: boolean;
+  showArtistRoster?: boolean;
+  // Customer
+  showSavedItems?: boolean;
+  showReviewHistory?: boolean;
+}
+
+export interface BillingInfo {
+  plan: TierSlug | null;
+  cycle: BillingCycle;
+  nextBillingDate?: string;
+  cancelledAt?: string;
+  status: BillingStatus;
+}
+
+export interface ConnectedAccount {
+  handle?: string;
+  email?: string;
+  connectedAt: string;
+}
+
+export interface ConnectedAccounts {
+  instagram?: ConnectedAccount;
+  google?: ConnectedAccount;
+  apple?: ConnectedAccount;
+}
+
+export interface SavedItemMeta {
+  id: string;
+  entityId: string;
+  entityType: "studio" | "artist" | "design";
+  savedAt: string;
+}
+
+// Customer dashboard types
+
+export type AppointmentStatus = "confirmed" | "pending" | "completed" | "cancelled";
+
+export interface Appointment extends BaseEntity {
+  customerId: string;
+  artistId: string;
+  artistName: string;
+  studioId?: string;
+  studioName?: string;
+  date: Date;
+  duration: number;
+  status: AppointmentStatus;
+  designBriefId?: string;
+  invoiceId?: string;
+  notes?: string;
+}
+
+export type BookingRequestStatus = "pending" | "accepted" | "declined" | "expired";
+
+export interface BookingRequest extends BaseEntity {
+  customerId: string;
+  artistId: string;
+  artistName: string;
+  studioId?: string;
+  studioName?: string;
+  requestedDate?: Date;
+  flexibleDates?: boolean;
+  designBriefId?: string;
+  status: BookingRequestStatus;
+  summary: string;
+}
+
+export type InvoiceStatus = "paid" | "unpaid" | "overdue" | "refunded";
+
+export interface Invoice extends BaseEntity {
+  customerId: string;
+  artistId: string;
+  artistName: string;
+  appointmentId?: string;
+  amount: number;
+  currency: string;
+  status: InvoiceStatus;
+  dueDate?: Date;
+  paidAt?: Date;
+  description: string;
+}
+
+export type DesignBriefStatus = "draft" | "submitted" | "in-review" | "accepted" | "declined";
+
+export interface DesignBrief extends BaseEntity {
+  customerId: string;
+  artistId?: string;
+  artistName?: string;
+  placement: string;
+  size: string;
+  budget?: { min: number; max: number };
+  description: string;
+  referenceImages: string[];
+  notes?: string;
+  status: DesignBriefStatus;
+}
+
+export interface AftercareStep {
+  id: string;
+  day: number;
+  title: string;
+  instructions: string;
+  completed: boolean;
+  completedAt?: Date;
+}
+
+export interface AftercareTimeline extends BaseEntity {
+  appointmentId: string;
+  artistId: string;
+  artistName: string;
+  startDate: Date;
+  steps: AftercareStep[];
+  customNotes?: string;
+}
+
+export interface HealedPhoto extends BaseEntity {
+  customerId: string;
+  appointmentId: string;
+  artistId: string;
+  url: string;
+  caption?: string;
+  approvedForPortfolio: boolean;
+}
+
+export type CustomerDashboardTab = "activity" | "invoices" | "reviews" | "aftercare" | "briefs";
+
+export interface ConversationParticipant {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  role: "artist" | "studio";
 }

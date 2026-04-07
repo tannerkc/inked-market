@@ -88,6 +88,32 @@ import { SortSelect } from "@/components/search/sort-select";
 /* ─── Artists ──────────────────────────────────────────────── */
 import { PortfolioGallery } from "@/components/artists";
 
+/* ─── Dashboard ───────────────────────────────────────────── */
+import {
+  OnboardingBanner,
+  DashboardSection,
+  StatCard,
+  EmptyState,
+  ProfileHeader,
+  TimeSlotBlock,
+  AffiliationRow,
+} from "@/components/dashboard";
+import { SlideOverPanel } from "@/components/ui/slide-over-panel";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { type TimeSlot } from "@/lib/types";
+
+/* ─── Lineup ──────────────────────────────────────────────── */
+import {
+  LineupTabs,
+  CoverStory,
+  NewsCard,
+  BlastCard,
+  PickRow,
+  IssueCard,
+} from "@/components/lineup";
+import type { LineupTabValue } from "@/components/lineup";
+import { lineupIssues, getAllSpotlights } from "@/lib/data/lineup";
+
 /* ─── Deprecated ───────────────────────────────────────────── */
 import { ComingSoon } from "@/components/ui/coming-soon";
 
@@ -187,6 +213,7 @@ const sections = [
   { id: "detail", label: "Detail Pages" },
   { id: "search-discover", label: "Search & Discover" },
   { id: "artists", label: "Artists" },
+  { id: "dashboard-interactions", label: "Dashboard Interactions" },
   { id: "layout", label: "Layout" },
   { id: "effects", label: "Effects" },
   { id: "deprecated", label: "The Graveyard" },
@@ -211,6 +238,15 @@ export default function ComponentLibraryPage() {
 
   /* Discover section state */
   const [activeFilter, setActiveFilter] = useState("All");
+
+  /* Dashboard interactions section state */
+  const [toggleSmChecked, setToggleSmChecked] = useState(false);
+  const [toggleMdChecked, setToggleMdChecked] = useState(true);
+  const [mondayEnabled, setMondayEnabled] = useState(true);
+  const [mondaySlots, setMondaySlots] = useState<TimeSlot[]>([
+    { start: "10:00 AM", end: "6:00 PM" },
+  ]);
+  const [slideOverOpen, setSlideOverOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-ink-black">
@@ -1184,7 +1220,7 @@ export default function ComponentLibraryPage() {
                     description: "Learn the basics of setting up your Inked Market profile.",
                     icon: "rocket",
                     accentColor: "rust",
-                    audiences: ["artist", "shop-owner"],
+                    audiences: ["artist", "studio-owner"],
                     articleCount: 5,
                     formats: ["guide", "faq"],
                   }}
@@ -1208,9 +1244,9 @@ export default function ComponentLibraryPage() {
                     },
                     {
                       id: "demo-faq-2",
-                      question: "Can I list multiple shops?",
+                      question: "Can I list multiple studios?",
                       answer: <p>Yes! Artists can be affiliated with multiple studios. Guest spots and multi-location artists are fully supported.</p>,
-                      audiences: ["artist", "shop-owner"],
+                      audiences: ["artist", "studio-owner"],
                     },
                   ]}
                   variant="dark"
@@ -1684,7 +1720,7 @@ export default function ComponentLibraryPage() {
                 <div className="scale-[0.5] origin-top-left" style={{ width: "200%", height: "200%" }}>
                   <ComingSoon
                     title="Booking System"
-                    description="Real-time scheduling for artists and shops."
+                    description="Real-time scheduling for artists and studios."
                     features={["Calendar sync", "Deposit collection"]}
                   />
                 </div>
@@ -1828,6 +1864,276 @@ export default function ComponentLibraryPage() {
                   <p className="font-mono text-[9px] text-ink-cream/30 mt-2">ink-sage-glow</p>
                 </div>
               </div>
+            </div>
+          </ShowcaseSection>
+
+          {/* ── DASHBOARD ── */}
+          <ShowcaseSection id="dashboard" title="Dashboard" description="Onboarding banners, stat cards, empty states, and section wrappers">
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Onboarding Banner — Artist (Indigo)
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <OnboardingBanner
+                title="Finish setting up your profile"
+                subtitle="4 of 7 complete — artists with full profiles get 3× more views"
+                progress={4 / 7}
+              />
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Onboarding Banner — Studio (Amber)
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <OnboardingBanner
+                title="Finish setting up your studio"
+                subtitle="3 of 6 complete — customize your page for free, publish when you&apos;re ready"
+                progress={3 / 6}
+              />
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Profile Header — Artist
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <ProfileHeader
+                name="Sarah Chen"
+                tags={["Fine Line", "Minimalist", "Geometric"]}
+                avatarShape="circle"
+                onEdit={() => {}}
+              />
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Profile Header — Studio
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <ProfileHeader
+                name="Iron Rose Tattoo"
+                subtitle="Portland, OR · (503) 555-0142"
+                tags={["Traditional", "Japanese", "Neo-Traditional"]}
+                avatarShape="rounded"
+                onEdit={() => {}}
+              />
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Stat Cards
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <div className="grid grid-cols-3 gap-3">
+                <StatCard label="Profile views" value={0} empty />
+                <StatCard label="Saves" value={38} />
+                <StatCard label="Messages" value={12} />
+              </div>
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Empty States
+            </p>
+            <div className="bg-white rounded-xl p-4 space-y-4 mb-6">
+              <EmptyState
+                message="No bio yet"
+                description="Tell clients about your work and style"
+                action={{ label: "+ Add a bio", onClick: () => {} }}
+              />
+              <EmptyState
+                variant="subtle"
+                message="No upcoming bookings"
+                description="Bookings will appear here once clients find you"
+              />
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Dashboard Section
+            </p>
+            <div className="bg-white rounded-xl p-4">
+              <DashboardSection title="Portfolio" action={{ label: "+ Add work", onClick: () => {} }}>
+                <EmptyState
+                  message="No portfolio pieces yet"
+                  description="Show off your best work"
+                  action={{ label: "+ Upload your first piece", onClick: () => {} }}
+                />
+              </DashboardSection>
+            </div>
+          </ShowcaseSection>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* DASHBOARD INTERACTIONS */}
+          {/* ═══════════════════════════════════════════════ */}
+          <ShowcaseSection
+            id="dashboard-interactions"
+            title="Dashboard Interactions"
+            description="Toggles, time blocks, affiliation rows, and slide-over panels"
+            dark
+          >
+            {/* ToggleSwitch */}
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              ToggleSwitch — sm &amp; md sizes, live state
+            </p>
+            <div className="bg-ink-cream/[0.03] border border-ink-cream/[0.06] rounded-xl p-4 mb-6 flex items-center gap-8">
+              <div className="flex items-center gap-3">
+                <ToggleSwitch checked={toggleSmChecked} onChange={setToggleSmChecked} size="sm" />
+                <span className="font-mono text-[10px] text-ink-cream/40 tracking-wide">
+                  sm — {toggleSmChecked ? "on" : "off"}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <ToggleSwitch checked={toggleMdChecked} onChange={setToggleMdChecked} size="md" />
+                <span className="font-mono text-[10px] text-ink-cream/40 tracking-wide">
+                  md — {toggleMdChecked ? "on" : "off"}
+                </span>
+              </div>
+            </div>
+
+            {/* TimeSlotBlock */}
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              TimeSlotBlock — interactive day block with add / remove / toggle
+            </p>
+            <div className="bg-ink-cream/[0.03] border border-ink-cream/[0.06] rounded-xl p-4 mb-6">
+              <TimeSlotBlock
+                dayName="Monday"
+                enabled={mondayEnabled}
+                onToggle={setMondayEnabled}
+                slots={mondaySlots}
+                onAddSlot={() =>
+                  setMondaySlots((prev) => [...prev, { start: "10:00 AM", end: "6:00 PM" }])
+                }
+                onRemoveSlot={(i) =>
+                  setMondaySlots((prev) => prev.filter((_, idx) => idx !== i))
+                }
+                onUpdateSlot={(i, field, value) =>
+                  setMondaySlots((prev) =>
+                    prev.map((s, idx) => (idx === i ? { ...s, [field]: value } : s))
+                  )
+                }
+              />
+            </div>
+
+            {/* AffiliationRow */}
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              AffiliationRow — active, pending-invite, pending-request variants
+            </p>
+            <div className="bg-ink-cream/[0.03] border border-ink-cream/[0.06] rounded-xl px-4 mb-6">
+              <AffiliationRow name="Sarah Chen" subtitle="Fine Line · Minimalist" status="active" />
+              <AffiliationRow name="Marcus Rivera" subtitle="Traditional · Neo-Traditional" status="pending-invite" />
+              <AffiliationRow
+                name="Yuki Tanaka"
+                subtitle="Geometric · Blackwork"
+                status="pending-request"
+                onAccept={() => {}}
+                onDecline={() => {}}
+              />
+            </div>
+
+            {/* SlideOverPanel */}
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              SlideOverPanel — right drawer on desktop, bottom sheet on mobile
+            </p>
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={() => setSlideOverOpen(true)}
+                className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink-rust border border-ink-rust/20 rounded-lg px-4 py-2 hover:bg-ink-rust/[0.06] transition-colors"
+              >
+                Open Demo Panel
+              </button>
+              <SlideOverPanel
+                open={slideOverOpen}
+                onClose={() => setSlideOverOpen(false)}
+                title="Demo Panel"
+              >
+                <p className="font-mono text-[11px] text-ink-cream/40 leading-relaxed mb-4">
+                  This is the SlideOverPanel component. On mobile it slides up from the bottom; on desktop it animates in from the right edge.
+                </p>
+                <p className="font-mono text-[11px] text-ink-cream/40 leading-relaxed">
+                  Press Escape or click the backdrop to close. Scroll is locked on the body while the panel is open.
+                </p>
+              </SlideOverPanel>
+            </div>
+          </ShowcaseSection>
+
+          {/* ── LINE UP COMPONENTS ── */}
+          <ShowcaseSection id="lineup" title="Line Up" description="Newsletter/feed components: tabs, cover stories, news cards, blast events, editor's picks, and archive issue cards" dark>
+            <div className="space-y-8">
+              <ComponentRow label="LineupTabs" dark>
+                <div className="w-full">
+                  <LineupTabs
+                    activeTab={"this-week" as LineupTabValue}
+                    onTabChange={() => {}}
+                    eventCount={3}
+                  />
+                </div>
+              </ComponentRow>
+
+              <ComponentRow label="CoverStory" dark>
+                <div className="w-full">
+                  <CoverStory spotlight={getAllSpotlights()[0]} />
+                </div>
+              </ComponentRow>
+
+              <ComponentRow label="NewsCard" dark>
+                <div className="w-full">
+                  <NewsCard
+                    article={{
+                      slug: "demo",
+                      category: "Trending",
+                      headline: "The Rise of Blue Ceramic Tattoos",
+                      excerpt: "How Portuguese azulejo tile patterns became the most-requested style of 2026.",
+                      readTime: "5 min read",
+                      date: "2026-04-03",
+                    }}
+                  />
+                </div>
+              </ComponentRow>
+
+              <ComponentRow label="BlastCard (active + past)" dark>
+                <div className="w-full space-y-2">
+                  <BlastCard
+                    event={{
+                      id: "demo-1",
+                      type: "flash",
+                      title: "Sacred Geometry — Spring Flash Day",
+                      details: "Walk-ins welcome · 12 artists · Pieces from $80",
+                      date: "2026-04-12",
+                      location: "Austin, TX",
+                      ctaLabel: "Save Event",
+                    }}
+                  />
+                  <BlastCard
+                    event={{
+                      id: "demo-2",
+                      type: "guest-spot",
+                      title: "Past Event Demo",
+                      details: "This event already happened",
+                      date: "2025-01-01",
+                      location: "NYC",
+                      ctaLabel: "View",
+                    }}
+                    past
+                  />
+                </div>
+              </ComponentRow>
+
+              <ComponentRow label="PickRow" dark>
+                <div className="w-full">
+                  {lineupIssues[0].editorsPicks.slice(0, 3).map((p, i) => (
+                    <PickRow key={p.id} profile={p} rank={i + 1} />
+                  ))}
+                </div>
+              </ComponentRow>
+
+              <ComponentRow label="IssueCard (Archive)" dark>
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {lineupIssues.map((issue) => (
+                    <IssueCard
+                      key={issue.id}
+                      issue={issue}
+                      isActive={issue.id === lineupIssues[0].id}
+                      onSelect={() => {}}
+                    />
+                  ))}
+                </div>
+              </ComponentRow>
             </div>
           </ShowcaseSection>
 

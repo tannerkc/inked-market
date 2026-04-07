@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { DrawingCanvas } from "@/components/hero/drawing-canvas";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Headline } from "@/components/ui/headline";
 import { Subtitle } from "@/components/ui/subtitle";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const loginDecorations = [
   {
@@ -73,11 +74,30 @@ function AppleIcon() {
 }
 
 export default function LoginPage() {
+  const { login, isAuthenticated, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "artist" || user.role === "studio") window.location.href = "/dashboard";
+      else window.location.href = "/";
+    }
+  }, [isAuthenticated, user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    if (!email || !password) return;
+    const result = login(email, password);
+    if (!result) {
+      setError("Invalid email or password");
+      return;
+    }
+    if (result.role === "artist" || result.role === "studio") window.location.href = "/dashboard";
+    else window.location.href = "/";
   };
 
   return (
@@ -119,7 +139,7 @@ export default function LoginPage() {
         />
 
         <Subtitle
-          text="Pick up where you left off. Your saved artists and shops are waiting."
+          text="Pick up where you left off. Your saved artists and studios are waiting."
           className="mb-8"
         />
 
@@ -187,6 +207,11 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
           />
+
+          {/* Error */}
+          {error && (
+            <p className="text-ink-red text-[11px] font-mono tracking-[0.1em]">{error}</p>
+          )}
 
           {/* Sign In */}
           <Button type="submit" variant="ink" size="lg" statusDot className="w-full">

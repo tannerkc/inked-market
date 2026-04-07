@@ -12,17 +12,17 @@ import {
 } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { artistTiers } from "@/lib/data/signup-tiers";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function ArtistPlanPage() {
+  const { updateSignupProgress, completeSignup, signupProgress } = useAuth();
   const [isAnnual, setIsAnnual] = useState(false);
-  const [selectedTier, setSelectedTier] = useState("Free");
+  const [selectedTier, setSelectedTier] = useState(signupProgress.plan || "Liner");
 
   const handleActivate = () => {
-    if (selectedTier === "Free") {
-      window.location.href = "/";
-    } else {
-      window.location.href = "/";
-    }
+    updateSignupProgress({ plan: selectedTier });
+    completeSignup();
+    window.location.href = "/dashboard";
   };
 
   return (
@@ -39,7 +39,7 @@ export default function ArtistPlanPage() {
           { text: "Plan", font: "cook", color: "text-ink-red" },
         ]}
       />
-      <Subtitle text="Start free or go Pro for independent visibility. Upgrade anytime." className="mb-5" />
+      <Subtitle text="Start on Liner or go Shader for independent visibility. Upgrade anytime." className="mb-5" />
       <BillingToggle isAnnual={isAnnual} onChange={setIsAnnual} className="mb-5" />
 
       <div className="flex flex-col gap-2.5 mb-5">
@@ -75,6 +75,7 @@ export default function ArtistPlanPage() {
 
       <Link
         href="/signup/artist/profile"
+        onClick={() => updateSignupProgress({ plan: selectedTier })}
         className="block text-center font-mono text-[10px] tracking-[0.15em] uppercase text-ink-black/25 hover:text-ink-black/45 transition-colors pt-3"
       >
         &larr; Back

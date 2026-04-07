@@ -15,7 +15,7 @@ import { studioTiers } from "@/lib/data/signup-tiers";
 
 export default function StudioPlanPage() {
   const [isAnnual, setIsAnnual] = useState(false);
-  const [selectedTier, setSelectedTier] = useState("Basic");
+  const [selectedTier, setSelectedTier] = useState("Liner");
 
   const handleActivate = () => {
     window.location.href = "/";

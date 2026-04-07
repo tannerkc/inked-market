@@ -77,10 +77,10 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = "CardFooter";
 
-// Specialized Profile Card for Shops and Artists
+// Specialized Profile Card for Studios and Artists
 interface ProfileCardProps {
   id: string;
-  type: "shop" | "artist";
+  type: "studio" | "artist";
   name: string;
   image: string;
   location?: string;

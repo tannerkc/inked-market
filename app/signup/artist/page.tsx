@@ -1,9 +1,14 @@
+"use client";
+
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Headline } from "@/components/ui/headline";
 import { Subtitle } from "@/components/ui/subtitle";
 import { ProgressBar, AuthForm } from "@/components/signup";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function ArtistSignupPage() {
+  const { updateSignupProgress, signupProgress } = useAuth();
+
   return (
     <div className="text-center">
       <ProgressBar currentStep={2} totalSteps={4} />
@@ -23,6 +28,18 @@ export default function ArtistSignupPage() {
         nameField={{ label: "Artist Name", placeholder: "Your display name" }}
         ctaLabel="Continue"
         onBack="/signup"
+        defaultEmail={signupProgress.email}
+        defaultPassword={signupProgress.password}
+        defaultName={signupProgress.name}
+        onSubmit={(data) => {
+          updateSignupProgress({
+            role: "artist",
+            email: data.email,
+            password: data.password,
+            name: data.name,
+          });
+          window.location.href = "/signup/artist/profile";
+        }}
       />
     </div>
   );

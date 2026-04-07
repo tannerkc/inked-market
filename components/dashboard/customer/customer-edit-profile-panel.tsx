@@ -1,0 +1,107 @@
+"use client";
+
+import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useTheme } from "@/components/providers/theme-provider";
+
+interface CustomerProfileForm {
+  firstName: string;
+  lastName: string;
+  location: string;
+  bio: string;
+  styles: string[];
+}
+
+interface CustomerEditProfilePanelProps {
+  open: boolean;
+  onClose: () => void;
+  profileForm: CustomerProfileForm;
+  setProfileForm: (form: CustomerProfileForm) => void;
+  onSave: () => void;
+}
+
+const STYLE_PREFERENCES = [
+  "Traditional",
+  "Realism",
+  "Watercolor",
+  "Tribal",
+  "Geometric",
+  "Blackwork",
+  "Japanese",
+  "Minimalist",
+  "Portrait",
+  "Fine Line",
+  "Neo-Traditional",
+  "Dotwork",
+  "Sketch",
+  "Abstract",
+];
+
+export function CustomerEditProfilePanel({
+  open,
+  onClose,
+  profileForm,
+  setProfileForm,
+  onSave,
+}: CustomerEditProfilePanelProps) {
+  const { mode } = useTheme();
+  const variant = mode === "dark" ? "dark" : "light";
+
+  return (
+    <EditProfilePanel
+      open={open}
+      onClose={onClose}
+      title="Edit Profile"
+      avatarShape="circle"
+      avatarLabel="Upload photo"
+      stylesLabel="Style Preferences"
+      styleOptions={STYLE_PREFERENCES}
+      selectedStyles={profileForm.styles}
+      onStylesChange={(styles) => setProfileForm({ ...profileForm, styles })}
+      styleAccentColor="red"
+      showSocialLinks={false}
+      onSave={onSave}
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          label="First Name"
+          variant={variant}
+          value={profileForm.firstName}
+          onChange={(e) =>
+            setProfileForm({ ...profileForm, firstName: e.target.value })
+          }
+          placeholder="First name"
+        />
+        <Input
+          label="Last Name"
+          variant={variant}
+          value={profileForm.lastName}
+          onChange={(e) =>
+            setProfileForm({ ...profileForm, lastName: e.target.value })
+          }
+          placeholder="Last name"
+        />
+      </div>
+      <Input
+        label="Location"
+        variant={variant}
+        value={profileForm.location}
+        onChange={(e) =>
+          setProfileForm({ ...profileForm, location: e.target.value })
+        }
+        placeholder="City, State"
+      />
+      <Textarea
+        label="About You"
+        variant={variant}
+        value={profileForm.bio}
+        onChange={(e) =>
+          setProfileForm({ ...profileForm, bio: e.target.value })
+        }
+        placeholder="What kind of tattoos are you looking for? Any style or placement preferences..."
+        rows={3}
+      />
+    </EditProfilePanel>
+  );
+}

@@ -1,0 +1,17 @@
+export { DashboardLayout } from "./dashboard-layout";
+export { OnboardingBanner } from "./onboarding-banner";
+export { DashboardSection } from "./dashboard-section";
+export { StatCard } from "./stat-card";
+export { EmptyState } from "./empty-state";
+export { ProfileHeader } from "./profile-header";
+export { TimeSlotBlock } from "./time-slot-block";
+export { AffiliationRow } from "./affiliation-row";
+export { DashboardShell } from "./dashboard-shell";
+export { ProfileCard } from "./profile-card";
+export { StatsPanel } from "./stats-panel";
+export { QuickActionsGrid } from "./quick-actions-grid";
+export { WeeklySchedulePanel } from "./weekly-schedule";
+export { EditProfilePanel } from "./edit-profile-panel";
+export { ArtistDashboard } from "./artist";
+export { StudioDashboard } from "./studio";
+export { CustomerDashboard } from "./customer";

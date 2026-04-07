@@ -17,7 +17,7 @@ import { DiscoverSearch } from "@/components/discover/search-bar";
 import { FilterPills } from "@/components/discover/filter-pills";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
-  mockShops,
+  mockStudios,
   mockArtists,
   discoverFilters,
 } from "@/lib/data/discover";
@@ -120,19 +120,19 @@ export default function DiscoverPage() {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[3px]">
-          {mockShops.map((shop) => (
+          {mockStudios.map((studio) => (
             <FlashCard
-              key={shop.id}
-              id={shop.id}
-              type="shop"
-              name={shop.name}
-              image={shop.image}
-              location={shop.location}
-              rating={shop.rating}
-              reviewCount={shop.reviewCount}
-              specialties={shop.specialties}
-              badges={shop.badges}
-              artistCount={shop.artistCount}
+              key={studio.id}
+              id={studio.id}
+              type="studio"
+              name={studio.name}
+              image={studio.image}
+              location={studio.location}
+              rating={studio.rating}
+              reviewCount={studio.reviewCount}
+              specialties={studio.specialties}
+              badges={studio.badges}
+              artistCount={studio.artistCount}
             />
           ))}
         </div>

@@ -5,6 +5,7 @@ export interface SignupTierFeature {
 
 export interface SignupTierData {
   name: string;
+  slug: string;
   price: number;
   annualPrice?: number;
   description: string;
@@ -16,7 +17,8 @@ export interface SignupTierData {
 
 export const artistTiers: SignupTierData[] = [
   {
-    name: "Free",
+    name: "Liner",
+    slug: "liner",
     price: 0,
     description: "Manage your profile and gallery on your studio\u2019s page.",
     features: [
@@ -28,7 +30,8 @@ export const artistTiers: SignupTierData[] = [
     freeBadge: true,
   },
   {
-    name: "Pro",
+    name: "Shader",
+    slug: "shader",
     price: 14.85,
     annualPrice: 11.85,
     description: "Go independent. Get discovered on your own terms \u2014 no studio required.",
@@ -46,7 +49,8 @@ export const artistTiers: SignupTierData[] = [
 
 export const studioTiers: SignupTierData[] = [
   {
-    name: "Basic",
+    name: "Liner",
+    slug: "liner",
     price: 19.85,
     annualPrice: 15.85,
     description: "A professional listing on the Inked Market marketplace.",
@@ -58,7 +62,8 @@ export const studioTiers: SignupTierData[] = [
     ],
   },
   {
-    name: "Pro",
+    name: "Shader",
+    slug: "shader",
     price: 59.85,
     annualPrice: 47.85,
     description: "Custom web page with full branding control.",
@@ -73,12 +78,13 @@ export const studioTiers: SignupTierData[] = [
     badgeColor: "rust",
   },
   {
-    name: "Studio",
+    name: "Magnum",
+    slug: "magnum",
     price: 79.85,
     annualPrice: 63.85,
-    description: "Everything in Pro plus premium templates and priority search placement.",
+    description: "Everything in Shader plus premium templates and priority search placement.",
     features: [
-      { text: "Everything in Pro", included: true },
+      { text: "Everything in Shader", included: true },
       { text: "Rearrange layout sections", included: true },
       { text: "Exclusive premium templates", included: true },
       { text: "Priority search placement", included: true },
