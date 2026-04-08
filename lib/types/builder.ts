@@ -14,16 +14,37 @@ export type DetailsLayout = "three-col" | "two-one" | "stacked";
 export type CtaLayout = "simple-minimal" | "contact-form" | "map-info" | "booking";
 export type FooterLayout = "columns" | "minimal-bar" | "centered" | "none";
 export type AboutLayout = "split" | "full-width" | "none";
-export type HeroCtaStyle = "filled" | "outline" | "pill";
+export type CtaStyle = "filled" | "outline" | "pill";
 export type TagStyle = "pill" | "square" | "outline";
 export type BuilderMode = "split" | "inline";
 export type DevicePreview = "desktop" | "tablet" | "mobile";
 export type NavStyle = "none" | "static" | "floating" | "reveal";
+export type NavLayout = "standard" | "logo-center" | "centered" | "minimal";
 export type TemplateSlug =
   | "bold-editorial"
   | "clean-minimal"
   | "immersive-dark"
-  | "warm-artisan";
+  | "warm-artisan"
+  | "gutter-punk"
+  | "dark-cinematic"
+  | "studio-minimal"
+  | "fine-line"
+  | "traditional-flash";
+
+export type BuilderTier = "flash" | "custom";
+export type Vibe = "raw" | "ghost" | "americana" | "noir" | "void" | "sacred";
+export type GradientDirection = "diagonal" | "horizontal" | "radial" | "none";
+export type GlowIntensity = "none" | "subtle" | "medium" | "intense";
+export type HeadingLetterSpacing = "tight" | "normal" | "wide";
+export type HeadingTextTransform = "uppercase" | "mixed" | "title";
+export type HeadingFontWeight = "light" | "regular" | "bold" | "black";
+export type Density = "compact" | "balanced" | "luxe";
+export type BorderShape = "sharp" | "rounded" | "editorial";
+export type DividerStyle = "none" | "solid" | "gradient" | "dotted" | "ornament";
+export type AnimationStyle = "none" | "fade-up" | "scale" | "slide";
+export type SurfaceTexture = "none" | "film-grain" | "parchment" | "concrete" | "leather" | "geometric";
+export type ImageTreatment = "none" | "bw" | "duotone" | "film" | "desat" | "vignette";
+export type LogoPlacement = "nav" | "hero" | "watermark";
 
 export interface StudioThemeConfig {
   template: TemplateSlug;
@@ -35,7 +56,7 @@ export interface StudioThemeConfig {
   bodyFont: string;
   heroLayout: HeroLayout;
   showHeroCta: boolean;
-  heroCtaStyle: HeroCtaStyle;
+  ctaStyle: CtaStyle;
   showHeroSubtext: boolean;
   heroSubtext: string;
   galleryLayout: GalleryLayout;
@@ -48,12 +69,33 @@ export interface StudioThemeConfig {
   showStudioDetails: boolean;
   tagStyle: TagStyle;
   navStyle: NavStyle;
+  navLayout?: NavLayout;
   builderMode: BuilderMode;
+  builderTier: BuilderTier;
+  vibe?: Vibe;
+  secondaryAccentColor?: string;
+  gradientDirection?: GradientDirection;
+  glowIntensity?: GlowIntensity;
+  headingLetterSpacing?: HeadingLetterSpacing;
+  headingTextTransform?: HeadingTextTransform;
+  headingFontWeight?: HeadingFontWeight;
+  density?: Density;
+  borderShape?: BorderShape;
+  dividerStyle?: DividerStyle;
+  animationStyle?: AnimationStyle;
+  surfaceTexture?: SurfaceTexture;
+  textureOpacity?: number;
+  imageTreatment?: ImageTreatment;
+  logoUrl?: string;
+  logoPlacement?: LogoPlacement;
+  galleryWatermarks?: boolean;
+  customSocialPreview?: boolean;
 }
 
 export interface ResolvedThemeVars {
   "--accent": string;
   "--accent-bg": string;
+  "--accent-text": string;
   "--bg-primary": string;
   "--bg-raised": string;
   "--bg-sunken": string;
@@ -73,6 +115,23 @@ export interface ResolvedThemeVars {
   "--widget-border": string;
   "--heading-font": string;
   "--body-font": string;
+  "--accent-secondary": string;
+  "--gradient-direction": string;
+  "--glow-intensity": string;
+  "--heading-letter-spacing": string;
+  "--heading-text-transform": string;
+  "--heading-font-weight": string;
+  "--section-padding": string;
+  "--element-gap": string;
+  "--border-radius": string;
+  "--border-radius-lg": string;
+  "--divider-style": string;
+  "--animation-style": string;
+  "--texture-opacity": string;
+  "--image-filter": string;
+  "--image-overlay": string;
+  "--surface-texture": string;
+  "--texture-bg": string;
 }
 
 export interface ThemePresetDefinition {
