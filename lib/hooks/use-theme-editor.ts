@@ -6,9 +6,11 @@ import type {
   ResolvedThemeVars,
   ThemePreset,
   TemplateSlug,
+  Vibe,
 } from "@/lib/types/builder";
 import { defaultThemeConfig, themePresets } from "@/lib/data/theme-presets";
 import { templates } from "@/lib/data/templates";
+import { vibeOptions } from "@/lib/data/builder-options";
 import { resolveTheme } from "@/lib/utils/resolve-theme";
 
 const MAX_HISTORY = 50;
@@ -23,6 +25,7 @@ export interface UseThemeEditorReturn {
   applyChange: (partial: Partial<StudioThemeConfig>) => void;
   applyPreset: (preset: ThemePreset) => void;
   applyTemplate: (slug: TemplateSlug) => void;
+  applyVibe: (vibe: Vibe) => void;
   undo: () => void;
   redo: () => void;
   reset: () => void;
@@ -87,12 +90,54 @@ export function useThemeEditor(
         heroLayout: config.heroLayout,
         galleryLayout: config.galleryLayout,
         detailsLayout: config.detailsLayout,
-        footerStyle: config.footerStyle,
+        footerLayout: config.footerLayout,
         tagStyle: config.tagStyle,
         builderMode: config.builderMode,
+        builderTier: config.builderTier,
+        vibe: config.vibe,
+        density: config.density,
+        borderShape: config.borderShape,
+        dividerStyle: config.dividerStyle,
+        animationStyle: config.animationStyle,
+        surfaceTexture: config.surfaceTexture,
+        textureOpacity: config.textureOpacity,
+        imageTreatment: config.imageTreatment,
+        headingLetterSpacing: config.headingLetterSpacing,
+        headingTextTransform: config.headingTextTransform,
+        headingFontWeight: config.headingFontWeight,
+        gradientDirection: config.gradientDirection,
+        glowIntensity: config.glowIntensity,
+        logoUrl: config.logoUrl,
+        logoPlacement: config.logoPlacement,
+        galleryWatermarks: config.galleryWatermarks,
+        customSocialPreview: config.customSocialPreview,
         accentColor: undefined,
         backgroundColor: undefined,
         backgroundMode: presetDef.mode,
+      };
+      pushHistory(newConfig);
+    },
+    [config, pushHistory],
+  );
+
+  const applyVibe = useCallback(
+    (vibe: Vibe) => {
+      const vibeDef = vibeOptions.find((v) => v.value === vibe);
+      if (!vibeDef) return;
+      const newConfig: StudioThemeConfig = {
+        ...config,
+        vibe,
+        density: vibeDef.defaults.density,
+        borderShape: vibeDef.defaults.borderShape,
+        dividerStyle: vibeDef.defaults.dividerStyle,
+        animationStyle: vibeDef.defaults.animationStyle,
+        imageTreatment: vibeDef.defaults.imageTreatment,
+        surfaceTexture: vibeDef.defaults.surfaceTexture,
+        headingTextTransform: vibeDef.defaults.headingTextTransform,
+        headingLetterSpacing: vibeDef.defaults.headingLetterSpacing,
+        headingFontWeight: vibeDef.defaults.headingFontWeight,
+        tagStyle: vibeDef.defaults.tagStyle,
+        ctaStyle: vibeDef.defaults.ctaStyle,
       };
       pushHistory(newConfig);
     },
@@ -104,13 +149,14 @@ export function useThemeEditor(
       const tmpl = templates[slug];
       const newConfig: StudioThemeConfig = {
         ...tmpl.defaults,
-        // Preserve user's color/font overrides
+        // Preserve user's color/font overrides and session state
         accentColor: config.accentColor,
         backgroundColor: config.backgroundColor,
         backgroundMode: config.backgroundMode,
         headingFont: config.headingFont,
         bodyFont: config.bodyFont,
         builderMode: config.builderMode,
+        builderTier: config.builderTier,
       };
       pushHistory(newConfig);
     },
@@ -132,7 +178,23 @@ export function useThemeEditor(
   }, [canRedo, historyIndex, history]);
 
   const reset = useCallback(() => {
-    const resetConfig = { ...defaultThemeConfig, builderMode: config.builderMode };
+    const resetConfig: StudioThemeConfig = {
+      ...defaultThemeConfig,
+      builderMode: config.builderMode,
+      builderTier: "flash",
+      vibe: "void",
+      density: "balanced",
+      borderShape: "rounded",
+      dividerStyle: "solid",
+      animationStyle: "fade-up",
+      surfaceTexture: "none",
+      imageTreatment: "none",
+      headingLetterSpacing: "normal",
+      headingTextTransform: "uppercase",
+      headingFontWeight: "bold",
+      gradientDirection: "none",
+      glowIntensity: "none",
+    };
     pushHistory(resetConfig);
   }, [config.builderMode, pushHistory]);
 
@@ -166,6 +228,7 @@ export function useThemeEditor(
     applyChange,
     applyPreset,
     applyTemplate,
+    applyVibe,
     undo,
     redo,
     reset,
