@@ -1,96 +1,60 @@
 "use client";
 
-import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { TemplateSwitcher } from "@/components/builder/template-switcher";
-import {
-  ThemePresetPicker,
-  AccentColorPicker,
-  BackgroundPicker,
-  TypographyPairPicker,
-  HeroStylePicker,
-  GalleryStylePicker,
-  AboutLayoutPicker,
-  DetailsLayoutPicker,
-  FooterStylePicker,
-  FooterLayoutPicker,
-  NavStylePicker,
-  TagStylePicker,
-  MagnumUpsellHint,
-} from "@/components/builder/controls";
-
-type EditorTab = "theme" | "colors" | "type" | "sections";
-
-const tabs: { label: string; value: EditorTab }[] = [
-  { label: "Theme", value: "theme" },
-  { label: "Colors", value: "colors" },
-  { label: "Type", value: "type" },
-  { label: "Sections", value: "sections" },
-];
+import { useBuilder } from "@/components/builder/builder-provider";
+import { FlashEditor } from "@/components/builder/flash-editor";
+import { CustomEditor } from "@/components/builder/custom-editor";
+import type { BuilderTier } from "@/lib/types/builder";
 
 export function EditorPanel() {
-  const [activeTab, setActiveTab] = useState<EditorTab>("theme");
+  const { config, applyChange } = useBuilder();
+  const tier = config.builderTier ?? "flash";
+
+  const switchTier = (newTier: BuilderTier) => {
+    applyChange({ builderTier: newTier });
+    try {
+      localStorage.setItem("inked-builder-tier", newTier);
+    } catch {
+      // localStorage may be unavailable
+    }
+  };
 
   return (
     <div className="flex flex-col w-[380px] min-w-[380px] h-full bg-[#111] border-r border-[#222]">
-      {/* Tab bar */}
-      <div className="flex border-b border-[#222]">
-        {tabs.map((tab) => (
+      {/* Tier badge */}
+      <div className="flex items-center justify-between border-b border-[#222] px-4 py-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#444]">
+          Editor
+        </span>
+        <div className="flex gap-1">
           <button
-            key={tab.value}
             type="button"
-            onClick={() => setActiveTab(tab.value)}
+            onClick={() => switchTier("flash")}
             className={cn(
-              "flex-1 py-3 text-[11px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2",
-              activeTab === tab.value
-                ? "text-red-500 border-red-500"
-                : "text-[#555] border-transparent hover:text-[#888]"
+              "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+              tier === "flash"
+                ? "bg-[#FF3333]/15 text-[#FF3333]"
+                : "bg-transparent text-[#444] hover:text-[#888]"
             )}
           >
-            {tab.label}
+            Flash
           </button>
-        ))}
+          <button
+            type="button"
+            onClick={() => switchTier("custom")}
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+              tier === "custom"
+                ? "bg-[#FF3333]/15 text-[#FF3333]"
+                : "bg-transparent text-[#444] hover:text-[#888]"
+            )}
+          >
+            Custom
+          </button>
+        </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {activeTab === "theme" && (
-          <>
-            <TemplateSwitcher />
-            <ThemePresetPicker />
-          </>
-        )}
-
-        {activeTab === "colors" && (
-          <>
-            <AccentColorPicker />
-            <BackgroundPicker />
-          </>
-        )}
-
-        {activeTab === "type" && <TypographyPairPicker />}
-
-        {activeTab === "sections" && (
-          <>
-            <NavStylePicker />
-            <HeroStylePicker />
-            <AboutLayoutPicker />
-            <TagStylePicker />
-            <GalleryStylePicker />
-            <DetailsLayoutPicker />
-            <FooterStylePicker />
-            <FooterLayoutPicker />
-            <MagnumUpsellHint
-              title="Section Reordering"
-              description="Drag to rearrange sections"
-            />
-            <MagnumUpsellHint
-              title="Premium Templates"
-              description="+6 exclusive themes"
-            />
-          </>
-        )}
-      </div>
+      {tier === "flash" ? <FlashEditor /> : <CustomEditor />}
     </div>
   );
 }

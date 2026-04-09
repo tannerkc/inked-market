@@ -115,3 +115,131 @@ body {
     transform: translateX(-50%) translateY(0) scale(1);
   }
 }
+
+/* ─── Builder Preview: Personality Dimensions ─────────────────────── */
+
+/* Typography tuning — cascades to all headings */
+[data-builder-root] h1,
+[data-builder-root] h2,
+[data-builder-root] h3 {
+  letter-spacing: var(--heading-letter-spacing, 0.05em);
+  text-transform: var(--heading-text-transform, uppercase);
+  font-weight: var(--heading-font-weight, 700);
+}
+
+/* Density — section vertical padding override */
+[data-builder-root] [data-density-section] {
+  padding-block: var(--section-padding, 3rem);
+}
+
+/* Border shape — round cards and images within builder */
+[data-builder-root] [data-builder-card] {
+  border-radius: var(--border-radius, 0.75rem);
+  overflow: hidden;
+}
+[data-builder-root] [data-builder-card-lg] {
+  border-radius: var(--border-radius-lg, 1rem);
+  overflow: hidden;
+}
+
+/* Texture overlay — ::after on builder root */
+[data-builder-root] {
+  position: relative;
+}
+[data-builder-root]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--texture-opacity, 0);
+  background: var(--texture-bg, none);
+  mix-blend-mode: overlay;
+}
+[data-builder-root][data-texture="none"]::after {
+  display: none;
+}
+
+/* Image treatment — gallery items */
+[data-builder-root] [data-gallery-item] {
+  position: relative;
+  filter: var(--image-filter, none);
+}
+[data-builder-root] [data-gallery-item]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--image-overlay, none);
+  mix-blend-mode: color;
+}
+
+/* Dividers between sections */
+[data-builder-root] [data-divider] {
+  position: relative;
+  margin-inline: 2.5rem;
+}
+[data-builder-root] [data-divider="solid"] {
+  height: 1px;
+  background: var(--border, #222);
+}
+[data-builder-root] [data-divider="gradient"] {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent, #FF3333), transparent);
+}
+[data-builder-root] [data-divider="dotted"] {
+  height: 0;
+  border-bottom: 2px dotted var(--border, #222);
+}
+[data-builder-root] [data-divider="ornament"] {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-builder-root] [data-divider="ornament"]::before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border, #222);
+}
+[data-builder-root] [data-divider="ornament"]::after {
+  content: "\2726";
+  font-size: 12px;
+  color: var(--accent, #FF3333);
+  padding-inline: 12px;
+}
+
+/* Scroll animation entrance states */
+[data-builder-root] [data-animate] {
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-builder-root] [data-animate].animate-visible {
+  opacity: 1;
+  transform: none !important;
+}
+
+/* Per-section stagger so sections cascade instead of firing simultaneously */
+[data-builder-root] [data-section="hero"]    { transition-delay: 0s; }
+[data-builder-root] [data-section="about"]   { transition-delay: 0.06s; }
+[data-builder-root] [data-section="gallery"] { transition-delay: 0.12s; }
+[data-builder-root] [data-section="details"] { transition-delay: 0.18s; }
+[data-builder-root] [data-section="footer-cta"] { transition-delay: 0.22s; }
+[data-builder-root] [data-section="footer"]  { transition-delay: 0.26s; }
+
+[data-builder-root][data-animation="fade-up"] [data-animate] {
+  transform: translateY(28px);
+}
+[data-builder-root][data-animation="scale"] [data-animate] {
+  transform: scale(0.94);
+}
+[data-builder-root][data-animation="slide"] [data-animate] {
+  transform: translateX(-28px);
+}
+[data-builder-root][data-animation="none"] [data-animate] {
+  opacity: 1;
+  transform: none;
+}

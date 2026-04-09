@@ -13,6 +13,9 @@ interface StudioForm {
   state: string;
   phone: string;
   email: string;
+  address: string;
+  zipCode: string;
+  bio: string;
   specialties: string[];
   instagram: string;
   website: string;
@@ -72,6 +75,28 @@ export function StudioEditInfoPanel({ open, onClose, studioForm, setStudioForm, 
       </div>
       <Input label="Phone" variant={variant} type="tel" value={studioForm.phone} onChange={(e) => setStudioForm({ ...studioForm, phone: e.target.value })} placeholder="(555) 555-0142" />
       <Input label="Email" variant={variant} type="email" value={studioForm.email} onChange={(e) => setStudioForm({ ...studioForm, email: e.target.value })} placeholder="studio@email.com" />
+      <div className="flex flex-col gap-1.5">
+        <label className={cn("text-[11px] font-medium uppercase tracking-wide", isDark ? "text-ink-cream/50" : "text-ink-black/50")}>
+          About / Bio
+        </label>
+        <textarea
+          rows={4}
+          placeholder="Tell your studio's story..."
+          value={studioForm.bio}
+          onChange={(e) => setStudioForm({ ...studioForm, bio: e.target.value })}
+          className={cn(
+            "w-full resize-none rounded-xl px-4 py-3 text-sm outline-none transition-colors",
+            isDark
+              ? "border border-ink-cream/[0.08] bg-ink-cream/[0.03] text-ink-cream placeholder:text-ink-cream/25 focus:border-ink-cream/20"
+              : "border border-ink-black/[0.08] bg-ink-black/[0.03] text-ink-black placeholder:text-ink-black/25 focus:border-ink-black/20"
+          )}
+        />
+      </div>
+      <Input label="Street Address" variant={variant} value={studioForm.address} onChange={(e) => setStudioForm({ ...studioForm, address: e.target.value })} placeholder="123 Main St" />
+      <div className="grid grid-cols-2 gap-3">
+        <Input label="Zip Code" variant={variant} value={studioForm.zipCode} onChange={(e) => setStudioForm({ ...studioForm, zipCode: e.target.value })} placeholder="97214" />
+        <div />
+      </div>
     </EditProfilePanel>
   );
 }

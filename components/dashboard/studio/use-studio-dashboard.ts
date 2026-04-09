@@ -1,20 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useStudio } from "@/lib/providers/studio-provider";
 import { getStudioDashboardData, getArtistSearchResults, getStudioRoster } from "@/lib/data/dashboard";
 import { computeAutoSpecialties } from "@/lib/utils/compute-auto-specialties";
 import type { Affiliation, StudioService } from "@/lib/types";
 
 export function useStudioDashboard() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
+  const { studio, update } = useStudio();
 
   const mockData = getStudioDashboardData();
   const data = {
     ...mockData,
-    name: user?.studioName || "",
-    subtitle: user?.city && user?.state ? `${user.city}, ${user.state}${user.phone ? ` · ${user.phone}` : ""}` : "",
-    tags: user?.specialties || [],
+    name: studio?.name ?? "",
+    subtitle: studio?.city && studio?.state
+      ? `${studio.city}, ${studio.state}${studio.phone ? ` · ${studio.phone}` : ""}`
+      : "",
+    tags: studio?.specialties ?? [],
   };
 
   // Panel open/close
@@ -25,33 +29,38 @@ export function useStudioDashboard() {
 
   // Studio form
   const [studioForm, setStudioForm] = useState({
-    name: user?.studioName || "",
-    city: user?.city || "",
-    state: user?.state || "",
-    phone: user?.phone || "",
-    email: user?.email || "",
-    specialties: user?.specialties || [] as string[],
-    instagram: user?.instagram || "",
-    website: user?.website || "",
-    tiktok: user?.tiktok || "",
+    name: studio?.name ?? "",
+    city: studio?.city ?? "",
+    state: studio?.state ?? "",
+    phone: studio?.phone ?? "",
+    email: studio?.email ?? "",
+    address: studio?.address ?? "",
+    zipCode: studio?.zipCode ?? "",
+    bio: studio?.bio ?? "",
+    specialties: studio?.specialties ?? [] as string[],
+    instagram: studio?.instagram ?? "",
+    website: studio?.website ?? "",
+    tiktok: studio?.tiktok ?? "",
   });
 
   // Auto-specialties
-  const [autoSpecialties, setAutoSpecialties] = useState(user?.autoSpecialties ?? false);
+  const [autoSpecialties, setAutoSpecialties] = useState(studio?.autoSpecialties ?? false);
 
   // Services (walk-ins, piercing)
-  const [services, setServices] = useState<StudioService[]>(user?.services ?? []);
+  const [services, setServices] = useState<StudioService[]>(studio?.services ?? []);
 
   // Business hours
-  const [businessHours, setBusinessHours] = useState<Record<string, { open: string; close: string; closed: boolean }>>({
-    Monday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Tuesday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Wednesday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Thursday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Friday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Saturday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    Sunday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-  });
+  const [businessHours, setBusinessHours] = useState<Record<string, { open: string; close: string; closed: boolean }>>(
+    studio?.hours ?? {
+      Monday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Tuesday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Wednesday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Thursday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Friday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Saturday: { open: "10:00 AM", close: "6:00 PM", closed: false },
+      Sunday: { open: "10:00 AM", close: "6:00 PM", closed: true },
+    }
+  );
   const [hoursSaved, setHoursSaved] = useState(false);
 
   // Artist management
@@ -83,6 +92,7 @@ export function useStudioDashboard() {
   };
 
   const handleSaveHours = () => {
+    update({ hours: businessHours });
     setHoursSaved(true);
     setHoursOpen(false);
   };
@@ -109,6 +119,35 @@ export function useStudioDashboard() {
     setRoster((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // Sync form state once when studio data loads from the repository.
+  // `useState` initializers run before the async repo.get() resolves,
+  // so studio is null at mount. This effect runs exactly once when it arrives.
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!studio || initialized.current) return;
+    initialized.current = true;
+    setStudioForm({
+      name: studio.name ?? "",
+      city: studio.city ?? "",
+      state: studio.state ?? "",
+      phone: studio.phone ?? "",
+      email: studio.email ?? "",
+      address: studio.address ?? "",
+      zipCode: studio.zipCode ?? "",
+      bio: studio.bio ?? "",
+      specialties: studio.specialties ?? [],
+      instagram: studio.instagram ?? "",
+      website: studio.website ?? "",
+      tiktok: studio.tiktok ?? "",
+    });
+    setAutoSpecialties(studio.autoSpecialties ?? false);
+    setServices(studio.services ?? []);
+    if (studio.hours) {
+      setBusinessHours(studio.hours);
+      setHoursSaved(true);
+    }
+  }, [studio]);
+
   // Recompute specialties when roster changes and auto mode is on
   useEffect(() => {
     if (!autoSpecialties) return;
@@ -119,11 +158,12 @@ export function useStudioDashboard() {
   const handleToggleAutoSpecialties = () => {
     const next = !autoSpecialties;
     setAutoSpecialties(next);
-    updateUser({ autoSpecialties: next });
     if (next) {
       const computed = computeAutoSpecialties(roster);
       setStudioForm((prev) => ({ ...prev, specialties: computed }));
-      updateUser({ autoSpecialties: next, specialties: computed });
+      update({ autoSpecialties: next, specialties: computed });
+    } else {
+      update({ autoSpecialties: next });
     }
   };
 
@@ -132,16 +172,19 @@ export function useStudioDashboard() {
       ? services.filter((s) => s !== service)
       : [...services, service];
     setServices(next);
-    updateUser({ services: next });
+    update({ services: next });
   };
 
   const handleSaveStudio = () => {
-    updateUser({
-      studioName: studioForm.name,
+    update({
+      name: studioForm.name,
       city: studioForm.city,
       state: studioForm.state,
       phone: studioForm.phone,
       email: studioForm.email,
+      address: studioForm.address,
+      zipCode: studioForm.zipCode,
+      bio: studioForm.bio,
       specialties: studioForm.specialties,
       instagram: studioForm.instagram,
       website: studioForm.website,

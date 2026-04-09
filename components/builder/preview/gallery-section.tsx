@@ -12,8 +12,9 @@ const GALLERY_ITEMS = [
   { id: 4, aspect: "aspect-[4/5]" },
   { id: 5, aspect: "aspect-[3/4]" },
   { id: 6, aspect: "aspect-square" },
-  { id: 7, aspect: "aspect-[4/3]" },
+  { id: 7, aspect: "aspect-[3/4]" },
   { id: 8, aspect: "aspect-square" },
+  { id: 9, aspect: "aspect-[3/4]" },
 ];
 
 function GalleryItem({
@@ -25,6 +26,8 @@ function GalleryItem({
 }) {
   return (
     <div
+      data-gallery-item
+      data-builder-card
       className={cn("overflow-hidden rounded-lg", aspect, className)}
       style={{
         backgroundColor: "var(--bg-sunken)",
@@ -36,20 +39,23 @@ function GalleryItem({
 
 function FeaturedGallery() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
       {/* First item spans 2x2 */}
       <div
+        data-gallery-item
+        data-builder-card
         className="col-span-2 row-span-2 overflow-hidden rounded-lg aspect-square"
         style={{
           backgroundColor: "var(--bg-sunken)",
           backgroundImage: SVG_PATTERN,
         }}
       />
-      {GALLERY_ITEMS.slice(1, 5).map((item) => (
+      {/* Mobile: 6 items = 3 clean rows of 2 (no orphan). @md: 8 items = 2 rows of 4. */}
+      {GALLERY_ITEMS.slice(1, 7).map((item) => (
         <GalleryItem key={item.id} aspect="aspect-square" />
       ))}
-      {GALLERY_ITEMS.slice(5, 8).map((item) => (
-        <GalleryItem key={item.id} aspect="aspect-square" />
+      {GALLERY_ITEMS.slice(7, 9).map((item) => (
+        <GalleryItem key={item.id} aspect="aspect-square" className="hidden @md:block" />
       ))}
     </div>
   );
@@ -57,8 +63,8 @@ function FeaturedGallery() {
 
 function UniformGallery() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {GALLERY_ITEMS.map((item) => (
+    <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
+      {GALLERY_ITEMS.slice(0, 8).map((item) => (
         <GalleryItem key={item.id} aspect="aspect-square" />
       ))}
     </div>
@@ -67,7 +73,7 @@ function UniformGallery() {
 
 function MasonryGallery() {
   return (
-    <div className="columns-2 gap-3 sm:columns-4">
+    <div className="columns-2 gap-3 @md:columns-4">
       {GALLERY_ITEMS.map((item) => (
         <div key={item.id} className="mb-3 break-inside-avoid">
           <GalleryItem aspect={item.aspect} />
@@ -83,7 +89,7 @@ function CarouselGallery() {
       {GALLERY_ITEMS.map((item) => (
         <div
           key={item.id}
-          className="w-56 shrink-0 snap-start sm:w-64"
+          className="w-40 shrink-0 snap-start @sm:w-56 @md:w-64"
         >
           <GalleryItem aspect="aspect-[3/4]" className="rounded-xl" />
         </div>
@@ -94,28 +100,33 @@ function CarouselGallery() {
 
 export function GallerySection({ className }: { className?: string }) {
   const { config } = useBuilder();
-  const { galleryLayout } = config;
+  const { galleryLayout, showGalleryHeading } = config;
+  const showHeading = showGalleryHeading !== false;
 
   return (
     <section
       className={cn(
-        "w-full px-6 py-12 transition-all duration-500 ease-in-out lg:px-10",
+        "w-full transition-all duration-500 ease-in-out",
         className,
       )}
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      {/* Section label */}
-      <p
-        className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
-        style={{ color: "var(--accent)" }}
-      >
-        Portfolio
-      </p>
+      <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
+        {/* Section label */}
+        {showHeading && (
+          <p
+            className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
+            style={{ color: "var(--accent)" }}
+          >
+            Portfolio
+          </p>
+        )}
 
-      {galleryLayout === "featured" && <FeaturedGallery />}
-      {galleryLayout === "uniform" && <UniformGallery />}
-      {galleryLayout === "masonry" && <MasonryGallery />}
-      {galleryLayout === "carousel" && <CarouselGallery />}
+        {galleryLayout === "featured" && <FeaturedGallery />}
+        {galleryLayout === "uniform" && <UniformGallery />}
+        {galleryLayout === "masonry" && <MasonryGallery />}
+        {galleryLayout === "carousel" && <CarouselGallery />}
+      </div>
     </section>
   );
 }

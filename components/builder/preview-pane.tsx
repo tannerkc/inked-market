@@ -5,6 +5,12 @@ import { cn } from "@/lib/utils";
 import type { DevicePreview } from "@/lib/types/builder";
 import { DeviceToggle } from "@/components/builder/device-toggle";
 import { StudioPagePreview } from "@/components/builder/studio-page-preview";
+import { useBuilder } from "@/components/builder/builder-provider";
+import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+
+function toSlug(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 const deviceMaxWidth: Record<DevicePreview, string> = {
   desktop: "max-w-full",
@@ -14,6 +20,10 @@ const deviceMaxWidth: Record<DevicePreview, string> = {
 
 export function PreviewPane() {
   const [device, setDevice] = useState<DevicePreview>("desktop");
+  const { studio, useMockData } = useBuilder();
+  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const slugParts = [data?.name, data?.city, data?.state].filter(Boolean) as string[];
+  const slug = slugParts.length ? toSlug(slugParts.join(" ")) : "your-studio";
 
   return (
     <div className="flex flex-1 flex-col min-w-0 h-full">
@@ -36,7 +46,7 @@ export function PreviewPane() {
             <span className="text-[11px] leading-none font-mono text-[#666] select-none">
               <span className="text-[#444]">https://</span>
               <span className="text-[#888]">inkedmarket.com</span>
-              <span className="text-[#555]">/studios/iron-ink</span>
+              <span className="text-[#555]">/studios/{slug}</span>
             </span>
           </div>
         </div>
@@ -46,11 +56,19 @@ export function PreviewPane() {
       </div>
 
       {/* Scrollable preview container */}
-      <div className="flex-1 overflow-y-auto bg-[#0a0a0a]">
+      <div
+        className="flex-1 overflow-y-auto transition-colors duration-400"
+        style={device !== "desktop" ? {
+          backgroundColor: "#111",
+          backgroundImage: "radial-gradient(circle, #2a2a2a 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        } : { backgroundColor: "#0a0a0a" }}
+      >
         <div
           className={cn(
             "mx-auto transition-all duration-400",
-            deviceMaxWidth[device]
+            deviceMaxWidth[device],
+            device !== "desktop" && "my-6 shadow-[0_8px_48px_rgba(0,0,0,0.7)] border border-[#333]",
           )}
         >
           <StudioPagePreview interactive={false} />

@@ -73,6 +73,7 @@ export function TypographyPairPicker() {
               applyChange({
                 headingFont: pairing.headingFont,
                 bodyFont: pairing.bodyFont,
+                headingFontWeight: pairing.headingFontWeight,
               })
             }
           />

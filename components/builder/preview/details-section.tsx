@@ -2,6 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import type { StudioData } from "@/lib/repositories";
 
 const MOCK_REVIEWS = [
   {
@@ -21,15 +23,7 @@ const MOCK_REVIEWS = [
   },
 ];
 
-const HOURS = [
-  { day: "Monday", time: "11:00 AM – 8:00 PM" },
-  { day: "Tuesday", time: "11:00 AM – 8:00 PM" },
-  { day: "Wednesday", time: "11:00 AM – 8:00 PM" },
-  { day: "Thursday", time: "11:00 AM – 9:00 PM" },
-  { day: "Friday", time: "11:00 AM – 9:00 PM" },
-  { day: "Saturday", time: "10:00 AM – 6:00 PM" },
-  { day: "Sunday", time: "Closed" },
-];
+const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const MOCK_ARTISTS = [
   { name: "Alex Rivera", specialty: "Traditional & Neo-Trad" },
@@ -52,6 +46,7 @@ function StarRating({ count }: { count: number }) {
 function ReviewsWidget() {
   return (
     <div
+      data-builder-card-lg
       className="flex h-full flex-col gap-5 rounded-xl border p-6"
       style={{ backgroundColor: "var(--widget-1)", borderColor: "var(--widget-border)" }}
     >
@@ -99,9 +94,10 @@ function ReviewsWidget() {
   );
 }
 
-function HoursWidget() {
+function HoursWidget({ hoursData }: { hoursData: StudioData['hours'] }) {
   return (
     <div
+      data-builder-card-lg
       className="flex h-full flex-col gap-5 rounded-xl border p-6"
       style={{ backgroundColor: "var(--widget-2)", borderColor: "var(--widget-border)" }}
     >
@@ -121,26 +117,28 @@ function HoursWidget() {
         VISIT US
       </h3>
       <div className="flex flex-col gap-2">
-        {HOURS.map((entry) => (
-          <div
-            key={entry.day}
-            className="flex items-center justify-between text-xs"
-          >
-            <span style={{ color: "var(--text-secondary)" }}>
-              {entry.day}
-            </span>
-            <span
-              style={{
-                color:
-                  entry.time === "Closed"
-                    ? "var(--text-muted)"
-                    : "var(--text-primary)",
-              }}
+        {DAY_ORDER.map((day) => {
+          const h = hoursData[day];
+          if (!h) return null;
+          const timeLabel = h.closed ? "Closed" : `${h.open} \u2013 ${h.close}`;
+          return (
+            <div
+              key={day}
+              className="flex items-center justify-between text-xs"
             >
-              {entry.time}
-            </span>
-          </div>
-        ))}
+              <span style={{ color: "var(--text-secondary)" }}>
+                {day}
+              </span>
+              <span
+                style={{
+                  color: h.closed ? "var(--text-muted)" : "var(--text-primary)",
+                }}
+              >
+                {timeLabel}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -149,6 +147,7 @@ function HoursWidget() {
 function TeamWidget() {
   return (
     <div
+      data-builder-card-lg
       className="flex h-full flex-col gap-5 rounded-xl border p-6"
       style={{ backgroundColor: "var(--widget-3)", borderColor: "var(--widget-border)" }}
     >
@@ -205,33 +204,36 @@ function TeamWidget() {
 }
 
 const LAYOUT_CLASSES = {
-  "three-col": "grid grid-cols-1 gap-[3px] md:grid-cols-[1.2fr_1fr_1fr]",
-  "two-one": "grid grid-cols-1 gap-[3px] md:grid-cols-[1.5fr_1fr]",
+  "three-col": "grid grid-cols-1 gap-[3px] @md:grid-cols-[1.2fr_1fr_1fr]",
+  "two-one": "grid grid-cols-1 gap-[3px] @md:grid-cols-[1.5fr_1fr]",
   stacked: "mx-auto flex max-w-3xl flex-col gap-[3px]",
 } as const;
 
 export function DetailsSection({ className }: { className?: string }) {
-  const { config } = useBuilder();
+  const { config, studio, useMockData } = useBuilder();
+  const data = useMockData ? MOCK_STUDIO_DATA : studio;
   const { detailsLayout } = config;
 
   return (
     <section
       className={cn(
-        "w-full px-6 py-12 transition-all duration-500 ease-in-out lg:px-10",
+        "w-full transition-all duration-500 ease-in-out",
         className,
       )}
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      <div className={LAYOUT_CLASSES[detailsLayout]}>
-        <ReviewsWidget />
-        <HoursWidget />
-        {detailsLayout === "two-one" ? (
-          <div className="md:col-span-2">
+      <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
+        <div className={LAYOUT_CLASSES[detailsLayout]}>
+          <ReviewsWidget />
+          <HoursWidget hoursData={data?.hours ?? {}} />
+          {detailsLayout === "two-one" ? (
+            <div className="@md:col-span-2">
+              <TeamWidget />
+            </div>
+          ) : (
             <TeamWidget />
-          </div>
-        ) : (
-          <TeamWidget />
-        )}
+          )}
+        </div>
       </div>
     </section>
   );

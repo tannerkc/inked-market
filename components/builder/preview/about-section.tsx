@@ -3,6 +3,8 @@
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
 import type { TagStyle } from "@/lib/types/builder";
+import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import type { StudioData } from "@/lib/repositories";
 
 const TAG_STYLES = {
   pill: "rounded-full",
@@ -10,17 +12,18 @@ const TAG_STYLES = {
   outline: "rounded-full border bg-transparent",
 } as const;
 
-const SPECIALTIES = ["Blackwork", "Fine Line", "Realism", "Neo-Traditional"];
-
 function SpecialtiesBlock({
   tagStyle,
   centered,
+  specialties,
 }: {
   tagStyle: TagStyle;
   centered?: boolean;
+  specialties: string[];
 }) {
   return (
     <div
+      data-builder-card
       className="rounded-lg p-4"
       style={{
         backgroundColor: "var(--bg-raised)",
@@ -36,7 +39,7 @@ function SpecialtiesBlock({
       <div
         className={cn("flex flex-wrap gap-1.5", centered && "justify-center")}
       >
-        {SPECIALTIES.map((tag) => (
+        {specialties.map((tag) => (
           <span
             key={tag}
             className={cn(
@@ -60,9 +63,10 @@ function SpecialtiesBlock({
   );
 }
 
-function StudioDetailsBlock() {
+function StudioDetailsBlock({ services }: { services: StudioData['services'] }) {
   return (
     <div
+      data-builder-card
       className="rounded-lg p-4"
       style={{
         backgroundColor: "var(--bg-raised)",
@@ -79,19 +83,18 @@ function StudioDetailsBlock() {
         className="space-y-1.5 text-sm"
         style={{ color: "var(--text-secondary)" }}
       >
-        <li>Walk-ins welcome</li>
-        <li>Private consultation rooms</li>
-        <li>Free on-site parking</li>
+        {services.includes("walk-ins") && <li>Walk-ins welcome</li>}
+        {services.includes("piercing") && <li>Piercing available</li>}
       </ul>
     </div>
   );
 }
 
-function StoryBlock({ centered }: { centered?: boolean }) {
+function StoryBlock({ centered, bio }: { centered?: boolean; bio?: string }) {
   return (
     <div className={cn(centered && "text-center")}>
       <h2
-        className="mb-4 text-2xl font-bold leading-tight sm:text-3xl"
+        className="mb-4 text-2xl font-bold leading-tight @sm:text-3xl"
         style={{
           fontFamily: "var(--heading-font)",
           color: "var(--text-primary)",
@@ -99,25 +102,15 @@ function StoryBlock({ centered }: { centered?: boolean }) {
       >
         Our Story
       </h2>
-      <p
-        className={cn(
-          "text-sm leading-relaxed",
-          centered && "mx-auto max-w-xl",
-        )}
-        style={{ color: "var(--text-secondary)" }}
-      >
-        Founded with a passion for exceptional tattoo art, our studio is a space
-        where creativity meets craftsmanship. Every piece we create is a
-        collaboration between artist and client, designed to last a lifetime.
-      </p>
-      {!centered && (
+      {bio && (
         <p
-          className="mt-3 text-sm leading-relaxed"
+          className={cn(
+            "text-sm leading-relaxed",
+            centered && "mx-auto max-w-xl",
+          )}
           style={{ color: "var(--text-secondary)" }}
         >
-          We believe tattoos should be as unique as the people who wear them.
-          From first sketch to final session, we&apos;re dedicated to bringing
-          your vision to life.
+          {bio}
         </p>
       )}
     </div>
@@ -125,11 +118,15 @@ function StoryBlock({ centered }: { centered?: boolean }) {
 }
 
 export function AboutSection({ className }: { className?: string }) {
-  const { config } = useBuilder();
+  const { config, studio, useMockData } = useBuilder();
+  const data = useMockData ? MOCK_STUDIO_DATA : studio;
   const { aboutLayout, showSpecialties, showStudioDetails, tagStyle } = config;
 
   const hasSpecialties = showSpecialties !== false;
   const hasDetails = showStudioDetails !== false;
+  const specialties = data?.specialties ?? [];
+  const services = data?.services ?? [];
+  const bio = data?.bio;
 
   // About = none: render standalone content blocks if any are toggled on
   if (aboutLayout === "none") {
@@ -138,22 +135,24 @@ export function AboutSection({ className }: { className?: string }) {
     return (
       <section
         className={cn(
-          "w-full px-6 py-8 transition-all duration-500 ease-in-out lg:px-10",
+          "w-full transition-all duration-500 ease-in-out",
           className,
         )}
         style={{ backgroundColor: "var(--bg-raised)" }}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-          {hasSpecialties && (
-            <div className="flex-1">
-              <SpecialtiesBlock tagStyle={tagStyle} />
-            </div>
-          )}
-          {hasDetails && (
-            <div className="flex-1">
-              <StudioDetailsBlock />
-            </div>
-          )}
+        <div className="mx-auto max-w-[1350px] px-6 py-8 @lg:px-10">
+          <div className="flex flex-col gap-4 @sm:flex-row @sm:gap-6">
+            {hasSpecialties && (
+              <div className="flex-1">
+                <SpecialtiesBlock tagStyle={tagStyle} specialties={specialties} />
+              </div>
+            )}
+            {hasDetails && (
+              <div className="flex-1">
+                <StudioDetailsBlock services={services} />
+              </div>
+            )}
+          </div>
         </div>
       </section>
     );
@@ -162,25 +161,33 @@ export function AboutSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "w-full px-6 py-12 transition-all duration-500 ease-in-out lg:px-10",
+        "w-full transition-all duration-500 ease-in-out",
         className,
       )}
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      {aboutLayout === "split" && (
-        <SplitAbout
-          tagStyle={tagStyle}
-          showSpecialties={hasSpecialties}
-          showDetails={hasDetails}
-        />
-      )}
-      {aboutLayout === "full-width" && (
-        <FullWidthAbout
-          tagStyle={tagStyle}
-          showSpecialties={hasSpecialties}
-          showDetails={hasDetails}
-        />
-      )}
+      <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
+        {aboutLayout === "split" && (
+          <SplitAbout
+            tagStyle={tagStyle}
+            showSpecialties={hasSpecialties}
+            showDetails={hasDetails}
+            specialties={specialties}
+            services={services}
+            bio={bio}
+          />
+        )}
+        {aboutLayout === "full-width" && (
+          <FullWidthAbout
+            tagStyle={tagStyle}
+            showSpecialties={hasSpecialties}
+            showDetails={hasDetails}
+            specialties={specialties}
+            services={services}
+            bio={bio}
+          />
+        )}
+      </div>
     </section>
   );
 }
@@ -189,10 +196,16 @@ function SplitAbout({
   tagStyle,
   showSpecialties,
   showDetails,
+  specialties,
+  services,
+  bio,
 }: {
   tagStyle: TagStyle;
   showSpecialties: boolean;
   showDetails: boolean;
+  specialties: string[];
+  services: StudioData['services'];
+  bio?: string;
 }) {
   const hasRightColumn = showSpecialties || showDetails;
 
@@ -200,17 +213,23 @@ function SplitAbout({
     <div
       className={cn(
         "grid grid-cols-1 gap-8",
-        hasRightColumn && "sm:grid-cols-2",
+        hasRightColumn && "@md:grid-cols-2",
       )}
     >
       <div>
-        <StoryBlock />
+        <StoryBlock bio={bio} />
+        {hasRightColumn && (
+          <div
+            className="mt-8 h-px @md:hidden"
+            style={{ backgroundColor: "var(--border)" }}
+          />
+        )}
       </div>
 
       {hasRightColumn && (
         <div className="space-y-5">
-          {showSpecialties && <SpecialtiesBlock tagStyle={tagStyle} />}
-          {showDetails && <StudioDetailsBlock />}
+          {showSpecialties && <SpecialtiesBlock tagStyle={tagStyle} specialties={specialties} />}
+          {showDetails && <StudioDetailsBlock services={services} />}
         </div>
       )}
     </div>
@@ -221,18 +240,24 @@ function FullWidthAbout({
   tagStyle,
   showSpecialties,
   showDetails,
+  specialties,
+  services,
+  bio,
 }: {
   tagStyle: TagStyle;
   showSpecialties: boolean;
   showDetails: boolean;
+  specialties: string[];
+  services: StudioData['services'];
+  bio?: string;
 }) {
   return (
     <div className="mx-auto max-w-2xl text-center">
-      <StoryBlock centered />
+      <StoryBlock centered bio={bio} />
 
       {showSpecialties && (
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {SPECIALTIES.map((tag) => (
+          {specialties.map((tag) => (
             <span
               key={tag}
               className={cn(
@@ -263,7 +288,7 @@ function FullWidthAbout({
               <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>Walk-ins Welcome</p>
+            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{services.includes('walk-ins') ? 'Walk-ins Welcome' : 'By Appointment'}</p>
           </div>
           <div>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }}>

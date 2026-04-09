@@ -9,6 +9,7 @@ import type {
   TagStyle,
   NavStyle,
   NavLayout,
+  MobileMenuType,
   AboutLayout,
   Vibe,
   Density,
@@ -142,6 +143,12 @@ export const navLayoutOptions: SectionVariantOption<NavLayout>[] = [
   { label: "Logo Center", value: "logo-center", description: "Links left, logo centered, CTA right" },
   { label: "Centered",    value: "centered",    description: "Logo, links, and CTA all centered" },
   { label: "Minimal",     value: "minimal",     description: "Logo and CTA only, no links" },
+];
+
+export const mobileMenuTypeOptions: SectionVariantOption<MobileMenuType>[] = [
+  { label: "Dropdown",   value: "dropdown",   description: "List below nav bar" },
+  { label: "Fullscreen", value: "fullscreen", description: "Full-screen overlay" },
+  { label: "Drawer",     value: "drawer",     description: "Slide-in side panel" },
 ];
 
 export const aboutOptions: SectionVariantOption<AboutLayout>[] = [

@@ -7,7 +7,7 @@ import { useBuilder } from "@/components/builder/builder-provider";
 
 export function BuilderTopBar() {
   const router = useRouter();
-  const { isDirty, canUndo, canRedo, undo, redo, saveDraft } = useBuilder();
+  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, useMockData, toggleMockData } = useBuilder();
 
   return (
     <div className="fixed top-0 right-0 left-0 z-[200] flex h-12 items-center justify-between border-b border-[#222] bg-[#0a0a0a]/92 px-5 backdrop-blur-xl">
@@ -27,7 +27,7 @@ export function BuilderTopBar() {
         </span>
         <div className="h-4 w-px bg-[#333]" />
         <span className="text-xs font-medium text-[#888]">
-          Iron & Ink Studio
+          {studio?.name ?? "Your Studio"}
         </span>
         <span className="rounded bg-[rgba(255,51,51,0.15)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#FF3333]">
           Editing
@@ -72,6 +72,18 @@ export function BuilderTopBar() {
           </button>
         </div>
 
+        <button
+          type="button"
+          onClick={toggleMockData}
+          className={cn(
+            "rounded-lg border bg-transparent px-3.5 py-1.5 text-xs font-medium transition-colors",
+            useMockData
+              ? "border-[#c08000] text-[#c08000]"
+              : "border-[#333] text-[#666]",
+          )}
+        >
+          Mock Data
+        </button>
         <button
           type="button"
           onClick={saveDraft}

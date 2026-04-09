@@ -1,15 +1,25 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import {
   useThemeEditor,
   type UseThemeEditorReturn,
 } from "@/lib/hooks/use-theme-editor";
 import type { StudioThemeConfig } from "@/lib/types/builder";
+import { useStudio } from "@/lib/providers/studio-provider";
+import type { StudioData } from "@/lib/repositories";
 
-const BuilderContext = createContext<UseThemeEditorReturn | null>(null);
+interface BuilderContextValue extends UseThemeEditorReturn {
+  replayKey: number;
+  triggerReplay: () => void;
+  studio: StudioData | null;
+  useMockData: boolean;
+  toggleMockData: () => void;
+}
 
-export function useBuilder(): UseThemeEditorReturn {
+const BuilderContext = createContext<BuilderContextValue | null>(null);
+
+export function useBuilder(): BuilderContextValue {
   const ctx = useContext(BuilderContext);
   if (!ctx) throw new Error("useBuilder must be used within BuilderProvider");
   return ctx;
@@ -22,6 +32,11 @@ interface BuilderProviderProps {
 
 export function BuilderProvider({ children, initial }: BuilderProviderProps) {
   const editor = useThemeEditor(initial);
+  const { studio } = useStudio();
+  const [replayKey, setReplayKey] = useState(0);
+  const triggerReplay = useCallback(() => setReplayKey((k) => k + 1), []);
+  const [useMockData, setUseMockData] = useState(false);
+  const toggleMockData = useCallback(() => setUseMockData((v) => !v), []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -45,6 +60,8 @@ export function BuilderProvider({ children, initial }: BuilderProviderProps) {
   }, [editor]);
 
   return (
-    <BuilderContext.Provider value={editor}>{children}</BuilderContext.Provider>
+    <BuilderContext.Provider value={{ ...editor, replayKey, triggerReplay, studio, useMockData, toggleMockData }}>
+      {children}
+    </BuilderContext.Provider>
   );
 }

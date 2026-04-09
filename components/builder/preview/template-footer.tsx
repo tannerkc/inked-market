@@ -37,9 +37,9 @@ function ColumnsFooter() {
         width: "100%",
         backgroundColor: "var(--bg-raised)",
         borderTop: "1px solid var(--border)",
-        padding: "40px 48px",
       }}
     >
+      <div style={{ maxWidth: "1350px", margin: "0 auto", padding: "40px 24px" }}>
       {/* Top row: studio name + social */}
       <div
         style={{
@@ -129,6 +129,7 @@ function ColumnsFooter() {
           <span style={{ cursor: "pointer" }}>Terms</span>
         </div>
       </div>
+      </div>
     </footer>
   );
 }
@@ -136,23 +137,38 @@ function ColumnsFooter() {
 function MinimalBarFooter() {
   return (
     <footer
+      className="w-full border-t"
       style={{
-        width: "100%",
         backgroundColor: "var(--bg-raised)",
-        borderTop: "1px solid var(--border)",
-        padding: "20px 40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        borderColor: "var(--border)",
       }}
     >
-      <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-        © 2025 Iron &amp; Ink
-      </span>
-      <div style={{ display: "flex", gap: "16px", fontSize: "12px", color: "var(--text-secondary)" }}>
+      <div className="mx-auto flex max-w-[1350px] flex-col items-center gap-3 px-6 py-4 @md:flex-row @md:justify-between @md:gap-0 @md:px-10 @md:py-5">
+      {/* Social — top on mobile, right on @md */}
+      <div
+        className="order-first @md:order-last"
+        style={{ display: "flex", gap: "16px", color: "var(--text-muted)" }}
+      >
+        <span style={{ cursor: "pointer" }}>◉</span>
+        <span style={{ cursor: "pointer" }}>✕</span>
+        <span style={{ cursor: "pointer" }}>◎</span>
+      </div>
+
+      {/* Nav links — centered on mobile, center on @md */}
+      <div
+        className="flex flex-wrap justify-center gap-x-4 gap-y-1 @md:gap-x-1"
+        style={{ fontSize: "12px", color: "var(--text-secondary)" }}
+      >
         {navLinks.map((link, i) => (
-          <span key={link}>
-            {i > 0 && <span style={{ marginRight: "16px", color: "var(--text-muted)" }}>·</span>}
+          <span key={link} className="flex items-center">
+            {i > 0 && (
+              <span
+                className="hidden @md:inline mr-4"
+                style={{ color: "var(--text-muted)" }}
+              >
+                ·
+              </span>
+            )}
             <span
               style={{ cursor: "pointer", transition: "color 0.2s" }}
               onMouseEnter={(e) => {
@@ -167,10 +183,14 @@ function MinimalBarFooter() {
           </span>
         ))}
       </div>
-      <div style={{ display: "flex", gap: "16px", color: "var(--text-muted)" }}>
-        <span style={{ cursor: "pointer" }}>◉</span>
-        <span style={{ cursor: "pointer" }}>✕</span>
-        <span style={{ cursor: "pointer" }}>◎</span>
+
+      {/* Copyright — bottom on mobile, left on @md */}
+      <span
+        className="order-last @md:order-first"
+        style={{ fontSize: "12px", color: "var(--text-muted)" }}
+      >
+        © 2025 Iron &amp; Ink
+      </span>
       </div>
     </footer>
   );
@@ -183,10 +203,10 @@ function CenteredFooter() {
         width: "100%",
         backgroundColor: "var(--bg-raised)",
         borderTop: "1px solid var(--border)",
-        padding: "40px",
         textAlign: "center",
       }}
     >
+      <div style={{ maxWidth: "1350px", margin: "0 auto", padding: "40px 24px" }}>
       <div
         style={{
           fontFamily: "var(--heading-font)",
@@ -240,6 +260,7 @@ function CenteredFooter() {
 
       <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
         © 2025 Iron &amp; Ink Studio
+      </div>
       </div>
     </footer>
   );

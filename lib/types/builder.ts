@@ -20,6 +20,7 @@ export type BuilderMode = "split" | "inline";
 export type DevicePreview = "desktop" | "tablet" | "mobile";
 export type NavStyle = "none" | "static" | "floating" | "reveal";
 export type NavLayout = "standard" | "logo-center" | "centered" | "minimal";
+export type MobileMenuType = "dropdown" | "fullscreen" | "drawer";
 export type TemplateSlug =
   | "bold-editorial"
   | "clean-minimal"
@@ -70,6 +71,7 @@ export interface StudioThemeConfig {
   tagStyle: TagStyle;
   navStyle: NavStyle;
   navLayout?: NavLayout;
+  mobileMenuType?: MobileMenuType;
   builderMode: BuilderMode;
   builderTier: BuilderTier;
   vibe?: Vibe;
@@ -90,6 +92,8 @@ export interface StudioThemeConfig {
   logoPlacement?: LogoPlacement;
   galleryWatermarks?: boolean;
   customSocialPreview?: boolean;
+  galleryBeforeAbout?: boolean;
+  showGalleryHeading?: boolean;
 }
 
 export interface ResolvedThemeVars {
@@ -149,6 +153,7 @@ export interface TypographyPairing {
   headingFont: string;
   bodyFont: string;
   character: string;
+  headingFontWeight: HeadingFontWeight;
 }
 
 export interface AccentColorOption {

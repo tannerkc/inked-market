@@ -9,23 +9,23 @@ function FooterLayoutThumbnail({ layout }: { layout: FooterLayout }) {
   switch (layout) {
     case "columns":
       return (
-        <div className="flex h-full w-full flex-col justify-end rounded-md bg-[#1a1a1a] p-1.5">
+        <div className="flex h-full w-full flex-col justify-end overflow-hidden rounded-md bg-[#1a1a1a] p-1.5">
           <div className="mb-1.5 h-px w-full bg-[#333]" />
-          <div className="flex w-full gap-2">
-            <div className="flex flex-1 flex-col gap-0.5">
-              <div className="h-0.5 w-3 rounded-full bg-[#444]" />
-              <div className="h-0.5 w-2.5 rounded-full bg-[#333]" />
-              <div className="h-0.5 w-3 rounded-full bg-[#333]" />
+          <div className="flex w-full gap-1.5">
+            <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+              <div className="h-0.5 w-full max-w-[10px] rounded-full bg-[#444]" />
+              <div className="h-0.5 w-full max-w-[8px] rounded-full bg-[#333]" />
+              <div className="h-0.5 w-full max-w-[10px] rounded-full bg-[#333]" />
             </div>
-            <div className="flex flex-1 flex-col gap-0.5">
-              <div className="h-0.5 w-3 rounded-full bg-[#444]" />
-              <div className="h-0.5 w-2 rounded-full bg-[#333]" />
-              <div className="h-0.5 w-2.5 rounded-full bg-[#333]" />
+            <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+              <div className="h-0.5 w-full max-w-[10px] rounded-full bg-[#444]" />
+              <div className="h-0.5 w-full max-w-[7px] rounded-full bg-[#333]" />
+              <div className="h-0.5 w-full max-w-[8px] rounded-full bg-[#333]" />
             </div>
-            <div className="flex flex-1 flex-col gap-0.5">
-              <div className="h-0.5 w-3 rounded-full bg-[#444]" />
-              <div className="h-0.5 w-2.5 rounded-full bg-[#333]" />
-              <div className="h-0.5 w-2 rounded-full bg-[#333]" />
+            <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+              <div className="h-0.5 w-full max-w-[10px] rounded-full bg-[#444]" />
+              <div className="h-0.5 w-full max-w-[8px] rounded-full bg-[#333]" />
+              <div className="h-0.5 w-full max-w-[7px] rounded-full bg-[#333]" />
             </div>
           </div>
         </div>

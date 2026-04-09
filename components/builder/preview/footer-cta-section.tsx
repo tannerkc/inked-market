@@ -2,10 +2,24 @@
 
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
-import type { CtaLayout } from "@/lib/types/builder";
+import type { CtaLayout, CtaStyle } from "@/lib/types/builder";
+import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import type { StudioData } from "@/lib/repositories";
 
 interface VariantProps {
   glow: boolean;
+  data: StudioData | null;
+  ctaStyle: CtaStyle;
+}
+
+function ctaButtonProps(style: CtaStyle): { radiusClass: string; inlineStyle: React.CSSProperties } {
+  return {
+    radiusClass: style === "pill" ? "rounded-full" : "rounded-lg",
+    inlineStyle:
+      style === "outline"
+        ? { background: "transparent", color: "var(--accent)", border: "2px solid var(--accent)" }
+        : { backgroundColor: "var(--accent)", color: "var(--accent-text)" },
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -40,10 +54,18 @@ function MapPinIcon({
 /* ------------------------------------------------------------------ */
 /*  Layout: simple-minimal                                            */
 /* ------------------------------------------------------------------ */
-function SimpleMinimal({ glow }: VariantProps) {
+function SimpleMinimal({ glow, data, ctaStyle }: VariantProps) {
+  const namePart = data?.name ? `VISIT ${data.name.toUpperCase()}?` : '';
+  const addressParts = [
+    data?.address,
+    [data?.city, data?.state].filter(Boolean).join(', '),
+  ].filter(Boolean);
+  if (data?.services?.includes('walk-ins')) addressParts.push('Walk-ins Welcome');
+  const bodyText = addressParts.join(' \u00B7 ');
+
   return (
     <section
-      className="relative w-full overflow-hidden px-6 py-20 lg:px-10"
+      className="relative w-full overflow-hidden"
       style={{ backgroundColor: "var(--bg-deep)" }}
     >
       {/* Glow: centered behind content */}
@@ -59,25 +81,29 @@ function SimpleMinimal({ glow }: VariantProps) {
         </div>
       )}
 
-      <div className="relative flex flex-col items-center gap-6 text-center">
-        <h2
-          className="text-3xl font-bold uppercase tracking-tight lg:text-4xl"
-          style={{
-            fontFamily: "var(--heading-font)",
-            color: "var(--text-primary)",
-          }}
-        >
-          VISIT IRON &amp; INK?
-        </h2>
-        <p className="max-w-lg text-sm" style={{ color: "var(--text-muted)" }}>
-          1234 Hawthorne Blvd &middot; Portland, OR &middot; Walk-ins Welcome
-        </p>
-        <button
-          className="mt-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "var(--accent)" }}
-        >
-          Book an Appointment
-        </button>
+      <div className="mx-auto max-w-[1350px] px-6 py-20 @lg:px-10">
+        <div className="relative flex flex-col items-center gap-6 text-center">
+          <h2
+            className="text-3xl font-bold uppercase tracking-tight @lg:text-4xl"
+            style={{
+              fontFamily: "var(--heading-font)",
+              color: "var(--text-primary)",
+            }}
+          >
+            {namePart}
+          </h2>
+          {bodyText && (
+            <p className="max-w-lg text-sm" style={{ color: "var(--text-muted)" }}>
+              {bodyText}
+            </p>
+          )}
+          <button
+            className={cn("mt-2 px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+            style={ctaButtonProps(ctaStyle).inlineStyle}
+          >
+            Book an Appointment
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -86,10 +112,10 @@ function SimpleMinimal({ glow }: VariantProps) {
 /* ------------------------------------------------------------------ */
 /*  Layout: contact-form                                              */
 /* ------------------------------------------------------------------ */
-function ContactForm({ glow }: VariantProps) {
+function ContactForm({ glow, data, ctaStyle }: VariantProps) {
   return (
     <section
-      className="relative w-full overflow-hidden px-8 py-16 lg:px-12"
+      className="relative w-full overflow-hidden"
       style={{ backgroundColor: "var(--bg-raised)" }}
     >
       {/* Glow: between the two columns, biased toward the form */}
@@ -105,7 +131,7 @@ function ContactForm({ glow }: VariantProps) {
         </div>
       )}
 
-      <div className="relative mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="relative mx-auto grid max-w-5xl grid-cols-1 gap-8 px-8 py-16 @md:grid-cols-2 @lg:px-12">
         {/* Left column */}
         <div className="flex flex-col gap-5">
           <h2
@@ -122,12 +148,16 @@ function ContactForm({ glow }: VariantProps) {
             get back to you within 24 hours.
           </p>
           <div className="mt-auto flex flex-col gap-2">
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              (503) 555-0147
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              hello@ironandink.com
-            </span>
+            {data?.phone && (
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {data.phone}
+              </span>
+            )}
+            {data?.email && (
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {data.email}
+              </span>
+            )}
           </div>
         </div>
 
@@ -172,8 +202,8 @@ function ContactForm({ glow }: VariantProps) {
             }}
           />
           <button
-            className="w-full rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "var(--accent)" }}
+            className={cn("w-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+            style={ctaButtonProps(ctaStyle).inlineStyle}
           >
             Send Message
           </button>
@@ -186,10 +216,11 @@ function ContactForm({ glow }: VariantProps) {
 /* ------------------------------------------------------------------ */
 /*  Layout: map-info                                                  */
 /* ------------------------------------------------------------------ */
-function MapInfo({ glow }: VariantProps) {
+function MapInfo({ glow, data, ctaStyle }: VariantProps) {
+  const cityStateZip = [data?.city, data?.state, data?.zipCode].filter(Boolean).join(', ');
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr]">
+      <div className="grid grid-cols-1 @md:grid-cols-[1.2fr_1fr]">
         {/* Map placeholder */}
         <div
           className="flex min-h-[320px] flex-col items-center justify-center"
@@ -205,7 +236,7 @@ function MapInfo({ glow }: VariantProps) {
         </div>
 
         {/* Info panel */}
-        <div className="relative p-8 lg:p-10" style={{ backgroundColor: "var(--bg-raised)" }}>
+        <div className="relative p-8 @lg:p-10" style={{ backgroundColor: "var(--bg-raised)" }}>
           {/* Glow: peeks into right column from behind the map edge */}
           {glow && (
             <div
@@ -229,39 +260,51 @@ function MapInfo({ glow }: VariantProps) {
           </h2>
 
           <div className="mt-5 flex flex-col gap-1">
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              1234 Hawthorne Blvd
-            </span>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              Portland, OR 97214
-            </span>
+            {data?.address && (
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {data.address}
+              </span>
+            )}
+            {cityStateZip && (
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {cityStateZip}
+              </span>
+            )}
           </div>
 
           <div className="my-5 h-px" style={{ backgroundColor: "var(--border)" }} />
 
           <div className="flex flex-col gap-1">
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              (503) 555-0147
-            </span>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              hello@ironandink.com
-            </span>
+            {data?.phone && (
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {data.phone}
+              </span>
+            )}
+            {data?.email && (
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {data.email}
+              </span>
+            )}
           </div>
 
           <div className="my-5 h-px" style={{ backgroundColor: "var(--border)" }} />
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Mon-Sat: 11AM-8PM
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Sunday: Closed
-            </span>
+            {["Monday", "Friday", "Saturday", "Sunday"].map((day) => {
+              const h = data?.hours?.[day];
+              if (!h) return null;
+              const label = h.closed ? "Closed" : `${h.open} \u2013 ${h.close}`;
+              return (
+                <span key={day} className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {day}: {label}
+                </span>
+              );
+            })}
           </div>
 
           <button
-            className="mt-6 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "var(--accent)" }}
+            className={cn("mt-6 px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+            style={ctaButtonProps(ctaStyle).inlineStyle}
           >
             Get Directions
           </button>
@@ -274,15 +317,15 @@ function MapInfo({ glow }: VariantProps) {
 /* ------------------------------------------------------------------ */
 /*  Layout: booking                                                   */
 /* ------------------------------------------------------------------ */
-function Booking({ glow }: VariantProps) {
+function Booking({ glow, data: _data, ctaStyle }: VariantProps) {
   return (
     <section className="relative w-full overflow-hidden">
       <div
-        className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr]"
+        className="grid grid-cols-1 @md:grid-cols-[1fr_1.1fr]"
         style={{ backgroundColor: "var(--bg-deep)" }}
       >
         {/* Left — headline + CTA */}
-        <div className="relative flex flex-col justify-center px-8 py-16 lg:px-12 lg:py-20">
+        <div className="relative flex flex-col justify-center px-8 py-16 @lg:px-12 @lg:py-20">
           {/* Glow: bleeds from left edge behind headline */}
           {glow && (
             <div
@@ -300,7 +343,7 @@ function Booking({ glow }: VariantProps) {
               Now Booking
             </p>
             <h2
-              className="mt-3 text-3xl font-bold uppercase tracking-tight lg:text-4xl"
+              className="mt-3 text-3xl font-bold uppercase tracking-tight @lg:text-4xl"
               style={{
                 fontFamily: "var(--heading-font)",
                 color: "var(--text-primary)",
@@ -320,8 +363,8 @@ function Booking({ glow }: VariantProps) {
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
-                className="rounded-lg px-8 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--accent)" }}
+                className={cn("px-8 py-3.5 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+                style={ctaButtonProps(ctaStyle).inlineStyle}
               >
                 Book a Consultation
               </button>
@@ -341,10 +384,10 @@ function Booking({ glow }: VariantProps) {
 
         {/* Right — trust signals panel */}
         <div
-          className="flex flex-col justify-center px-8 py-16 lg:px-12 lg:py-20"
+          className="flex flex-col justify-center border-t px-6 py-10 @md:border-t-0 @md:border-l @md:px-8 @md:py-16 @lg:px-12 @lg:py-20"
           style={{
             backgroundColor: "var(--bg-raised)",
-            borderLeft: "1px solid var(--border)",
+            borderColor: "var(--border)",
           }}
         >
           <div className="grid grid-cols-2 gap-5">
@@ -389,8 +432,8 @@ function Booking({ glow }: VariantProps) {
             style={{ backgroundColor: "var(--border)" }}
           />
 
-          <div className="mt-5 flex items-center gap-4">
-            <div className="flex -space-x-2">
+          <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex shrink-0 -space-x-2">
               {[
                 "https://randomuser.me/api/portraits/women/44.jpg",
                 "https://randomuser.me/api/portraits/men/32.jpg",
@@ -405,7 +448,7 @@ function Booking({ glow }: VariantProps) {
                 />
               ))}
             </div>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <p className="min-w-0 text-xs" style={{ color: "var(--text-muted)" }}>
               Join 127+ satisfied clients who trusted us with their ink
             </p>
           </div>
@@ -429,14 +472,16 @@ const VARIANTS: Record<CtaLayout, React.FC<VariantProps>> = {
 /*  Exported wrapper                                                  */
 /* ------------------------------------------------------------------ */
 export function FooterCTASection({ className }: { className?: string }) {
-  const { config } = useBuilder();
+  const { config, studio, useMockData } = useBuilder();
+  const data = useMockData ? MOCK_STUDIO_DATA : studio;
   const layout: CtaLayout = config.ctaLayout ?? "simple-minimal";
   const Variant = VARIANTS[layout] ?? VARIANTS["simple-minimal"];
-  const glow = config.ctaGlow ?? false;
+  const glow = config.glowIntensity !== undefined && config.glowIntensity !== "none";
+  const ctaStyle: CtaStyle = config.ctaStyle ?? "filled";
 
   return (
     <div className={cn("transition-all duration-500 ease-in-out", className)}>
-      <Variant glow={glow} />
+      <Variant glow={glow} data={data} ctaStyle={ctaStyle} />
     </div>
   );
 }

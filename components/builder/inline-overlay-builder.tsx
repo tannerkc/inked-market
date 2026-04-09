@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { EditableSection } from "@/components/builder/editable-section";
 import { SectionPopover } from "@/components/builder/section-popover";
-import { BottomToolbar } from "@/components/builder/bottom-toolbar";
+import { BottomToolbar, type ToolbarButtonDef } from "@/components/builder/bottom-toolbar";
 import { ToolbarFlyout } from "@/components/builder/toolbar-flyout";
 import { DeviceFrameWrapper } from "@/components/builder/device-frame-wrapper";
 import { TemplateNavBar } from "@/components/builder/preview/template-nav-bar";
@@ -15,18 +15,30 @@ import { DetailsSection } from "@/components/builder/preview/details-section";
 import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
 import { TemplateFooter } from "@/components/builder/preview/template-footer";
 import { TemplateSwitcher } from "@/components/builder/template-switcher";
-import { ThemePresetPicker } from "@/components/builder/controls/theme-preset-picker";
-import { AccentColorPicker } from "@/components/builder/controls/accent-color-picker";
-import { BackgroundPicker } from "@/components/builder/controls/background-picker";
-import { TypographyPairPicker } from "@/components/builder/controls/typography-pair-picker";
-import { HeroStylePicker } from "@/components/builder/controls/hero-style-picker";
-import { GalleryStylePicker } from "@/components/builder/controls/gallery-style-picker";
-import { AboutLayoutPicker } from "@/components/builder/controls/about-layout-picker";
-import { DetailsLayoutPicker } from "@/components/builder/controls/details-layout-picker";
-import { FooterStylePicker } from "@/components/builder/controls/footer-style-picker";
-import { FooterLayoutPicker } from "@/components/builder/controls/footer-layout-picker";
-import { NavStylePicker } from "@/components/builder/controls/nav-style-picker";
-import { TagStylePicker } from "@/components/builder/controls/tag-style-picker";
+import {
+  ThemePresetPicker,
+  AccentColorPicker,
+  BackgroundPicker,
+  TypographyPairPicker,
+  HeroStylePicker,
+  GalleryStylePicker,
+  AboutLayoutPicker,
+  DetailsLayoutPicker,
+  FooterStylePicker,
+  FooterLayoutPicker,
+  NavStylePicker,
+  NavLayoutPicker,
+  TagStylePicker,
+  AdvancedColorPanel,
+  TypographyTuner,
+  VibePicker,
+  PageStyleGroup,
+  TexturePicker,
+  ImageTreatmentPicker,
+  LogoUpload,
+  LogoPlacementPicker,
+  ToggleRow,
+} from "@/components/builder/controls";
 import type { DevicePreview } from "@/lib/types/builder";
 
 interface SectionConfig {
@@ -37,15 +49,38 @@ interface SectionConfig {
   controls: React.ReactNode;
 }
 
+const FLASH_BUTTONS: ToolbarButtonDef[] = [
+  { id: "theme", icon: "◐", label: "Theme & Colors" },
+  { id: "type", icon: "Aa", label: "Type" },
+  { id: "sections", icon: "▤", label: "Sections" },
+];
+
+const CUSTOM_BUTTONS: ToolbarButtonDef[] = [
+  { id: "theme", icon: "◐", label: "Theme" },
+  { id: "type", icon: "Aa", label: "Type" },
+  { id: "sections", icon: "▤", label: "Sections" },
+  { id: "effects", icon: "◎", label: "Effects" },
+  { id: "brand", icon: "◇", label: "Brand" },
+];
+
 export function InlineOverlayBuilder() {
   const editor = useBuilder();
-  const { resolvedVars } = editor;
+  const { config, resolvedVars, applyChange } = editor;
+  const tier = config.builderTier ?? "flash";
+
+  const handleTierChange = useCallback((newTier: typeof tier) => {
+    applyChange({ builderTier: newTier });
+    try {
+      localStorage.setItem("inked-builder-tier", newTier);
+    } catch {
+      // localStorage unavailable
+    }
+  }, [applyChange]);
 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [activeFlyout, setActiveFlyout] = useState<string | null>(null);
   const [device, setDevice] = useState<DevicePreview>("desktop");
 
-  // Close all popovers and flyouts on Escape, and outside clicks
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -56,7 +91,6 @@ export function InlineOverlayBuilder() {
 
     function handlePointerDown(e: PointerEvent) {
       const target = e.target as HTMLElement;
-      // Don't close if clicking inside a popover, flyout, or toolbar
       if (
         target.closest("[data-builder-popover]") ||
         target.closest("[data-builder-flyout]") ||
@@ -64,10 +98,7 @@ export function InlineOverlayBuilder() {
       ) {
         return;
       }
-      // Close flyouts if clicking outside them
       setActiveFlyout(null);
-      // Close section popovers if clicking outside them
-      // (but not when clicking a different section — that's handled by handleSectionClick)
       if (!target.closest("[data-section]")) {
         setActiveSection(null);
       }
@@ -81,22 +112,16 @@ export function InlineOverlayBuilder() {
     };
   }, []);
 
-  const handleSectionClick = useCallback(
-    (sectionId: string) => {
-      // Close flyout when opening a section popover
-      setActiveFlyout(null);
-      setActiveSection((prev) => (prev === sectionId ? null : sectionId));
-    },
-    []
-  );
+  const handleSectionClick = useCallback((sectionId: string) => {
+    setActiveFlyout(null);
+    setActiveSection((prev) => (prev === sectionId ? null : sectionId));
+  }, []);
 
   const handleFlyoutToggle = useCallback((name: string) => {
-    // Close section popover when opening a flyout
     setActiveSection(null);
     setActiveFlyout((prev) => (prev === name ? null : name));
   }, []);
 
-  // Convert resolved vars to inline CSS properties
   const cssVarStyle = Object.entries(resolvedVars).reduce<
     Record<string, string>
   >((acc, [key, value]) => {
@@ -104,67 +129,84 @@ export function InlineOverlayBuilder() {
     return acc;
   }, {});
 
-  const sections: SectionConfig[] = [
-    {
-      id: "nav",
-      name: "Navigation",
-      component: <TemplateNavBar />,
-      popoverTitle: "Navigation Bar",
-      controls: <NavStylePicker />,
-    },
-    {
-      id: "hero",
-      name: "Hero",
-      component: <HeroSection />,
-      popoverTitle: "Hero Section",
-      controls: (
-        <>
-          <HeroStylePicker />
-          <TagStylePicker />
-        </>
-      ),
-    },
-    {
-      id: "about",
-      name: "About",
-      component: <AboutSection />,
-      popoverTitle: "About Section",
-      controls: <AboutLayoutPicker />,
-    },
-    {
-      id: "gallery",
-      name: "Gallery",
-      component: <GallerySection />,
-      popoverTitle: "Gallery Section",
-      controls: <GalleryStylePicker />,
-    },
-    {
-      id: "details",
-      name: "Details",
-      component: <DetailsSection />,
-      popoverTitle: "Details Section",
-      controls: <DetailsLayoutPicker />,
-    },
-    {
-      id: "footer-cta",
-      name: "CTA",
-      component: <FooterCTASection />,
-      popoverTitle: "CTA Section",
-      controls: <FooterStylePicker />,
-    },
-    {
-      id: "footer",
-      name: "Footer",
-      component: <TemplateFooter />,
-      popoverTitle: "Footer",
-      controls: <FooterLayoutPicker />,
-    },
-  ];
+  const surfaceTexture = config.surfaceTexture ?? "none";
+  const animationStyle = config.animationStyle ?? "none";
+  const toolbarButtons = tier === "custom" ? CUSTOM_BUTTONS : FLASH_BUTTONS;
+
+  const sections: SectionConfig[] = useMemo(
+    () => [
+      {
+        id: "nav",
+        name: "Navigation",
+        component: <TemplateNavBar />,
+        popoverTitle: "Navigation Bar",
+        controls: (
+          <>
+            <NavStylePicker />
+            {tier === "custom" && <NavLayoutPicker />}
+          </>
+        ),
+      },
+      {
+        id: "hero",
+        name: "Hero",
+        component: <HeroSection />,
+        popoverTitle: "Hero Section",
+        controls: <HeroStylePicker />,
+      },
+      {
+        id: "about",
+        name: "About",
+        component: <AboutSection />,
+        popoverTitle: "About Section",
+        controls: (
+          <>
+            <AboutLayoutPicker />
+            <TagStylePicker />
+          </>
+        ),
+      },
+      {
+        id: "gallery",
+        name: "Gallery",
+        component: <GallerySection />,
+        popoverTitle: "Gallery Section",
+        controls: <GalleryStylePicker />,
+      },
+      {
+        id: "details",
+        name: "Details",
+        component: <DetailsSection />,
+        popoverTitle: "Details Section",
+        controls: <DetailsLayoutPicker />,
+      },
+      {
+        id: "footer-cta",
+        name: "CTA",
+        component: <FooterCTASection />,
+        popoverTitle: "CTA Section",
+        controls: <FooterStylePicker />,
+      },
+      {
+        id: "footer",
+        name: "Footer",
+        component: <TemplateFooter />,
+        popoverTitle: "Footer",
+        controls: <FooterLayoutPicker />,
+      },
+    ],
+    [],
+  );
+
+  const closeFlyout = useCallback(() => setActiveFlyout(null), []);
 
   return (
     <>
       {/* Preview area with themed CSS variables */}
       <div
+        data-builder-root
+        data-texture={surfaceTexture}
+        data-animation={animationStyle}
         className="relative pb-[100px]"
         style={{
           ...cssVarStyle,
@@ -198,41 +240,135 @@ export function InlineOverlayBuilder() {
 
       {/* Bottom toolbar */}
       <BottomToolbar
+        buttons={toolbarButtons}
         activeFlyout={activeFlyout}
         onFlyoutToggle={handleFlyoutToggle}
         device={device}
         onDeviceChange={setDevice}
         onReset={editor.reset}
+        tier={tier}
+        onTierChange={handleTierChange}
       />
 
-      {/* Flyout panels */}
+      {/* ─── Shared flyouts (both tiers) ─────────────────────── */}
       <ToolbarFlyout
-        title="Theme"
+        title={tier === "flash" ? "Theme & Colors" : "Theme"}
         isOpen={activeFlyout === "theme"}
-        onClose={() => setActiveFlyout(null)}
+        onClose={closeFlyout}
       >
         <TemplateSwitcher />
         <ThemePresetPicker />
-      </ToolbarFlyout>
-
-      <ToolbarFlyout
-        title="Colors"
-        isOpen={activeFlyout === "colors"}
-        onClose={() => setActiveFlyout(null)}
-      >
-        <div className="space-y-4">
-          <AccentColorPicker />
-          <BackgroundPicker />
-        </div>
+        {tier === "flash" && (
+          <>
+            <AccentColorPicker />
+            <BackgroundPicker />
+          </>
+        )}
+        {tier === "custom" && (
+          <>
+            <AccentColorPicker />
+            <BackgroundPicker />
+            <AdvancedColorPanel />
+          </>
+        )}
       </ToolbarFlyout>
 
       <ToolbarFlyout
         title="Typography"
         isOpen={activeFlyout === "type"}
-        onClose={() => setActiveFlyout(null)}
+        onClose={closeFlyout}
       >
         <TypographyPairPicker />
+        {tier === "custom" && <TypographyTuner />}
       </ToolbarFlyout>
+
+      <ToolbarFlyout
+        title="Sections"
+        isOpen={activeFlyout === "sections"}
+        onClose={closeFlyout}
+      >
+        {tier === "flash" ? (
+          <div className="space-y-6">
+            <VibePicker />
+            <div>
+              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+                Show / Hide
+              </div>
+              <div className="space-y-1">
+                <ToggleRow
+                  label="Hero Tagline"
+                  checked={config.showHeroSubtext}
+                  onChange={(v) => applyChange({ showHeroSubtext: v })}
+                />
+                <ToggleRow
+                  label="Hero CTA"
+                  checked={config.showHeroCta}
+                  onChange={(v) => applyChange({ showHeroCta: v })}
+                />
+                <ToggleRow
+                  label="About Section"
+                  checked={config.aboutLayout !== "none"}
+                  onChange={(v) => applyChange({ aboutLayout: v ? "split" : "none" })}
+                />
+                <ToggleRow
+                  label="Specialties"
+                  checked={config.showSpecialties}
+                  onChange={(v) => applyChange({ showSpecialties: v })}
+                />
+                <ToggleRow
+                  label="Studio Details"
+                  checked={config.showStudioDetails}
+                  onChange={(v) => applyChange({ showStudioDetails: v })}
+                />
+                <ToggleRow
+                  label="CTA Glow"
+                  checked={config.ctaGlow}
+                  onChange={(v) => applyChange({ ctaGlow: v })}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <PageStyleGroup />
+          </div>
+        )}
+      </ToolbarFlyout>
+
+      {/* ─── Custom-only flyouts ─────────────────────────────── */}
+      {tier === "custom" && (
+        <>
+          <ToolbarFlyout
+            title="Effects"
+            isOpen={activeFlyout === "effects"}
+            onClose={closeFlyout}
+          >
+            <TexturePicker />
+            <ImageTreatmentPicker />
+          </ToolbarFlyout>
+
+          <ToolbarFlyout
+            title="Brand"
+            isOpen={activeFlyout === "brand"}
+            onClose={closeFlyout}
+          >
+            <LogoUpload />
+            {config.logoUrl && <LogoPlacementPicker />}
+            <div className="space-y-1">
+              <ToggleRow
+                label="Gallery Watermarks"
+                checked={config.galleryWatermarks ?? false}
+                onChange={(v) => applyChange({ galleryWatermarks: v })}
+              />
+              <ToggleRow
+                label="Custom Social Preview"
+                checked={config.customSocialPreview ?? false}
+                onChange={(v) => applyChange({ customSocialPreview: v })}
+              />
+            </div>
+          </ToolbarFlyout>
+        </>
+      )}
     </>
   );
 }

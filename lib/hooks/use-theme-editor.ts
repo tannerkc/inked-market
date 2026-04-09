@@ -149,12 +149,6 @@ export function useThemeEditor(
       const tmpl = templates[slug];
       const newConfig: StudioThemeConfig = {
         ...tmpl.defaults,
-        // Preserve user's color/font overrides and session state
-        accentColor: config.accentColor,
-        backgroundColor: config.backgroundColor,
-        backgroundMode: config.backgroundMode,
-        headingFont: config.headingFont,
-        bodyFont: config.bodyFont,
         builderMode: config.builderMode,
         builderTier: config.builderTier,
       };
