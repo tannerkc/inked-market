@@ -156,7 +156,11 @@ export default function BuilderPage() {
           {mode === "split" ? (
             <SplitScreenBuilder />
           ) : (
-            <div className="h-full overflow-y-auto">
+            <div
+              className="h-full overflow-y-auto"
+              data-sheet-root
+              style={{ transform: "translateZ(0)" }}
+            >
               <InlineOverlayBuilder />
             </div>
           )}

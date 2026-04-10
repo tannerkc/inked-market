@@ -57,12 +57,14 @@ export function PreviewPane() {
 
       {/* Scrollable preview container */}
       <div
+        data-sheet-root
         className="flex-1 overflow-y-auto transition-colors duration-400"
         style={device !== "desktop" ? {
+          transform: "translateZ(0)",
           backgroundColor: "#111",
           backgroundImage: "radial-gradient(circle, #2a2a2a 1px, transparent 1px)",
           backgroundSize: "20px 20px",
-        } : { backgroundColor: "#0a0a0a" }}
+        } : { transform: "translateZ(0)", backgroundColor: "#0a0a0a" }}
       >
         <div
           className={cn(
