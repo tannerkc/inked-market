@@ -1,7 +1,7 @@
 import type {
   SectionVariantOption,
   HeroLayout,
-  GalleryLayout,
+  GalleryPhotosPerArtist,
   DetailsLayout,
   CtaLayout,
   CtaStyle,
@@ -44,26 +44,21 @@ export const heroOptions: SectionVariantOption<HeroLayout>[] = [
   },
 ];
 
-export const galleryOptions: SectionVariantOption<GalleryLayout>[] = [
+export const galleryPhotosOptions: SectionVariantOption<GalleryPhotosPerArtist>[] = [
   {
-    label: "Featured Grid",
-    value: "featured",
-    description: "Hero image with supporting grid",
+    label: "Compact",
+    value: 3,
+    description: "3 photos per artist before overflow",
   },
   {
-    label: "Uniform Grid",
-    value: "uniform",
-    description: "Equal-size tiles",
+    label: "Standard",
+    value: 5,
+    description: "5 photos per artist before overflow",
   },
   {
-    label: "Masonry",
-    value: "masonry",
-    description: "Pinterest-style staggered layout",
-  },
-  {
-    label: "Carousel",
-    value: "carousel",
-    description: "Horizontal scroll",
+    label: "Generous",
+    value: 8,
+    description: "8 photos per artist before overflow",
   },
 ];
 
