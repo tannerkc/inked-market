@@ -237,13 +237,11 @@ export function GallerySection() {
           onOverflowClick={setSheetArtist}
         />
       ))}
-      {sheetArtist && (
-        <ArtistGallerySheet
-          artist={sheetArtist}
-          open={!!sheetArtist}
-          onClose={() => setSheetArtist(null)}
-        />
-      )}
+      <ArtistGallerySheet
+        artist={sheetArtist ?? MOCK_ARTISTS[0]}
+        open={!!sheetArtist}
+        onClose={() => setSheetArtist(null)}
+      />
     </section>
   );
 }
