@@ -250,53 +250,85 @@ function BookingWidget() {
   return (
     <div
       data-builder-card-lg
-      className="flex h-full flex-col gap-0 rounded-xl border overflow-hidden"
+      className="flex h-full flex-col rounded-xl border overflow-hidden"
       style={{ backgroundColor: "var(--widget-3)", borderColor: "var(--widget-border)" }}
     >
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3 shrink-0">
-        <p
-          className="text-[9px] font-bold tracking-[0.12em] uppercase mb-1"
-          style={{ color: "var(--widget-label)" }}
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div
+        className="flex items-center justify-between px-5 py-4 border-b shrink-0"
+        style={{ borderColor: "var(--widget-border)" }}
+      >
+        <div>
+          <h3
+            className="text-lg font-bold uppercase tracking-tight leading-none"
+            style={{ fontFamily: "var(--heading-font)", color: "var(--text-primary)" }}
+          >
+            Book a Session
+          </h3>
+          <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+            {CAL_MONTH}
+          </p>
+        </div>
+        {/* Calendar icon */}
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          style={{ background: "var(--accent-bg)" }}
         >
-          Book a Session
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: "var(--accent)" }}>
+            <rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M1 7h14" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ── Artist selector ────────────────────────────────── */}
+      <div className="px-5 py-4 border-b shrink-0" style={{ borderColor: "var(--widget-border)" }}>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+          Artist
         </p>
-        <h3
-          className="text-base font-bold uppercase tracking-tight leading-none"
-          style={{ fontFamily: "var(--heading-font)", color: "var(--text-primary)" }}
-        >
-          {CAL_MONTH}
-        </h3>
+        {/* Styled select wrapper */}
+        <div className="relative">
+          {/* Person icon */}
+          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style={{ color: "var(--text-muted)" }}>
+              <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+              <path d="M1.5 12.5c0-2.485 2.462-4.5 5.5-4.5s5.5 2.015 5.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            </svg>
+          </div>
+          <select
+            value={artistId}
+            onChange={(e) => handleArtistChange(e.target.value)}
+            className="w-full rounded-lg border pl-8 pr-8 py-2.5 text-[11px] font-medium appearance-none cursor-pointer transition-colors focus:outline-none"
+            style={{
+              background: "var(--bg-raised)",
+              borderColor: "var(--border)",
+              color: "var(--text-primary)",
+            }}
+          >
+            {BOOKING_ARTISTS.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.id === "any" ? "Any Available Artist" : a.label}
+              </option>
+            ))}
+          </select>
+          {/* Chevron */}
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ color: "var(--text-muted)" }}>
+              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
       </div>
 
-      {/* Artist selector */}
-      <div className="px-4 pb-3 shrink-0">
-        <select
-          value={artistId}
-          onChange={(e) => handleArtistChange(e.target.value)}
-          className="w-full rounded-lg border px-3 py-2 text-[11px] font-medium appearance-none cursor-pointer transition-colors focus:outline-none"
-          style={{
-            background: "var(--bg-raised)",
-            borderColor: "var(--border)",
-            color: "var(--text-primary)",
-          }}
-        >
-          {BOOKING_ARTISTS.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.id === "any" ? "Any Available Artist" : a.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="px-4 pb-3 shrink-0">
+      {/* ── Calendar ───────────────────────────────────────── */}
+      <div className="px-5 py-4 shrink-0">
         {/* Day headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {["S","M","T","W","T","F","S"].map((d, i) => (
+        <div className="grid grid-cols-7 mb-1.5">
+          {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d, i) => (
             <div
               key={i}
-              className="text-center text-[9px] font-semibold py-0.5"
+              className="text-center text-[8px] font-bold uppercase tracking-wide py-0.5"
               style={{ color: "var(--text-muted)" }}
             >
               {d}
@@ -304,7 +336,7 @@ function BookingWidget() {
           ))}
         </div>
         {/* Day cells */}
-        <div className="grid grid-cols-7 gap-0.5">
+        <div className="grid grid-cols-7 gap-1">
           {cells.map((cell, i) => {
             if (!cell) return <div key={`empty-${i}`} />;
             const { day } = cell;
@@ -314,20 +346,20 @@ function BookingWidget() {
             const isSelected = day === selectedDate;
 
             let cellStyle: React.CSSProperties = {};
-            let cellClass = "aspect-square flex items-center justify-center rounded text-[10px] font-medium transition-colors";
+            let cellClass = "aspect-square flex items-center justify-center rounded-md text-[10px] font-medium transition-all";
 
             if (isSelected) {
               cellStyle = { background: "var(--accent)", color: "var(--accent-text)" };
-              cellClass += " cursor-pointer";
+              cellClass += " cursor-pointer shadow-sm";
             } else if (isToday && avail) {
               cellStyle = { background: "var(--accent-bg)", color: "var(--accent)" };
-              cellClass += " cursor-pointer ring-1 ring-[var(--accent)]/30";
+              cellClass += " cursor-pointer font-bold";
             } else if (isPast || !avail) {
-              cellStyle = { color: "var(--text-muted)", opacity: 0.35 };
+              cellStyle = { color: "var(--text-muted)", opacity: 0.3 };
               cellClass += " cursor-default";
             } else {
               cellStyle = { color: "var(--text-secondary)" };
-              cellClass += " cursor-pointer hover:bg-[var(--bg-raised)]";
+              cellClass += " cursor-pointer hover:bg-[var(--bg-raised)] hover:font-semibold";
             }
 
             return (
@@ -346,16 +378,16 @@ function BookingWidget() {
         </div>
       </div>
 
-      {/* Time slots — shown only when a date is selected */}
+      {/* ── Time slots ─────────────────────────────────────── */}
       {selectedDate && (
         <div
-          className="px-4 pb-3 border-t pt-3 shrink-0"
+          className="px-5 py-4 border-t shrink-0"
           style={{ borderColor: "var(--widget-border)" }}
         >
-          <p className="text-[9px] font-bold tracking-[0.1em] uppercase mb-2" style={{ color: "var(--widget-label)" }}>
-            Available Times
+          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] mb-2.5" style={{ color: "var(--text-muted)" }}>
+            Available Times — Apr {selectedDate}
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {availableSlots.map((time) => {
               const active = selectedTime === time;
               return (
@@ -363,11 +395,11 @@ function BookingWidget() {
                   key={time}
                   type="button"
                   onClick={() => setSelectedTime(active ? null : time)}
-                  className="rounded px-2 py-1 text-[10px] font-semibold transition-colors border"
+                  className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all border"
                   style={
                     active
                       ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--accent-text)" }
-                      : { background: "transparent", borderColor: "var(--border)", color: "var(--text-secondary)" }
+                      : { background: "var(--bg-raised)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                   }
                 >
                   {time}
@@ -383,23 +415,26 @@ function BookingWidget() {
         </div>
       )}
 
-      {/* CTA */}
-      <div className="mt-auto px-4 pb-4 pt-3 shrink-0">
+      {/* ── CTA ────────────────────────────────────────────── */}
+      <div
+        className="mt-auto px-5 py-4 border-t shrink-0"
+        style={{ borderColor: "var(--widget-border)" }}
+      >
         <button
           type="button"
           disabled={!selectedDate || !selectedTime}
           className={cn(
-            "w-full rounded-lg py-2.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-all",
-            !selectedDate || !selectedTime ? "opacity-40 cursor-not-allowed" : ""
+            "w-full rounded-lg py-3 text-[11px] font-bold uppercase tracking-[0.12em] transition-all",
+            !selectedDate || !selectedTime ? "cursor-not-allowed" : ""
           )}
           style={
             selectedDate && selectedTime
               ? { background: "var(--accent)", color: "var(--accent-text)" }
-              : { background: "var(--bg-raised)", color: "var(--text-muted)" }
+              : { background: "var(--bg-raised)", color: "var(--text-muted)", opacity: 0.5 }
           }
         >
           {selectedDate && selectedTime
-            ? `Request ${selectedTime} on Apr ${selectedDate}`
+            ? `Request ${selectedTime} · Apr ${selectedDate}`
             : "Select a Date & Time"}
         </button>
       </div>
