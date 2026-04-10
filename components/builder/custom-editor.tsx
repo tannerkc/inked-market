@@ -17,7 +17,7 @@ import {
   HeroStylePicker,
   AboutLayoutPicker,
   TagStylePicker,
-  GalleryStylePicker,
+  GalleryPhotosPicker,
   DetailsLayoutPicker,
   FooterStylePicker,
   FooterLayoutPicker,
@@ -131,7 +131,7 @@ export function CustomEditor() {
             </SectionCard>
 
             <SectionCard title="Gallery">
-              <GalleryStylePicker />
+              <GalleryPhotosPicker />
             </SectionCard>
 
             <SectionCard title="Details">

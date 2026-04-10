@@ -21,7 +21,7 @@ import {
   BackgroundPicker,
   TypographyPairPicker,
   HeroStylePicker,
-  GalleryStylePicker,
+  GalleryPhotosPicker,
   AboutLayoutPicker,
   DetailsLayoutPicker,
   FooterStylePicker,
@@ -171,7 +171,7 @@ export function InlineOverlayBuilder() {
         name: "Gallery",
         component: <GallerySection />,
         popoverTitle: "Gallery Section",
-        controls: <GalleryStylePicker />,
+        controls: <GalleryPhotosPicker />,
       },
       {
         id: "details",
