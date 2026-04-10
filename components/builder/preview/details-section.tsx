@@ -250,7 +250,7 @@ function BookingWidget() {
   return (
     <div
       data-builder-card-lg
-      className="flex h-full flex-col rounded-xl border overflow-hidden"
+      className="@container flex h-full flex-col rounded-xl border overflow-hidden"
       style={{ backgroundColor: "var(--widget-3)", borderColor: "var(--widget-border)" }}
     >
       {/* ── Header ─────────────────────────────────────────── */}
@@ -258,20 +258,20 @@ function BookingWidget() {
         className="flex items-center justify-between px-5 py-4 border-b shrink-0"
         style={{ borderColor: "var(--widget-border)" }}
       >
-        <div>
+        <div className="min-w-0">
           <h3
-            className="text-lg font-bold uppercase tracking-tight leading-none"
+            className="text-base @[260px]:text-lg font-bold uppercase tracking-tight leading-none truncate"
             style={{ fontFamily: "var(--heading-font)", color: "var(--text-primary)" }}
           >
             Book a Session
           </h3>
-          <p className="text-[12px] font-medium mt-1" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-[11px] @[260px]:text-[12px] font-medium mt-1" style={{ color: "var(--text-secondary)" }}>
             {CAL_MONTH}
           </p>
         </div>
-        {/* Calendar icon */}
+        {/* Calendar icon — hidden when card is too narrow */}
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          className="hidden @[260px]:flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ml-3"
           style={{ background: "var(--accent-bg)" }}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: "var(--accent)" }}>
