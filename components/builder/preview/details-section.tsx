@@ -1,26 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
 import type { StudioData } from "@/lib/repositories";
 
 const MOCK_REVIEWS = [
-  {
-    author: "Sarah M.",
-    stars: 5,
-    text: "Absolutely incredible work. The detail in my sleeve is beyond what I imagined.",
-  },
-  {
-    author: "Jake T.",
-    stars: 5,
-    text: "Clean lines, great communication, and a welcoming atmosphere. Highly recommend.",
-  },
-  {
-    author: "Mia R.",
-    stars: 4,
-    text: "Beautiful realism piece. Took their time to get every detail right.",
-  },
+  { author: "Megan R.", stars: 5, text: "Jake did an incredible traditional rose sleeve on me. The line work is perfect and healed beautifully." },
+  { author: "Daniel S.", stars: 5, text: "Sarah's fine line work is unmatched. Got a botanical piece on my forearm — exactly what I envisioned." },
+  { author: "Priya K.", stars: 4, text: "Amazing work overall. Marcus did a gorgeous Japanese sleeve start and I'll definitely be back." },
+  { author: "Chris M.", stars: 5, text: "Lin's geometric sleeve is stunning. The precision is unreal. Worth every penny and the wait time." },
+  { author: "Alicia T.", stars: 5, text: "Second session with Marcus — the Japanese koi piece is coming along beautifully. Super professional studio." },
+  { author: "James L.", stars: 4, text: "Great experience. Parking can be tricky on weekends but the work speaks for itself." },
+  { author: "Taylor B.", stars: 5, text: "Sarah did a fine line botanical sleeve that turned out better than I imagined. Booked for the next one." },
+  { author: "Jordan M.", stars: 5, text: "Third time here — Jake's color work is on another level. The studio is always clean and welcoming." },
 ];
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -31,65 +26,117 @@ const MOCK_ARTISTS = [
   { name: "Sam Okafor", specialty: "Blackwork & Geometric" },
 ];
 
-function StarRating({ count }: { count: number }) {
-  return (
-    <span className="text-xs" style={{ color: "var(--accent)" }}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} className={i < count ? "opacity-100" : "opacity-30"}>
-          &#9733;
-        </span>
-      ))}
-    </span>
-  );
-}
 
 function ReviewsWidget() {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const VISIBLE_COUNT = 3;
+  const visibleReviews = MOCK_REVIEWS.slice(0, VISIBLE_COUNT);
+  const totalCount = MOCK_REVIEWS.length;
+
   return (
     <div
+      className="flex h-full flex-col gap-0 rounded-[var(--border-radius-lg)] overflow-hidden"
       data-builder-card-lg
-      className="flex h-full flex-col gap-5 rounded-xl border p-6"
-      style={{ backgroundColor: "var(--widget-1)", borderColor: "var(--widget-border)" }}
     >
-      <p
-        className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-        style={{ color: "var(--widget-label)" }}
+      <div
+        className="px-4 pt-4 pb-2 shrink-0"
+        style={{ background: "var(--widget-1)" }}
       >
-        Reviews — 4.9 Average
-      </p>
-      <h3
-        className="text-lg font-bold uppercase tracking-tight"
-        style={{
-          fontFamily: "var(--heading-font)",
-          color: "var(--text-primary)",
-        }}
-      >
-        WHAT CLIENTS SAY
-      </h3>
-      <div className="flex flex-col gap-4">
-        {MOCK_REVIEWS.map((review) => (
-          <div
-            key={review.author}
-            className="rounded-lg p-3"
-            style={{ backgroundColor: "var(--bg-raised)" }}
+        <div
+          className="text-[9px] font-bold tracking-[0.12em] uppercase mb-2"
+          style={{ color: "var(--widget-label)" }}
+        >
+          What clients say
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span
+            className="text-2xl font-black tracking-tight"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--heading-font)" }}
           >
-            <div className="mb-1 flex items-center justify-between">
+            4.9
+          </span>
+          <div>
+            <div className="text-xs" style={{ color: "#f59e0b" }}>
+              {"★".repeat(5)}
+            </div>
+            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+              {totalCount} verified reviews
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="flex flex-col gap-2 px-3 py-3 flex-1"
+        style={{ background: "var(--widget-1)" }}
+      >
+        {visibleReviews.map((review, i) => (
+          <div
+            key={i}
+            className="rounded-lg p-3"
+            style={{ background: "var(--bg-raised)" }}
+          >
+            <div className="flex items-center justify-between mb-1">
               <span
-                className="text-xs font-semibold"
+                className="text-[11px] font-semibold"
                 style={{ color: "var(--text-primary)" }}
               >
                 {review.author}
               </span>
-              <StarRating count={review.stars} />
+              <span className="text-[10px]" style={{ color: "#f59e0b" }}>
+                {"★".repeat(review.stars)}
+                <span style={{ opacity: 0.25 }}>
+                  {"★".repeat(5 - review.stars)}
+                </span>
+              </span>
             </div>
             <p
-              className="text-xs leading-relaxed"
-              style={{ color: "var(--text-muted)" }}
+              className="text-[11px] leading-relaxed line-clamp-2"
+              style={{ color: "var(--text-secondary)" }}
             >
               {review.text}
             </p>
           </div>
         ))}
       </div>
+      <button
+        type="button"
+        onClick={() => setSheetOpen(true)}
+        className="flex items-center justify-between px-4 py-3 border-t transition-colors shrink-0"
+        style={{
+          background: "var(--widget-1)",
+          borderColor: "var(--widget-border)",
+          color: "var(--accent)",
+        }}
+      >
+        <span className="text-[11px] font-medium">
+          See all {totalCount} reviews
+        </span>
+        <span className="text-[12px]">↑</span>
+      </button>
+      <BottomSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={`${totalCount} Verified Reviews · 4.9 avg`}
+      >
+        <div className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
+          {MOCK_REVIEWS.map((review, i) => (
+            <div key={i} className="py-4 first:pt-0">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                  {review.author}
+                </span>
+                <span className="text-xs text-amber-500">
+                  {"★".repeat(review.stars)}
+                  <span className="opacity-25">{"★".repeat(5 - review.stars)}</span>
+                </span>
+              </div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                {review.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
     </div>
   );
 }
