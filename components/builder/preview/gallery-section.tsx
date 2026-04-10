@@ -1,132 +1,249 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { cn } from "@/lib/utils";
 
-const SVG_PATTERN = `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath fill-rule='evenodd' d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/svg%3E")`;
+const SVG_PATTERN = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='none'/%3E%3Cpath d='M0 0h1v20H0zm10 0h1v20h-1zM0 0v1h20V0zm0 10v1h20v-1z' fill='%23fff' opacity='.06'/%3E%3C/svg%3E`;
 
-const GALLERY_ITEMS = [
-  { id: 1, aspect: "aspect-square" },
-  { id: 2, aspect: "aspect-[3/4]" },
-  { id: 3, aspect: "aspect-square" },
-  { id: 4, aspect: "aspect-[4/5]" },
-  { id: 5, aspect: "aspect-[3/4]" },
-  { id: 6, aspect: "aspect-square" },
-  { id: 7, aspect: "aspect-[3/4]" },
-  { id: 8, aspect: "aspect-square" },
-  { id: 9, aspect: "aspect-[3/4]" },
+type MockPhoto = {
+  id: number;
+};
+
+type MockArtist = {
+  id: number;
+  name: string;
+  initials: string;
+  styles: string[];
+  photoCount: number;
+  avatarClass: string;
+  photos: MockPhoto[];
+};
+
+const MOCK_ARTISTS: MockArtist[] = [
+  {
+    id: 1,
+    name: "Jake Morrison",
+    initials: "JM",
+    styles: ["Traditional", "Neo-Traditional"],
+    photoCount: 43,
+    avatarClass: "from-blue-700 to-blue-500",
+    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
+  },
+  {
+    id: 2,
+    name: "Sarah Chen",
+    initials: "SC",
+    styles: ["Fine Line", "Minimalist"],
+    photoCount: 28,
+    avatarClass: "from-orange-700 to-orange-500",
+    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
+  },
+  {
+    id: 3,
+    name: "Marcus Reyes",
+    initials: "MR",
+    styles: ["Japanese", "Blackwork"],
+    photoCount: 61,
+    avatarClass: "from-emerald-800 to-emerald-600",
+    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
+  },
 ];
 
-function GalleryItem({
-  aspect,
-  className,
-}: {
-  aspect: string;
-  className?: string;
-}) {
+function PhotoBlock({ className }: { className?: string }) {
   return (
     <div
-      data-gallery-item
-      data-builder-card
-      className={cn("overflow-hidden rounded-lg", aspect, className)}
+      className={cn("rounded-lg overflow-hidden flex-1 min-w-0 aspect-[3/4]", className)}
       style={{
-        backgroundColor: "var(--bg-sunken)",
-        backgroundImage: SVG_PATTERN,
+        background: "var(--bg-sunken)",
+        backgroundImage: `url("${SVG_PATTERN}")`,
       }}
     />
   );
 }
 
-function FeaturedGallery() {
+function OverflowPill({
+  remaining,
+  onClick,
+}: {
+  remaining: number;
+  onClick: () => void;
+}) {
   return (
-    <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
-      {/* First item spans 2x2 */}
-      <div
-        data-gallery-item
-        data-builder-card
-        className="col-span-2 row-span-2 overflow-hidden rounded-lg aspect-square"
-        style={{
-          backgroundColor: "var(--bg-sunken)",
-          backgroundImage: SVG_PATTERN,
-        }}
-      />
-      {/* Mobile: 6 items = 3 clean rows of 2 (no orphan). @md: 8 items = 2 rows of 4. */}
-      {GALLERY_ITEMS.slice(1, 7).map((item) => (
-        <GalleryItem key={item.id} aspect="aspect-square" />
-      ))}
-      {GALLERY_ITEMS.slice(7, 9).map((item) => (
-        <GalleryItem key={item.id} aspect="aspect-square" className="hidden @md:block" />
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex-1 min-w-0 aspect-[3/4] rounded-lg border border-dashed flex flex-col items-center justify-center gap-1 transition-colors"
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--bg-sunken)",
+      }}
+    >
+      <span
+        className="text-base font-bold leading-none"
+        style={{ color: "var(--accent)" }}
+      >
+        +{remaining}
+      </span>
+      <span
+        className="text-[9px] font-semibold uppercase tracking-[0.08em]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        more
+      </span>
+    </button>
   );
 }
 
-function UniformGallery() {
-  return (
-    <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
-      {GALLERY_ITEMS.slice(0, 8).map((item) => (
-        <GalleryItem key={item.id} aspect="aspect-square" />
-      ))}
-    </div>
-  );
-}
+function ArtistStrip({
+  artist,
+  photosToShow,
+  onOverflowClick,
+}: {
+  artist: MockArtist;
+  photosToShow: number;
+  onOverflowClick: (artist: MockArtist) => void;
+}) {
+  const strip = artist.photos.slice(0, photosToShow);
+  const remaining = artist.photoCount - photosToShow;
 
-function MasonryGallery() {
   return (
-    <div className="columns-2 gap-3 @md:columns-4">
-      {GALLERY_ITEMS.map((item) => (
-        <div key={item.id} className="mb-3 break-inside-avoid">
-          <GalleryItem aspect={item.aspect} />
+    <div
+      className="px-5 py-5 border-b last:border-b-0"
+      style={{ borderColor: "var(--border)" }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              "w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-[11px] font-bold text-white shrink-0",
+              artist.avatarClass
+            )}
+          >
+            {artist.initials}
+          </div>
+          <div>
+            <div
+              className="text-[13px] font-semibold leading-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {artist.name}
+            </div>
+            <div
+              className="text-[11px] leading-tight mt-0.5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {artist.styles.join(" · ")} · {artist.photoCount} photos
+            </div>
+          </div>
         </div>
-      ))}
-    </div>
-  );
-}
-
-function CarouselGallery() {
-  return (
-    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-none">
-      {GALLERY_ITEMS.map((item) => (
-        <div
-          key={item.id}
-          className="w-40 shrink-0 snap-start @sm:w-56 @md:w-64"
+        <button
+          type="button"
+          className="text-[11px] font-medium shrink-0"
+          style={{ color: "var(--accent)" }}
         >
-          <GalleryItem aspect="aspect-[3/4]" className="rounded-xl" />
-        </div>
-      ))}
+          View profile ↗
+        </button>
+      </div>
+      <div className="flex gap-2">
+        {strip.map((photo) => (
+          <PhotoBlock key={photo.id} />
+        ))}
+        {remaining > 0 && (
+          <OverflowPill
+            remaining={remaining}
+            onClick={() => onOverflowClick(artist)}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-export function GallerySection({ className }: { className?: string }) {
+function ArtistGallerySheet({
+  artist,
+  open,
+  onClose,
+}: {
+  artist: MockArtist;
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      title={`${artist.name} — ${artist.photoCount} photos`}
+    >
+      <div className="grid grid-cols-2 @md:grid-cols-4 gap-2">
+        {artist.photos.map((photo) => (
+          <div
+            key={photo.id}
+            className="aspect-square rounded-lg overflow-hidden"
+            style={{
+              background: "var(--bg-sunken)",
+              backgroundImage: `url("${SVG_PATTERN}")`,
+            }}
+          />
+        ))}
+      </div>
+      <div
+        className="mt-4 pt-4 border-t flex items-center justify-between"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+          Showing 12 of {artist.photoCount} photos
+        </span>
+        <button
+          type="button"
+          className="text-[12px] font-medium"
+          style={{ color: "var(--accent)" }}
+        >
+          View full profile ↗
+        </button>
+      </div>
+    </BottomSheet>
+  );
+}
+
+export function GallerySection() {
   const { config } = useBuilder();
-  const { galleryLayout, showGalleryHeading } = config;
-  const showHeading = showGalleryHeading !== false;
+  const { showGalleryHeading, galleryPhotosPerArtist } = config;
+  const [sheetArtist, setSheetArtist] = useState<MockArtist | null>(null);
+
+  const photosToShow = galleryPhotosPerArtist ?? 5;
 
   return (
     <section
-      className={cn(
-        "w-full transition-all duration-500 ease-in-out",
-        className,
-      )}
-      style={{ backgroundColor: "var(--bg-primary)" }}
+      data-builder-section="gallery"
+      style={{ background: "var(--bg-primary)" }}
     >
-      <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
-        {/* Section label */}
-        {showHeading && (
-          <p
-            className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
-            style={{ color: "var(--accent)" }}
+      {showGalleryHeading && (
+        <div className="px-5 pt-6 pb-2">
+          <div
+            className="text-[10px] font-bold tracking-[0.12em] uppercase"
+            style={{ color: "var(--text-muted)" }}
           >
-            Portfolio
-          </p>
-        )}
-
-        {galleryLayout === "featured" && <FeaturedGallery />}
-        {galleryLayout === "uniform" && <UniformGallery />}
-        {galleryLayout === "masonry" && <MasonryGallery />}
-        {galleryLayout === "carousel" && <CarouselGallery />}
-      </div>
+            Gallery
+          </div>
+        </div>
+      )}
+      {MOCK_ARTISTS.map((artist) => (
+        <ArtistStrip
+          key={artist.id}
+          artist={artist}
+          photosToShow={photosToShow}
+          onOverflowClick={setSheetArtist}
+        />
+      ))}
+      {sheetArtist && (
+        <ArtistGallerySheet
+          artist={sheetArtist}
+          open={!!sheetArtist}
+          onClose={() => setSheetArtist(null)}
+        />
+      )}
     </section>
   );
 }
