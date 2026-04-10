@@ -129,7 +129,7 @@ export function FlashEditor() {
             {showOverrides && (
               <div className="space-y-6">
                 <HeroStylePicker />
-                <GalleryStylePicker />
+                {config.galleryBeforeAbout && <GalleryStylePicker />}
                 <GalleryPhotosPicker />
                 <FooterStylePicker />
               </div>

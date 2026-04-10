@@ -131,9 +131,11 @@ export function CustomEditor() {
               <TagStylePicker />
             </SectionCard>
 
-            <SectionCard title="Gallery">
-              <GalleryStylePicker />
-            </SectionCard>
+            {config.galleryBeforeAbout && (
+              <SectionCard title="Gallery">
+                <GalleryStylePicker />
+              </SectionCard>
+            )}
 
             <SectionCard title="Artists">
               <GalleryPhotosPicker />

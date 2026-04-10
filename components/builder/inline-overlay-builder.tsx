@@ -168,13 +168,13 @@ export function InlineOverlayBuilder() {
           </>
         ),
       },
-      {
+      ...(config.galleryBeforeAbout ? [{
         id: "gallery",
         name: "Gallery",
         component: <GallerySection />,
         popoverTitle: "Gallery Style",
         controls: <GalleryStylePicker />,
-      },
+      }] : []),
       {
         id: "artist-strips",
         name: "Artists",
@@ -204,7 +204,7 @@ export function InlineOverlayBuilder() {
         controls: <FooterLayoutPicker />,
       },
     ],
-    [],
+    [config.galleryBeforeAbout, tier],
   );
 
   const closeFlyout = useCallback(() => setActiveFlyout(null), []);

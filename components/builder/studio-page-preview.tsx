@@ -137,11 +137,7 @@ export function StudioPagePreview({
           {section("about", <AboutSection />)}
         </>
       ) : (
-        <>
-          {section("about", <AboutSection />)}
-          {divider()}
-          {section("gallery", <GallerySection />)}
-        </>
+        section("about", <AboutSection />)
       )}
       {divider()}
       {section("artist-strips", <ArtistStripsSection />)}
