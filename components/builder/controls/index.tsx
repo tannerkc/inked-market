@@ -3,7 +3,7 @@ export { AccentColorPicker } from "./accent-color-picker";
 export { BackgroundPicker } from "./background-picker";
 export { TypographyPairPicker } from "./typography-pair-picker";
 export { HeroStylePicker } from "./hero-style-picker";
-export { GalleryPhotosPicker } from "./gallery-style-picker";
+export { GalleryStylePicker, GalleryPhotosPicker } from "./gallery-style-picker";
 export { DetailsLayoutPicker } from "./details-layout-picker";
 export { FooterStylePicker } from "./footer-style-picker";
 export { FooterLayoutPicker } from "./footer-layout-picker";

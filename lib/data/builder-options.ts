@@ -1,6 +1,7 @@
 import type {
   SectionVariantOption,
   HeroLayout,
+  GalleryLayout,
   GalleryPhotosPerArtist,
   DetailsLayout,
   CtaLayout,
@@ -41,6 +42,29 @@ export const heroOptions: SectionVariantOption<HeroLayout>[] = [
     label: "Centered",
     value: "centered",
     description: "Centered text over image",
+  },
+];
+
+export const galleryOptions: SectionVariantOption<GalleryLayout>[] = [
+  {
+    label: "Featured",
+    value: "featured",
+    description: "One large hero image + supporting grid",
+  },
+  {
+    label: "Uniform",
+    value: "uniform",
+    description: "Equal-sized square grid",
+  },
+  {
+    label: "Masonry",
+    value: "masonry",
+    description: "Pinterest-style variable heights",
+  },
+  {
+    label: "Carousel",
+    value: "carousel",
+    description: "Horizontal scrolling strip",
   },
 ];
 

@@ -13,6 +13,7 @@ import {
   AdvancedColorPanel,
   CtaStylePicker,
   HeroStylePicker,
+  GalleryStylePicker,
   GalleryPhotosPicker,
   FooterStylePicker,
   ToggleRow,
@@ -128,6 +129,7 @@ export function FlashEditor() {
             {showOverrides && (
               <div className="space-y-6">
                 <HeroStylePicker />
+                <GalleryStylePicker />
                 <GalleryPhotosPicker />
                 <FooterStylePicker />
               </div>

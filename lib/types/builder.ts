@@ -9,6 +9,7 @@ export type ThemePreset =
   | "mono";
 
 export type HeroLayout = "split" | "fullbleed" | "centered";
+export type GalleryLayout = "featured" | "uniform" | "masonry" | "carousel";
 export type GalleryPhotosPerArtist = 3 | 5 | 8;
 export type DetailsLayout = "three-col" | "two-one" | "stacked";
 export type CtaLayout = "simple-minimal" | "contact-form" | "map-info" | "booking";
@@ -60,6 +61,7 @@ export interface StudioThemeConfig {
   ctaStyle: CtaStyle;
   showHeroSubtext: boolean;
   heroSubtext: string;
+  galleryLayout: GalleryLayout;
   galleryPhotosPerArtist: GalleryPhotosPerArtist;
   detailsLayout: DetailsLayout;
   ctaLayout: CtaLayout;
@@ -167,7 +169,7 @@ export interface BackgroundOption {
   mode: "light" | "dark";
 }
 
-export interface SectionVariantOption<T extends string> {
+export interface SectionVariantOption<T extends string | number> {
   label: string;
   value: T;
   description: string;

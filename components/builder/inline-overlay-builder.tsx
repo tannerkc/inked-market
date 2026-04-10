@@ -10,6 +10,7 @@ import { DeviceFrameWrapper } from "@/components/builder/device-frame-wrapper";
 import { TemplateNavBar } from "@/components/builder/preview/template-nav-bar";
 import { HeroSection } from "@/components/builder/preview/hero-section";
 import { GallerySection } from "@/components/builder/preview/gallery-section";
+import { ArtistStripsSection } from "@/components/builder/preview/artist-strips-section";
 import { AboutSection } from "@/components/builder/preview/about-section";
 import { DetailsSection } from "@/components/builder/preview/details-section";
 import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
@@ -21,6 +22,7 @@ import {
   BackgroundPicker,
   TypographyPairPicker,
   HeroStylePicker,
+  GalleryStylePicker,
   GalleryPhotosPicker,
   AboutLayoutPicker,
   DetailsLayoutPicker,
@@ -170,7 +172,14 @@ export function InlineOverlayBuilder() {
         id: "gallery",
         name: "Gallery",
         component: <GallerySection />,
-        popoverTitle: "Gallery Section",
+        popoverTitle: "Gallery Style",
+        controls: <GalleryStylePicker />,
+      },
+      {
+        id: "artist-strips",
+        name: "Artists",
+        component: <ArtistStripsSection />,
+        popoverTitle: "Artist Strips",
         controls: <GalleryPhotosPicker />,
       },
       {

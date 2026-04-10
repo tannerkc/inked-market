@@ -6,6 +6,7 @@ import { useBuilder } from "@/components/builder/builder-provider";
 import { TemplateNavBar } from "@/components/builder/preview/template-nav-bar";
 import { HeroSection } from "@/components/builder/preview/hero-section";
 import { GallerySection } from "@/components/builder/preview/gallery-section";
+import { ArtistStripsSection } from "@/components/builder/preview/artist-strips-section";
 import { AboutSection } from "@/components/builder/preview/about-section";
 import { DetailsSection } from "@/components/builder/preview/details-section";
 import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
@@ -142,6 +143,8 @@ export function StudioPagePreview({
           {section("gallery", <GallerySection />)}
         </>
       )}
+      {divider()}
+      {section("artist-strips", <ArtistStripsSection />)}
       {divider()}
       {section("details", <DetailsSection />)}
       {divider()}

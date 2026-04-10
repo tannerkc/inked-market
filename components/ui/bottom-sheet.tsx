@@ -73,6 +73,7 @@ const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
               {title}
             </span>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Close"
               className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
