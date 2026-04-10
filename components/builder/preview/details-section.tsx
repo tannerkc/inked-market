@@ -265,7 +265,7 @@ function BookingWidget() {
           >
             Book a Session
           </h3>
-          <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[12px] font-medium mt-1" style={{ color: "var(--text-secondary)" }}>
             {CAL_MONTH}
           </p>
         </div>
