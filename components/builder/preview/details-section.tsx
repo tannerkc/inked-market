@@ -281,13 +281,11 @@ function BookingWidget() {
                 onClick={() => handleArtistChange(a.id)}
                 className={cn(
                   "rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors",
-                  active
-                    ? "text-white"
-                    : "border"
+                  active ? "" : "border"
                 )}
                 style={
                   active
-                    ? { background: "var(--accent)", borderColor: "transparent" }
+                    ? { background: "var(--accent)", borderColor: "transparent", color: "var(--accent-text)" }
                     : { background: "transparent", borderColor: "var(--border)", color: "var(--text-muted)" }
                 }
               >
@@ -326,7 +324,7 @@ function BookingWidget() {
             let cellClass = "aspect-square flex items-center justify-center rounded text-[10px] font-medium transition-colors";
 
             if (isSelected) {
-              cellStyle = { background: "var(--accent)", color: "#fff" };
+              cellStyle = { background: "var(--accent)", color: "var(--accent-text)" };
               cellClass += " cursor-pointer";
             } else if (isToday && avail) {
               cellStyle = { background: "var(--accent-bg)", color: "var(--accent)" };
@@ -375,7 +373,7 @@ function BookingWidget() {
                   className="rounded px-2 py-1 text-[10px] font-semibold transition-colors border"
                   style={
                     active
-                      ? { background: "var(--accent)", borderColor: "var(--accent)", color: "#fff" }
+                      ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--accent-text)" }
                       : { background: "transparent", borderColor: "var(--border)", color: "var(--text-secondary)" }
                   }
                 >
@@ -399,13 +397,11 @@ function BookingWidget() {
           disabled={!selectedDate || !selectedTime}
           className={cn(
             "w-full rounded-lg py-2.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-all",
-            selectedDate && selectedTime
-              ? "text-white"
-              : "opacity-40 cursor-not-allowed"
+            !selectedDate || !selectedTime ? "opacity-40 cursor-not-allowed" : ""
           )}
           style={
             selectedDate && selectedTime
-              ? { background: "var(--accent)" }
+              ? { background: "var(--accent)", color: "var(--accent-text)" }
               : { background: "var(--bg-raised)", color: "var(--text-muted)" }
           }
         >
