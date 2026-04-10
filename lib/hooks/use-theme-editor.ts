@@ -88,7 +88,7 @@ export function useThemeEditor(
         headingFont: config.headingFont,
         bodyFont: config.bodyFont,
         heroLayout: config.heroLayout,
-        galleryLayout: config.galleryLayout,
+        galleryPhotosPerArtist: config.galleryPhotosPerArtist,
         detailsLayout: config.detailsLayout,
         footerLayout: config.footerLayout,
         tagStyle: config.tagStyle,

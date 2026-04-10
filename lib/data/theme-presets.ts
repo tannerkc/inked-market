@@ -335,7 +335,7 @@ export const defaultThemeConfig: StudioThemeConfig = {
   ctaStyle: "filled",
   showHeroSubtext: true,
   heroSubtext: "Tattoo crafted with intention.",
-  galleryLayout: "featured",
+  galleryPhotosPerArtist: 5,
   detailsLayout: "three-col",
   ctaLayout: "simple-minimal",
   ctaGlow: true,
