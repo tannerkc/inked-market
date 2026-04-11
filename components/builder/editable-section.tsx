@@ -36,7 +36,7 @@ export function EditableSection({
       {/* Floating label */}
       <div
         className={cn(
-          "absolute top-2 left-2 z-20 rounded-md bg-[#ff3333] px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-white transition-all duration-200 ease-out",
+          "absolute top-2 left-2 z-20 rounded-md bg-ink-red px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-white transition-all duration-200 ease-out",
           isActive
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-1 group-hover/section:opacity-100 group-hover/section:translate-y-0"

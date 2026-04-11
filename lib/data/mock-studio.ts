@@ -7,6 +7,26 @@ import type { StudioData } from "@/lib/repositories";
  *
  * Toggle via the "Mock" button in BuilderTopBar.
  */
+/**
+ * Muted photo placeholder tones — simulate the visual variety of real tattoo
+ * portfolio photos in the artist gallery preview. Intentional design data,
+ * not UI chrome, so it lives here rather than in component files.
+ */
+export const PHOTO_TONES = [
+  "#c4c0b8", // warm parchment
+  "#b8bec6", // cool slate
+  "#b8c0b8", // sage
+  "#c0b8c0", // dusty mauve
+  "#b4bec4", // steel blue-gray
+  "#c0c0b4", // warm olive
+  "#c8b8b4", // terracotta blush
+  "#b4c0bc", // sea glass
+  "#bcb8c4", // lavender gray
+  "#c4bcb4", // sandstone
+  "#b8c4b8", // eucalyptus
+  "#c4b8bc", // rose quartz
+];
+
 export const MOCK_STUDIO_DATA: StudioData = {
   name: "Iron & Ink",
   phone: "(503) 555-0147",

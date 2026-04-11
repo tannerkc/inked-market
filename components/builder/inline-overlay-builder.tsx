@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { useOverlayContainer } from "@/lib/contexts/overlay-context";
 import { EditableSection } from "@/components/builder/editable-section";
 import { SectionPopover } from "@/components/builder/section-popover";
 import { BottomToolbar, type ToolbarButtonDef } from "@/components/builder/bottom-toolbar";
@@ -78,6 +79,31 @@ export function InlineOverlayBuilder() {
       // localStorage unavailable
     }
   }, [applyChange]);
+
+  const overlayEl = useOverlayContainer();
+
+  // Sync template CSS vars to the overlay portal container so portaled components
+  // (BottomSheet, PhotoLightbox) inherit the active template's color scheme.
+  useEffect(() => {
+    if (!overlayEl) return;
+    Object.entries(resolvedVars).forEach(([key, value]) => {
+      overlayEl.style.setProperty(key, value);
+    });
+  }, [overlayEl, resolvedVars]);
+
+  // Constrain overlay to device frame width so bottom sheets stay within bounds
+  useEffect(() => {
+    if (!overlayEl) return;
+    const mw = device === "desktop" ? "" : device === "tablet" ? "768px" : "390px";
+    overlayEl.style.maxWidth = mw;
+    overlayEl.style.marginLeft = mw ? "auto" : "";
+    overlayEl.style.marginRight = mw ? "auto" : "";
+    return () => {
+      overlayEl.style.maxWidth = "";
+      overlayEl.style.marginLeft = "";
+      overlayEl.style.marginRight = "";
+    };
+  }, [overlayEl, device]);
 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [activeFlyout, setActiveFlyout] = useState<string | null>(null);
@@ -156,6 +182,13 @@ export function InlineOverlayBuilder() {
         popoverTitle: "Hero Section",
         controls: <HeroStylePicker />,
       },
+      ...(config.galleryBeforeAbout ? [{
+        id: "gallery",
+        name: "Gallery",
+        component: <GallerySection />,
+        popoverTitle: "Gallery Style",
+        controls: <GalleryStylePicker />,
+      }] : []),
       {
         id: "about",
         name: "About",
@@ -168,13 +201,6 @@ export function InlineOverlayBuilder() {
           </>
         ),
       },
-      ...(config.galleryBeforeAbout ? [{
-        id: "gallery",
-        name: "Gallery",
-        component: <GallerySection />,
-        popoverTitle: "Gallery Style",
-        controls: <GalleryStylePicker />,
-      }] : []),
       {
         id: "artist-strips",
         name: "Artists",
@@ -300,7 +326,7 @@ export function InlineOverlayBuilder() {
           <div className="space-y-6">
             <VibePicker />
             <div>
-              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
                 Show / Hide
               </div>
               <div className="space-y-1">

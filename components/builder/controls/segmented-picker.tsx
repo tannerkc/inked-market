@@ -17,7 +17,7 @@ export function SegmentedPicker<T extends string>({
 }: SegmentedPickerProps<T>) {
   return (
     <div>
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         {label}
       </div>
       <div className="flex gap-1">
@@ -31,8 +31,8 @@ export function SegmentedPicker<T extends string>({
               className={cn(
                 "flex-1 rounded border px-2 py-1.5 text-[10px] font-semibold transition-colors",
                 selected
-                  ? "border-[#FF3333] bg-[rgba(255,51,51,0.1)] text-[#FF3333]"
-                  : "border-[#222] bg-[#111] text-[#555] hover:border-[#333] hover:text-[#888]"
+                  ? "border-ink-red bg-[rgba(255,51,51,0.1)] text-ink-red"
+                  : "border-chrome-border bg-chrome-surface text-chrome-text-dim hover:border-chrome-border-hover hover:text-chrome-text-secondary"
               )}
             >
               {opt.label}

@@ -26,8 +26,8 @@ function PresetCard({
       className={cn(
         "w-full rounded-lg border text-left transition-colors overflow-hidden",
         selected
-          ? "border-[#FF3333] bg-[rgba(255,51,51,0.1)]"
-          : "border-[#222] bg-[#111] hover:border-[#333]"
+          ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+          : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover"
       )}
     >
       {/* Color preview bar */}
@@ -45,7 +45,7 @@ function PresetCard({
             (color, i) => (
               <span
                 key={i}
-                className="block h-3.5 w-3.5 rounded-full border border-[#333]"
+                className="block h-3.5 w-3.5 rounded-full border border-chrome-border-hover"
                 style={{ backgroundColor: color }}
               />
             )
@@ -53,7 +53,7 @@ function PresetCard({
         </div>
 
         {/* Preset name */}
-        <span className="text-xs font-medium text-[#ededed]">
+        <span className="text-xs font-medium text-chrome-text-primary">
           {preset.name}
         </span>
       </div>
@@ -71,7 +71,7 @@ export function ThemePresetPicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Theme Preset
       </div>
       <div className="grid grid-cols-2 gap-2">

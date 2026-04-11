@@ -48,8 +48,8 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-[#222] bg-[#0d0d0d] p-3">
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#666]">
+    <div className="rounded-lg border border-chrome-border bg-ink-black-raised p-3">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-tertiary">
         {title}
       </div>
       <div className="space-y-4">{children}</div>
@@ -65,7 +65,7 @@ export function CustomEditor() {
 
   return (
     <>
-      <div className="flex border-b border-[#222]">
+      <div className="flex border-b border-chrome-border">
         {tabs.map((tab) => (
           <button
             key={tab.value}
@@ -75,7 +75,7 @@ export function CustomEditor() {
               "flex-1 py-3 text-[10px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2",
               activeTab === tab.value
                 ? "text-red-500 border-red-500"
-                : "text-[#555] border-transparent hover:text-[#888]"
+                : "text-chrome-text-dim border-transparent hover:text-chrome-text-secondary"
             )}
           >
             {tab.label}
@@ -160,7 +160,7 @@ export function CustomEditor() {
             <TexturePicker />
 
             <div>
-              <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+              <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
                 Texture Opacity
               </div>
               <div className="flex items-center gap-3">
@@ -173,9 +173,9 @@ export function CustomEditor() {
                   onChange={(e) =>
                     applyChange({ textureOpacity: Number(e.target.value) / 100 })
                   }
-                  className="h-1 w-full cursor-pointer appearance-none rounded-full bg-[#333] accent-[#FF3333] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#FF3333]"
+                  className="h-1 w-full cursor-pointer appearance-none rounded-full bg-chrome-border-hover accent-ink-red [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-ink-red"
                 />
-                <span className="w-8 text-right text-[10px] font-mono text-[#555]">
+                <span className="w-8 text-right text-[10px] font-mono text-chrome-text-dim">
                   {Math.round((config.textureOpacity ?? 0.5) * 100)}%
                 </span>
               </div>
@@ -190,7 +190,7 @@ export function CustomEditor() {
           <>
             <LogoUpload />
             {config.logoUrl && <LogoPlacementPicker />}
-            <div className="rounded-lg border border-[#222] bg-[#0d0d0d] p-3 space-y-1">
+            <div className="rounded-lg border border-chrome-border bg-ink-black-raised p-3 space-y-1">
               <ToggleRow
                 label="Gallery Watermarks"
                 checked={config.galleryWatermarks ?? false}
@@ -224,7 +224,7 @@ function ExpandToggle({
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center justify-between rounded-lg border border-[#222] bg-[#0d0d0d] px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555] transition-colors hover:border-[#333] hover:text-[#888]"
+      className="flex w-full items-center justify-between rounded-lg border border-chrome-border bg-ink-black-raised px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim transition-colors hover:border-chrome-border-hover hover:text-chrome-text-secondary"
     >
       <span>{label}</span>
       <svg

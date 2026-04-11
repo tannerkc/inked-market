@@ -40,8 +40,8 @@ function ToolbarButton({
       className={cn(
         "flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-medium transition-colors",
         isActive
-          ? "bg-white text-[#0a0a0a]"
-          : "bg-transparent text-[#888] hover:bg-[#1a1a1a] hover:text-white"
+          ? "bg-white text-ink-black"
+          : "bg-transparent text-chrome-text-secondary hover:bg-chrome-raised hover:text-white"
       )}
     >
       <span className="text-sm">{icon}</span>
@@ -51,7 +51,7 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <div className="mx-0.5 h-6 w-px bg-[#2a2a2a]" />;
+  return <div className="mx-0.5 h-6 w-px bg-chrome-muted" />;
 }
 
 export function BottomToolbar({
@@ -65,7 +65,7 @@ export function BottomToolbar({
   onTierChange,
 }: BottomToolbarProps) {
   return (
-    <div data-builder-toolbar className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-2xl border border-[#2a2a2a] bg-[#0a0a0a]/95 p-[5px] shadow-2xl backdrop-blur-xl">
+    <div data-builder-toolbar className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-2xl border border-chrome-muted bg-ink-black/95 p-[5px] shadow-2xl backdrop-blur-xl">
       {buttons.map((btn) => (
         <ToolbarButton
           key={btn.id}
@@ -87,7 +87,7 @@ export function BottomToolbar({
       <button
         type="button"
         onClick={onReset}
-        className="flex items-center gap-2 rounded-xl bg-transparent px-4 py-2.5 text-xs font-medium text-[#888] transition-colors hover:bg-[#1a1a1a] hover:text-white"
+        className="flex items-center gap-2 rounded-xl bg-transparent px-4 py-2.5 text-xs font-medium text-chrome-text-secondary transition-colors hover:bg-chrome-raised hover:text-white"
       >
         <span className="text-sm">↺</span>
         Reset
@@ -105,8 +105,8 @@ export function BottomToolbar({
                 className={cn(
                   "rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors",
                   tier === t
-                    ? "bg-[#FF3333]/15 text-[#FF3333]"
-                    : "bg-transparent text-[#444] hover:text-[#888]"
+                    ? "bg-ink-red/15 text-ink-red"
+                    : "bg-transparent text-chrome-text-faint hover:text-chrome-text-secondary"
                 )}
               >
                 {t}

@@ -34,18 +34,18 @@ export function ToolbarFlyout({
   return (
     <div
       data-builder-flyout
-      className="fixed bottom-20 left-1/2 z-40 w-[360px] -translate-x-1/2 rounded-2xl border border-[#2a2a2a] bg-[#111]/97 shadow-2xl backdrop-blur-xl [animation:flyout-in_200ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]"
+      className="fixed bottom-20 left-1/2 z-40 w-[360px] -translate-x-1/2 rounded-2xl border border-chrome-muted bg-chrome-surface/97 shadow-2xl backdrop-blur-xl [animation:flyout-in_200ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#2a2a2a] px-3 py-2.5">
-        <span className="text-[11px] font-medium uppercase tracking-wider text-[#555]">
+      <div className="flex items-center justify-between border-b border-chrome-muted px-3 py-2.5">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-chrome-text-dim">
           {title}
         </span>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-6 w-6 items-center justify-center rounded-md bg-[#1a1a1a] text-[#666] transition-colors hover:bg-[#222] hover:text-[#aaa]"
+          className="flex h-6 w-6 items-center justify-center rounded-md bg-chrome-raised text-chrome-text-tertiary transition-colors hover:bg-chrome-border hover:text-chrome-text-light"
         >
           <span className="text-xs leading-none">&times;</span>
         </button>

@@ -26,16 +26,16 @@ export function TemplatePreviewCard({ template, onSelect }: TemplatePreviewCardP
         "group relative rounded-2xl overflow-hidden cursor-pointer",
         "border transition-all duration-300",
         "hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-black"
       )}
       style={{
-        borderColor: "#1a1a1a",
+        borderColor: "var(--chrome-raised)",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = "#333";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "var(--chrome-border-hover)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = "#1a1a1a";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "var(--chrome-raised)";
       }}
     >
       {/* Floating badges */}
@@ -46,7 +46,7 @@ export function TemplatePreviewCard({ template, onSelect }: TemplatePreviewCardP
             backgroundColor: "rgba(0,0,0,0.6)",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
-            color: "#fff",
+            color: "var(--chrome-text-primary)",
           }}
         >
           {template.name}
@@ -55,8 +55,8 @@ export function TemplatePreviewCard({ template, onSelect }: TemplatePreviewCardP
           <span
             className="text-[11px] font-medium px-3 py-1 rounded-full"
             style={{
-              backgroundColor: "#FF3333",
-              color: "#fff",
+              backgroundColor: "var(--ink-red)",
+              color: "var(--chrome-text-primary)",
             }}
           >
             {template.badge}
@@ -77,7 +77,7 @@ export function TemplatePreviewCard({ template, onSelect }: TemplatePreviewCardP
         <div className="flex-1 mr-4">
           <h3
             className="text-[15px] font-semibold mb-0.5"
-            style={{ color: "#fff" }}
+            style={{ color: "var(--chrome-text-primary)" }}
           >
             {template.name}
           </h3>
@@ -101,8 +101,8 @@ export function TemplatePreviewCard({ template, onSelect }: TemplatePreviewCardP
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           )}
           style={{
-            backgroundColor: "#fff",
-            color: "#0a0a0a",
+            backgroundColor: "var(--chrome-text-primary)",
+            color: "var(--chrome-bg)",
           }}
         >
           Use This Template

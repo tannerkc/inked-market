@@ -73,7 +73,7 @@ function ReviewsWidget() {
             4.9
           </span>
           <div>
-            <div className="text-xs" style={{ color: "#f59e0b" }}>
+            <div className="text-xs text-amber-500">
               {"★".repeat(5)}
             </div>
             <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
@@ -99,7 +99,7 @@ function ReviewsWidget() {
               >
                 {review.author}
               </span>
-              <span className="text-[10px]" style={{ color: "#f59e0b" }}>
+              <span className="text-[10px] text-amber-500">
                 {"★".repeat(review.stars)}
                 <span style={{ opacity: 0.25 }}>
                   {"★".repeat(5 - review.stars)}
@@ -135,11 +135,18 @@ function ReviewsWidget() {
         onClose={() => setSheetOpen(false)}
         title={`${totalCount} Verified Reviews · 4.9 avg`}
       >
-        <div className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
+        <div className="flex flex-col">
           {MOCK_REVIEWS.map((review, i) => (
-            <div key={i} className="py-4 first:pt-0">
+            <div
+              key={i}
+              className="py-4 first:pt-0"
+              style={i > 0 ? { borderTop: "1px solid var(--border)" } : undefined}
+            >
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
                   {review.author}
                 </span>
                 <span className="text-xs text-amber-500">
@@ -147,7 +154,10 @@ function ReviewsWidget() {
                   <span className="opacity-25">{"★".repeat(5 - review.stars)}</span>
                 </span>
               </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "var(--text-secondary)" }}
+              >
                 {review.text}
               </p>
             </div>

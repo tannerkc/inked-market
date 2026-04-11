@@ -21,13 +21,13 @@ function PairingCard({
       className={cn(
         "w-full rounded-lg border p-3 text-left transition-colors",
         selected
-          ? "border-[#FF3333] bg-[rgba(255,51,51,0.1)]"
-          : "border-[#222] bg-[#111] hover:border-[#333]"
+          ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+          : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover"
       )}
     >
       {/* Heading preview */}
       <div
-        className="mb-1 truncate text-sm uppercase text-[#ededed]"
+        className="mb-1 truncate text-sm uppercase text-chrome-text-primary"
         style={{ fontFamily: `'${pairing.headingFont}', sans-serif` }}
       >
         IRON & INK STUDIO
@@ -35,7 +35,7 @@ function PairingCard({
 
       {/* Body preview */}
       <div
-        className="mb-2 truncate text-[11px] leading-snug text-[#888]"
+        className="mb-2 truncate text-[11px] leading-snug text-chrome-text-secondary"
         style={{ fontFamily: `'${pairing.bodyFont}', sans-serif` }}
       >
         Where classic American tradition meets modern precision.
@@ -43,10 +43,10 @@ function PairingCard({
 
       {/* Label */}
       <div className="flex items-baseline gap-1.5">
-        <span className="text-[10px] font-semibold text-[#ededed]">
+        <span className="text-[10px] font-semibold text-chrome-text-primary">
           {pairing.name}
         </span>
-        <span className="text-[10px] text-[#555]">{pairing.character}</span>
+        <span className="text-[10px] text-chrome-text-dim">{pairing.character}</span>
       </div>
     </button>
   );
@@ -57,7 +57,7 @@ export function TypographyPairPicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Typography
       </div>
       <div className="flex flex-col gap-2">

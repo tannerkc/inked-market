@@ -51,19 +51,19 @@ export function TemplateSwitchDialog({
     >
       <div
         className={cn(
-          "w-[420px] rounded-2xl bg-[#111] border border-[#2a2a2a] shadow-2xl p-6",
+          "w-[420px] rounded-2xl bg-chrome-surface border border-chrome-muted shadow-2xl p-6",
           "animate-in fade-in zoom-in-95 duration-200",
         )}
       >
         {/* Title */}
-        <h2 className="text-[16px] font-semibold text-[#ededed]">
+        <h2 className="text-[16px] font-semibold text-chrome-text-primary">
           Switch Template?
         </h2>
 
         {/* Body */}
-        <p className="mt-3 text-[13px] leading-relaxed text-[#888]">
+        <p className="mt-3 text-[13px] leading-relaxed text-chrome-text-secondary">
           Switching to{" "}
-          <span className="font-semibold text-[#ededed]">{tmpl.name}</span> will
+          <span className="font-semibold text-chrome-text-primary">{tmpl.name}</span> will
           reset your layout choices to the new template&apos;s defaults. Your
           color and font customizations will be preserved.
         </p>
@@ -71,16 +71,16 @@ export function TemplateSwitchDialog({
         {/* Color preview dots */}
         <div className="flex items-center gap-2 mt-4">
           <span
-            className="w-4 h-4 rounded-full border border-[#333]"
+            className="w-4 h-4 rounded-full border border-chrome-border-hover"
             style={{ backgroundColor: tmpl.previewAccent }}
           />
           <span
-            className="w-4 h-4 rounded-full border border-[#333]"
+            className="w-4 h-4 rounded-full border border-chrome-border-hover"
             style={{ backgroundColor: tmpl.previewBg }}
           />
           <span
-            className="w-4 h-4 rounded-full border border-[#333]"
-            style={{ backgroundColor: "#555" }}
+            className="w-4 h-4 rounded-full border border-chrome-border-hover"
+            style={{ backgroundColor: "var(--chrome-text-dim)" }}
           />
         </div>
 
@@ -89,14 +89,14 @@ export function TemplateSwitchDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-[13px] font-medium text-[#888] border border-[#333] rounded-lg hover:text-[#ededed] hover:border-[#555] transition-colors"
+            className="px-4 py-2 text-[13px] font-medium text-chrome-text-secondary border border-chrome-border-hover rounded-lg hover:text-chrome-text-primary hover:border-chrome-text-dim transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 text-[13px] font-medium text-white bg-[#FF3333] rounded-lg hover:bg-[#e62e2e] transition-colors"
+            className="px-4 py-2 text-[13px] font-medium text-white bg-ink-red rounded-lg hover:opacity-90 transition-opacity"
           >
             Switch Template
           </button>

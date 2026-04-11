@@ -35,13 +35,13 @@ export function LogoUpload() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Studio Logo
       </div>
 
       {config.logoUrl ? (
-        <div className="flex items-center gap-3 rounded-lg border border-[#222] bg-[#111] p-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded border border-[#333] bg-[#0d0d0d]">
+        <div className="flex items-center gap-3 rounded-lg border border-chrome-border bg-chrome-surface p-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded border border-chrome-border-hover bg-ink-black-raised">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={config.logoUrl}
@@ -50,13 +50,13 @@ export function LogoUpload() {
             />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold text-[#ccc]">Logo uploaded</p>
-            <p className="text-[10px] text-[#555]">Stored in draft</p>
+            <p className="text-[11px] font-semibold text-chrome-text-light">Logo uploaded</p>
+            <p className="text-[10px] text-chrome-text-dim">Stored in draft</p>
           </div>
           <button
             type="button"
             onClick={() => applyChange({ logoUrl: undefined })}
-            className="shrink-0 text-[10px] font-semibold text-[#555] hover:text-[#FF3333] transition-colors"
+            className="shrink-0 text-[10px] font-semibold text-chrome-text-dim hover:text-ink-red transition-colors"
           >
             Remove
           </button>
@@ -71,15 +71,15 @@ export function LogoUpload() {
           className={cn(
             "flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors",
             dragging
-              ? "border-[#FF3333] bg-[rgba(255,51,51,0.05)]"
-              : "border-[#333] bg-[#0d0d0d] hover:border-[#444]"
+              ? "border-ink-red bg-[rgba(255,51,51,0.05)]"
+              : "border-chrome-border-hover bg-ink-black-raised hover:border-chrome-text-faint"
           )}
         >
-          <svg className="h-6 w-6 text-[#444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="h-6 w-6 text-chrome-text-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-[11px] font-semibold text-[#555]">Drop logo here or click to upload</span>
-          <span className="text-[10px] text-[#444]">SVG, PNG, JPG</span>
+          <span className="text-[11px] font-semibold text-chrome-text-dim">Drop logo here or click to upload</span>
+          <span className="text-[10px] text-chrome-text-faint">SVG, PNG, JPG</span>
         </button>
       )}
 

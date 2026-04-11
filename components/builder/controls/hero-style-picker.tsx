@@ -11,29 +11,29 @@ function HeroThumbnail({ layout, selected }: { layout: HeroLayout; selected: boo
   switch (layout) {
     case "split":
       return (
-        <div className="flex h-full w-full gap-1 rounded-md bg-[#1a1a1a] p-2">
-          <div className="w-1/2 rounded bg-[#2a2a2a]" />
+        <div className="flex h-full w-full gap-1 rounded-md bg-chrome-raised p-2">
+          <div className="w-1/2 rounded bg-chrome-muted" />
           <div className="flex w-1/2 flex-col gap-1 py-1">
-            <div className="h-2 w-full rounded-sm bg-[#444]" />
-            <div className="h-1.5 w-3/4 rounded-sm bg-[#333]" />
+            <div className="h-2 w-full rounded-sm bg-chrome-text-faint" />
+            <div className="h-1.5 w-3/4 rounded-sm bg-chrome-border-hover" />
             <div className="mt-auto h-2 w-1/2 rounded-sm" style={{ backgroundColor: accent }} />
           </div>
         </div>
       );
     case "fullbleed":
       return (
-        <div className="flex h-full w-full flex-col rounded-md bg-[#2a2a2a] p-2">
+        <div className="flex h-full w-full flex-col rounded-md bg-chrome-muted p-2">
           <div className="mt-auto flex flex-col gap-1">
-            <div className="h-2 w-3/4 rounded-sm bg-[#ededed]" />
-            <div className="h-1.5 w-1/2 rounded-sm bg-[#888]" />
+            <div className="h-2 w-3/4 rounded-sm bg-chrome-text-primary" />
+            <div className="h-1.5 w-1/2 rounded-sm bg-chrome-text-secondary" />
           </div>
         </div>
       );
     case "centered":
       return (
-        <div className="flex h-full w-full flex-col items-center justify-center rounded-md bg-[#2a2a2a] p-2">
-          <div className="mb-1 h-2 w-3/4 rounded-sm bg-[#ededed]" />
-          <div className="mb-1.5 h-1.5 w-1/2 rounded-sm bg-[#888]" />
+        <div className="flex h-full w-full flex-col items-center justify-center rounded-md bg-chrome-muted p-2">
+          <div className="mb-1 h-2 w-3/4 rounded-sm bg-chrome-text-primary" />
+          <div className="mb-1.5 h-1.5 w-1/2 rounded-sm bg-chrome-text-secondary" />
           <div className="h-2 w-2/5 rounded-sm" style={{ backgroundColor: accent }} />
         </div>
       );
@@ -45,7 +45,7 @@ export function HeroStylePicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Hero Layout
       </div>
       <div className="grid grid-cols-3 gap-2">
@@ -59,8 +59,8 @@ export function HeroStylePicker() {
               className={cn(
                 "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
                 selected
-                  ? "border-[#FF3333] bg-[#111] ring-1 ring-[#FF3333]/30"
-                  : "border-[#222] bg-[#111] hover:border-[#333] hover:bg-[#161616]"
+                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
+                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
               )}
             >
               {/* Thumbnail area */}
@@ -73,7 +73,7 @@ export function HeroStylePicker() {
                 <span
                   className={cn(
                     "text-[11px] font-medium transition-colors",
-                    selected ? "text-[#FF3333]" : "text-[#888] group-hover:text-[#bbb]"
+                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
                   )}
                 >
                   {opt.label}
@@ -82,7 +82,7 @@ export function HeroStylePicker() {
 
               {/* Selected check */}
               {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF3333]">
+                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red">
                   <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
                     <path d="M2 5.5L4 7.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -95,19 +95,19 @@ export function HeroStylePicker() {
 
       {/* Hero Options */}
       <div className="mt-5 space-y-3">
-        <div className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+        <div className="text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
           Hero Options
         </div>
 
         {/* Show Subtext toggle */}
-        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[#222] bg-[#111] px-3 py-2.5">
-          <span className="text-xs font-medium text-[#888]">Subtext</span>
+        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-chrome-border bg-chrome-surface px-3 py-2.5">
+          <span className="text-xs font-medium text-chrome-text-secondary">Subtext</span>
           <button
             type="button"
             onClick={() => applyChange({ showHeroSubtext: !config.showHeroSubtext })}
             className={cn(
               "relative h-5 w-9 rounded-full transition-colors",
-              config.showHeroSubtext !== false ? "bg-[#FF3333]" : "bg-[#333]",
+              config.showHeroSubtext !== false ? "bg-ink-red" : "bg-chrome-border-hover",
             )}
           >
             <span
@@ -126,19 +126,19 @@ export function HeroStylePicker() {
             value={config.heroSubtext || ""}
             onChange={(e) => applyChange({ heroSubtext: e.target.value })}
             placeholder="Tattoo crafted with intention."
-            className="w-full rounded-lg border border-[#222] bg-[#111] px-3 py-2.5 text-xs text-[#ededed] placeholder-[#444] outline-none transition-colors focus:border-[#FF3333]"
+            className="w-full rounded-lg border border-chrome-border bg-chrome-surface px-3 py-2.5 text-xs text-chrome-text-primary placeholder-chrome-text-faint outline-none transition-colors focus:border-ink-red"
           />
         )}
 
         {/* Show CTA toggle */}
-        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[#222] bg-[#111] px-3 py-2.5">
-          <span className="text-xs font-medium text-[#888]">Call to Action</span>
+        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-chrome-border bg-chrome-surface px-3 py-2.5">
+          <span className="text-xs font-medium text-chrome-text-secondary">Call to Action</span>
           <button
             type="button"
             onClick={() => applyChange({ showHeroCta: !config.showHeroCta })}
             className={cn(
               "relative h-5 w-9 rounded-full transition-colors",
-              config.showHeroCta !== false ? "bg-[#FF3333]" : "bg-[#333]",
+              config.showHeroCta !== false ? "bg-ink-red" : "bg-chrome-border-hover",
             )}
           >
             <span

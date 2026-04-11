@@ -10,7 +10,7 @@ export function BackgroundPicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Background
       </div>
       <div className="flex flex-wrap gap-2">
@@ -31,8 +31,8 @@ export function BackgroundPicker() {
                 selected
                   ? "border-white"
                   : isDark
-                    ? "border-[#333] hover:border-[#555]"
-                    : "border-transparent hover:border-[#555]"
+                    ? "border-chrome-border-hover hover:border-chrome-text-dim"
+                    : "border-transparent hover:border-chrome-text-dim"
               )}
               style={{ backgroundColor: opt.hex }}
             />

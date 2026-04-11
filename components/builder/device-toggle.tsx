@@ -26,8 +26,8 @@ export function DeviceToggle({ value, onChange }: DeviceToggleProps) {
           className={cn(
             "rounded-md px-3 py-[5px] text-xs font-medium border transition-colors",
             value === device.value
-              ? "bg-[#222] text-white border-[#444]"
-              : "bg-transparent text-[#888] border-[#333] hover:text-[#bbb]"
+              ? "bg-chrome-border text-white border-chrome-text-faint"
+              : "bg-transparent text-chrome-text-secondary border-chrome-border-hover hover:text-chrome-text-light"
           )}
         >
           {device.label}

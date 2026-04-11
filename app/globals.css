@@ -8,6 +8,7 @@
   --ink-red: #FF3333;
   --ink-rust: #C1440E;
   --ink-sage: #6B7C5E;
+  --ink-gold: #c08000;
   --ink-parchment-light: #FAF3E8;
   --ink-parchment-dark: #F0E8DE;
   --ink-black-raised: #0e0e0e;
@@ -15,6 +16,27 @@
   --pill-inset: 6px;
   --pill-btn-px: 16px;
   --pill-btn-py: 6px;
+
+  /* Builder chrome — dark UI shell, separate from template CSS vars */
+  --chrome-bg: #0a0a0a;
+  --chrome-surface: #111111;
+  --chrome-surface-hover: #161616;
+  --chrome-raised: #1a1a1a;
+  --chrome-border: #222222;
+  --chrome-border-hover: #333333;
+  --chrome-muted: #2a2a2a;
+  --chrome-subtle: #3a3a3a;
+  --chrome-text-faint: #444444;
+  --chrome-text-dim: #555555;
+  --chrome-text-tertiary: #666666;
+  --chrome-text-secondary: #888888;
+  --chrome-text-light: #bbbbbb;
+  --chrome-text-primary: #ededed;
+
+  /* macOS traffic light dot colors — used in browser chrome simulation */
+  --traffic-red: #ff5f57;
+  --traffic-yellow: #febc2e;
+  --traffic-green: #28c840;
 }
 
 @theme inline {
@@ -27,8 +49,26 @@
   --color-ink-sage: var(--ink-sage);
   --color-ink-parchment-light: var(--ink-parchment-light);
   --color-ink-parchment-dark: var(--ink-parchment-dark);
+  --color-ink-gold: var(--ink-gold);
   --color-ink-black-raised: var(--ink-black-raised);
   --color-ink-black-sunken: var(--ink-black-sunken);
+  --color-chrome-bg: var(--chrome-bg);
+  --color-chrome-surface: var(--chrome-surface);
+  --color-chrome-surface-hover: var(--chrome-surface-hover);
+  --color-chrome-raised: var(--chrome-raised);
+  --color-chrome-border: var(--chrome-border);
+  --color-chrome-border-hover: var(--chrome-border-hover);
+  --color-chrome-muted: var(--chrome-muted);
+  --color-chrome-text-faint: var(--chrome-text-faint);
+  --color-chrome-text-dim: var(--chrome-text-dim);
+  --color-chrome-text-secondary: var(--chrome-text-secondary);
+  --color-chrome-text-tertiary: var(--chrome-text-tertiary);
+  --color-chrome-subtle: var(--chrome-subtle);
+  --color-chrome-text-primary: var(--chrome-text-primary);
+  --color-chrome-text-light: var(--chrome-text-light);
+  --color-traffic-red: var(--traffic-red);
+  --color-traffic-yellow: var(--traffic-yellow);
+  --color-traffic-green: var(--traffic-green);
   --spacing-pill-inset: var(--pill-inset);
   --spacing-pill-btn-px: var(--pill-btn-px);
   --spacing-pill-btn-py: var(--pill-btn-py);
@@ -158,6 +198,39 @@ body {
 }
 [data-builder-root][data-texture="none"]::after {
   display: none;
+}
+
+/* ─── Artist strip photo scroll ─────────────────────────────────── */
+/* Mobile: fixed-width photos that scroll horizontally.
+   Desktop (≥640px container): photos flex-fill the row, no scroll. */
+[data-photo-strip] {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+[data-photo-strip]::-webkit-scrollbar {
+  display: none;
+}
+[data-photo-track] {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+}
+[data-photo-item] {
+  width: 140px;
+  flex-shrink: 0;
+  aspect-ratio: 3 / 4;
+}
+@container (min-width: 640px) {
+  [data-photo-strip] {
+    overflow-x: visible;
+  }
+  [data-photo-track] {
+    width: auto;
+  }
+  [data-photo-item] {
+    width: 0;
+    flex: 1 1 0%;
+  }
 }
 
 /* Image treatment — gallery items */

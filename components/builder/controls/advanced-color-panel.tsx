@@ -31,12 +31,12 @@ function HexInput({
 
   return (
     <div>
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         {label}
       </div>
       <div className="flex items-center gap-2">
         <div
-          className="h-7 w-7 shrink-0 rounded border border-[#333]"
+          className="h-7 w-7 shrink-0 rounded border border-chrome-border-hover"
           style={{ backgroundColor: value }}
         />
         <input
@@ -50,7 +50,7 @@ function HexInput({
               e.currentTarget.blur();
             }
           }}
-          className="w-full rounded border border-[#222] bg-[#111] px-2.5 py-1.5 text-[11px] font-mono text-[#ccc] outline-none transition-colors focus:border-[#FF3333] focus:ring-1 focus:ring-[#FF3333]/30"
+          className="w-full rounded border border-chrome-border bg-chrome-surface px-2.5 py-1.5 text-[11px] font-mono text-chrome-text-light outline-none transition-colors focus:border-ink-red focus:ring-1 focus:ring-ink-red/30"
           placeholder="#000000"
         />
       </div>

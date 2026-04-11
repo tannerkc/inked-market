@@ -35,7 +35,7 @@ export function FlashEditor() {
 
   return (
     <>
-      <div className="flex border-b border-[#222]">
+      <div className="flex border-b border-chrome-border">
         {tabs.map((tab) => (
           <button
             key={tab.value}
@@ -45,7 +45,7 @@ export function FlashEditor() {
               "flex-1 py-3 text-[11px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2",
               activeTab === tab.value
                 ? "text-red-500 border-red-500"
-                : "text-[#555] border-transparent hover:text-[#888]"
+                : "text-chrome-text-dim border-transparent hover:text-chrome-text-secondary"
             )}
           >
             {tab.label}
@@ -63,7 +63,7 @@ export function FlashEditor() {
             <button
               type="button"
               onClick={() => setShowAdvancedColor(!showAdvancedColor)}
-              className="flex w-full items-center justify-between rounded-lg border border-[#222] bg-[#0d0d0d] px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555] transition-colors hover:border-[#333] hover:text-[#888]"
+              className="flex w-full items-center justify-between rounded-lg border border-chrome-border bg-ink-black-raised px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim transition-colors hover:border-chrome-border-hover hover:text-chrome-text-secondary"
             >
               <span>Advanced Color</span>
               <svg
@@ -88,10 +88,10 @@ export function FlashEditor() {
             <CtaStylePicker />
 
             <div>
-              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
                 Show / Hide
               </div>
-              <div className="rounded-lg border border-[#222] bg-[#0d0d0d] p-3 space-y-1">
+              <div className="rounded-lg border border-chrome-border bg-ink-black-raised p-3 space-y-1">
                 <ToggleRow
                   label="About Section"
                   checked={config.aboutLayout !== "none"}
@@ -113,7 +113,7 @@ export function FlashEditor() {
             <button
               type="button"
               onClick={() => setShowOverrides(!showOverrides)}
-              className="flex w-full items-center justify-between rounded-lg border border-[#222] bg-[#0d0d0d] px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555] transition-colors hover:border-[#333] hover:text-[#888]"
+              className="flex w-full items-center justify-between rounded-lg border border-chrome-border bg-ink-black-raised px-3 py-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim transition-colors hover:border-chrome-border-hover hover:text-chrome-text-secondary"
             >
               <span>Override Sections</span>
               <svg

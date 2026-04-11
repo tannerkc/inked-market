@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { useOverlayContainer } from "@/lib/contexts/overlay-context";
 
 export interface LightboxPhoto {
   id: number;
@@ -23,22 +24,11 @@ export interface PhotoLightboxProps {
 
 const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
   ({ photos, activeIndex, onClose, onNavigate, placeholderPattern, className }, ref) => {
-    const [mounted, setMounted] = React.useState(false);
-
-    React.useEffect(() => {
-      setMounted(true);
-    }, []);
+    const overlayEl = useOverlayContainer();
+    const container = overlayEl ?? (typeof document !== "undefined" ? document.body : null);
+    const posClass = overlayEl ? "absolute" : "fixed";
 
     const open = activeIndex !== null;
-
-    // Body scroll lock
-    React.useEffect(() => {
-      if (typeof document === "undefined") return;
-      document.body.style.overflow = open ? "hidden" : "";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }, [open]);
 
     // Keyboard navigation
     React.useEffect(() => {
@@ -56,7 +46,7 @@ const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
       return () => document.removeEventListener("keydown", handler);
     }, [open, activeIndex, photos.length, onClose, onNavigate]);
 
-    if (!mounted || typeof document === "undefined") return null;
+    if (!container) return null;
 
     const photo = activeIndex !== null ? photos[activeIndex] : null;
 
@@ -67,9 +57,9 @@ const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
           aria-hidden="true"
           onClick={onClose}
           className={cn(
-            "fixed inset-0 z-50 bg-black/85 backdrop-blur-sm",
+            `${posClass} inset-0 z-50 bg-black/85 backdrop-blur-sm`,
             "transition-opacity duration-200",
-            open ? "opacity-100" : "opacity-0 pointer-events-none"
+            open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         />
 
@@ -80,9 +70,9 @@ const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
           aria-modal="true"
           aria-label="Photo viewer"
           className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center p-4",
+            `${posClass} inset-0 z-50 flex items-center justify-center p-4`,
             "transition-opacity duration-200",
-            open ? "opacity-100" : "opacity-0 pointer-events-none",
+            open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
             className
           )}
           onClick={onClose}
@@ -166,7 +156,7 @@ const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
           )}
         </div>
       </>,
-      document.body
+      container
     );
   }
 );

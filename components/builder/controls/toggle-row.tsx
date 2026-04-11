@@ -11,7 +11,7 @@ interface ToggleRowProps {
 export function ToggleRow({ label, checked, onChange }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between py-1">
-      <span className="text-[11px] font-semibold text-[#ccc]">{label}</span>
+      <span className="text-[11px] font-semibold text-chrome-text-light">{label}</span>
       <button
         type="button"
         role="switch"
@@ -19,7 +19,7 @@ export function ToggleRow({ label, checked, onChange }: ToggleRowProps) {
         onClick={() => onChange(!checked)}
         className={cn(
           "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-          checked ? "bg-[#FF3333]" : "bg-[#333]"
+          checked ? "bg-ink-red" : "bg-chrome-border-hover"
         )}
       >
         <span

@@ -1,13 +1,13 @@
 "use client";
 
+import { PLACEHOLDER_PATTERN, PLACEHOLDER_PATTERN_RAW } from "@/lib/utils/placeholder-pattern";
+
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { PhotoLightbox } from "@/components/ui/photo-lightbox";
 
-const SVG_PATTERN = `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath fill-rule='evenodd' d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/svg%3E")`;
 
-const SVG_PATTERN_RAW = `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath fill-rule='evenodd' d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/svg%3E`;
 
 const GALLERY_ITEMS = [
   { id: 1, aspect: "aspect-square" },
@@ -41,13 +41,13 @@ function GalleryItem({
       data-builder-card
       onClick={() => onClick(index)}
       className={cn(
-        "overflow-hidden rounded-lg cursor-zoom-in text-left transition-opacity hover:opacity-90",
+        "block w-full overflow-hidden rounded-lg cursor-zoom-in text-left transition-opacity hover:opacity-90",
         aspect,
         className,
       )}
       style={{
         backgroundColor: "var(--bg-sunken)",
-        backgroundImage: SVG_PATTERN,
+        backgroundImage: PLACEHOLDER_PATTERN,
       }}
     />
   );
@@ -65,7 +65,7 @@ function FeaturedGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }
         className="col-span-2 row-span-2 overflow-hidden rounded-lg aspect-square cursor-zoom-in transition-opacity hover:opacity-90"
         style={{
           backgroundColor: "var(--bg-sunken)",
-          backgroundImage: SVG_PATTERN,
+          backgroundImage: PLACEHOLDER_PATTERN,
         }}
       />
       {GALLERY_ITEMS.slice(1, 7).map((item, i) => (
@@ -150,7 +150,7 @@ export function GallerySection({ className }: { className?: string }) {
         activeIndex={lightboxIndex}
         onClose={() => setLightboxIndex(null)}
         onNavigate={setLightboxIndex}
-        placeholderPattern={SVG_PATTERN_RAW}
+        placeholderPattern={PLACEHOLDER_PATTERN_RAW}
       />
     </section>
   );

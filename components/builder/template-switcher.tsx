@@ -60,7 +60,7 @@ export function TemplateSwitcher() {
     <>
       <div className="relative" ref={listRef}>
         {/* Current template + Change button */}
-        <div className="flex items-center justify-between rounded-lg border border-[#222] bg-[#0a0a0a] px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-chrome-border bg-ink-black px-3 py-2.5">
           <div className="flex items-center gap-2.5">
             {/* Color dots for current template */}
             <div className="flex items-center gap-1">
@@ -73,14 +73,14 @@ export function TemplateSwitcher() {
                 style={{ backgroundColor: currentTemplate.previewBg }}
               />
             </div>
-            <span className="text-[13px] font-medium text-[#ededed]">
+            <span className="text-[13px] font-medium text-chrome-text-primary">
               {currentTemplate.name}
             </span>
           </div>
           <button
             type="button"
             onClick={() => setShowList((prev) => !prev)}
-            className="text-[12px] font-medium text-[#888] hover:text-[#ededed] transition-colors"
+            className="text-[12px] font-medium text-chrome-text-secondary hover:text-chrome-text-primary transition-colors"
           >
             Change
           </button>
@@ -88,7 +88,7 @@ export function TemplateSwitcher() {
 
         {/* Dropdown list */}
         {showList && (
-          <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border border-[#222] bg-[#111] shadow-xl overflow-hidden">
+          <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border border-chrome-border bg-chrome-surface shadow-xl overflow-hidden">
             {templateList.map((tmpl) => {
               const isCurrent = tmpl.slug === config.template;
               return (
@@ -99,8 +99,8 @@ export function TemplateSwitcher() {
                   className={cn(
                     "flex items-center w-full px-3 py-2.5 text-left transition-colors",
                     isCurrent
-                      ? "bg-[#1a1a1a] text-[#ededed]"
-                      : "text-[#888] hover:bg-[#1a1a1a] hover:text-[#ededed]",
+                      ? "bg-chrome-raised text-chrome-text-primary"
+                      : "text-chrome-text-secondary hover:bg-chrome-raised hover:text-chrome-text-primary",
                   )}
                 >
                   {/* Color dots */}
@@ -123,7 +123,7 @@ export function TemplateSwitcher() {
                   {/* Checkmark for current */}
                   {isCurrent && (
                     <svg
-                      className="w-4 h-4 text-[#FF3333]"
+                      className="w-4 h-4 text-ink-red"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

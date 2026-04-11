@@ -20,10 +20,10 @@ export function EditorPanel() {
   };
 
   return (
-    <div className="flex flex-col w-[380px] min-w-[380px] h-full bg-[#111] border-r border-[#222]">
+    <div className="flex flex-col w-[380px] min-w-[380px] h-full bg-chrome-surface border-r border-chrome-border">
       {/* Tier badge */}
-      <div className="flex items-center justify-between border-b border-[#222] px-4 py-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#444]">
+      <div className="flex items-center justify-between border-b border-chrome-border px-4 py-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-faint">
           Editor
         </span>
         <div className="flex gap-1">
@@ -33,8 +33,8 @@ export function EditorPanel() {
             className={cn(
               "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
               tier === "flash"
-                ? "bg-[#FF3333]/15 text-[#FF3333]"
-                : "bg-transparent text-[#444] hover:text-[#888]"
+                ? "bg-ink-red/15 text-ink-red"
+                : "bg-transparent text-chrome-text-faint hover:text-chrome-text-secondary"
             )}
           >
             Flash
@@ -45,8 +45,8 @@ export function EditorPanel() {
             className={cn(
               "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
               tier === "custom"
-                ? "bg-[#FF3333]/15 text-[#FF3333]"
-                : "bg-transparent text-[#444] hover:text-[#888]"
+                ? "bg-ink-red/15 text-ink-red"
+                : "bg-transparent text-chrome-text-faint hover:text-chrome-text-secondary"
             )}
           >
             Custom

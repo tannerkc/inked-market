@@ -8,8 +8,8 @@ import { CtaStylePicker } from "./cta-style-picker";
 
 export function PageStyleGroup() {
   return (
-    <div className="rounded-lg border border-[#FF3333]/20 bg-[#0d0d0d] p-4">
-      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#FF3333]/70">
+    <div className="rounded-lg border border-ink-red/20 bg-ink-black-raised p-4">
+      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[1.5px] text-ink-red/70">
         Page Style
       </div>
       <div className="flex flex-col gap-5">

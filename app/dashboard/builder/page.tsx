@@ -9,6 +9,7 @@ import { TemplatePicker } from "@/components/builder/template-picker";
 import { TierSelector } from "@/components/builder/tier-selector";
 import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
+import { OverlayContext } from "@/lib/contexts/overlay-context";
 
 const BUILDER_MODE_KEY = "inked-builder-mode";
 const BUILDER_TIER_KEY = "inked-builder-tier";
@@ -47,6 +48,7 @@ function getExistingDraft(): StudioThemeConfig | null {
 export default function BuilderPage() {
   const [mode, setMode] = useState<BuilderMode>("inline");
   const [mounted, setMounted] = useState(false);
+  const [overlayEl, setOverlayEl] = useState<HTMLElement | null>(null);
   const [hasTemplate, setHasTemplate] = useState(false);
   const [hasTier, setHasTier] = useState(false);
   const [selectedTier, setSelectedTier] = useState<BuilderTier>("flash");
@@ -156,13 +158,17 @@ export default function BuilderPage() {
           {mode === "split" ? (
             <SplitScreenBuilder />
           ) : (
-            <div
-              className="h-full overflow-y-auto"
-              data-sheet-root
-              style={{ transform: "translateZ(0)" }}
-            >
-              <InlineOverlayBuilder />
-            </div>
+            <OverlayContext.Provider value={overlayEl}>
+              <div className="relative h-full overflow-hidden">
+                <div className="absolute inset-0 overflow-y-auto">
+                  <InlineOverlayBuilder />
+                </div>
+                <div
+                  ref={setOverlayEl}
+                  className="absolute inset-0 pointer-events-none z-50"
+                />
+              </div>
+            </OverlayContext.Provider>
           )}
         </div>
       </div>

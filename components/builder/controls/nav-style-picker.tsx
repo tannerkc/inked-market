@@ -11,11 +11,11 @@ function NavThumbnail({ style, selected }: { style: NavStyle; selected: boolean 
   switch (style) {
     case "none":
       return (
-        <div className="flex h-full w-full rounded-md bg-[#1a1a1a]" />
+        <div className="flex h-full w-full rounded-md bg-chrome-raised" />
       );
     case "static":
       return (
-        <div className="flex h-full w-full flex-col rounded-md bg-[#1a1a1a] p-1.5">
+        <div className="flex h-full w-full flex-col rounded-md bg-chrome-raised p-1.5">
           {/* Static bar at top */}
           <div
             className="h-[5px] w-full rounded-sm"
@@ -26,7 +26,7 @@ function NavThumbnail({ style, selected }: { style: NavStyle; selected: boolean 
       );
     case "floating":
       return (
-        <div className="flex h-full w-full flex-col rounded-md bg-[#1a1a1a] p-1.5">
+        <div className="flex h-full w-full flex-col rounded-md bg-chrome-raised p-1.5">
           {/* Floating bar with gap from top + glow effect */}
           <div className="mt-0.5 px-1">
             <div
@@ -42,7 +42,7 @@ function NavThumbnail({ style, selected }: { style: NavStyle; selected: boolean 
       );
     case "reveal":
       return (
-        <div className="flex h-full w-full flex-col rounded-md bg-[#1a1a1a] p-1.5">
+        <div className="flex h-full w-full flex-col rounded-md bg-chrome-raised p-1.5">
           {/* Bar partially slid in from top with arrow hint */}
           <div
             className="h-[5px] w-full rounded-sm"
@@ -68,7 +68,7 @@ export function NavStylePicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-[#555]">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
         Navigation Bar
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -82,8 +82,8 @@ export function NavStylePicker() {
               className={cn(
                 "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
                 selected
-                  ? "border-[#FF3333] bg-[#111] ring-1 ring-[#FF3333]/30"
-                  : "border-[#222] bg-[#111] hover:border-[#333] hover:bg-[#161616]"
+                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
+                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
               )}
             >
               {/* Thumbnail area */}
@@ -96,19 +96,19 @@ export function NavStylePicker() {
                 <span
                   className={cn(
                     "block text-[11px] font-medium transition-colors",
-                    selected ? "text-[#FF3333]" : "text-[#888] group-hover:text-[#bbb]"
+                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
                   )}
                 >
                   {opt.label}
                 </span>
-                <span className="block text-[10px] text-[#555]">
+                <span className="block text-[10px] text-chrome-text-dim">
                   {opt.description}
                 </span>
               </div>
 
               {/* Selected check */}
               {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF3333]">
+                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red">
                   <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
                     <path d="M2 5.5L4 7.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
