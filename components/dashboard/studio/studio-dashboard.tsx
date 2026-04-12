@@ -13,8 +13,11 @@ import { StudioServicesCard } from "./studio-services-card";
 import { StudioEditInfoPanel } from "./studio-edit-info-panel";
 import { StudioManageArtistsPanel } from "./studio-manage-artists-panel";
 import { StudioBusinessHoursPanel } from "./studio-business-hours-panel";
+import { StudioIntegrationsCard } from "./studio-integrations-card";
+import { StudioIntegrationsPanel } from "./studio-integrations-panel";
+import { StudioLinkFlowPanel } from "./studio-link-flow-panel";
 import { useStudioDashboard } from "./use-studio-dashboard";
-import type { QuickAction } from "@/lib/types";
+import type { QuickAction, TierSlug } from "@/lib/types";
 
 export function StudioDashboard() {
   const { mode } = useTheme();
@@ -92,6 +95,10 @@ export function StudioDashboard() {
           <>
             <StudioPageCard />
             <StudioArtistsSection onInvite={() => dashboard.setInviteOpen(true)} />
+            <StudioIntegrationsCard
+              connectedCount={dashboard.connectedCount}
+              onOpen={() => dashboard.setIntegrationsOpen(true)}
+            />
             <QuickActionsGrid actions={quickActions} />
           </>
         }
@@ -129,6 +136,20 @@ export function StudioDashboard() {
               onToggleDay={dashboard.handleToggleDay}
               onUpdateHour={dashboard.handleUpdateHour}
               onSave={dashboard.handleSaveHours}
+            />
+            <StudioIntegrationsPanel
+              open={dashboard.integrationsOpen}
+              onClose={() => dashboard.setIntegrationsOpen(false)}
+              integrations={dashboard.studio?.integrations}
+              currentTier={(dashboard.user?.billing?.plan as TierSlug) ?? null}
+              onLink={dashboard.handleOpenLinkFlow}
+              onUnlink={dashboard.handleUnlink}
+            />
+            <StudioLinkFlowPanel
+              open={dashboard.linkFlowOpen}
+              onClose={() => dashboard.setLinkFlowOpen(false)}
+              platform={dashboard.linkFlowPlatform}
+              onSave={dashboard.handleSaveLink}
             />
           </>
         }

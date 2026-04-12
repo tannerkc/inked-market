@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useStudio } from "@/lib/providers/studio-provider";
 import { getStudioDashboardData, getArtistSearchResults, getStudioRoster } from "@/lib/data/dashboard";
 import { computeAutoSpecialties } from "@/lib/utils/compute-auto-specialties";
 import type { Affiliation, StudioService } from "@/lib/types";
+import {
+  countActiveIntegrations,
+  makeIntegrationUpdate,
+  createLinkRecord,
+  removeIntegration,
+} from "@/lib/utils/integration-helpers";
+import { getPlatformMeta } from "@/lib/data/integration-platforms";
+import type { IntegrationPlatform, IntegrationPlatformMeta } from "@/lib/types/integrations";
 
 export function useStudioDashboard() {
   const { user } = useAuth();
@@ -67,6 +75,31 @@ export function useStudioDashboard() {
   const [artistSearch, setArtistSearch] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [roster, setRoster] = useState<Affiliation[]>(getStudioRoster());
+
+  // ── Integration state ──────────────────────────────────────────────
+  const [integrationsOpen, setIntegrationsOpen] = useState(false);
+  const [linkFlowOpen, setLinkFlowOpen] = useState(false);
+  const [linkFlowPlatform, setLinkFlowPlatform] = useState<IntegrationPlatformMeta | null>(null);
+
+  const connectedCount = countActiveIntegrations(studio?.integrations);
+
+  const handleOpenLinkFlow = (platformId: IntegrationPlatform) => {
+    const meta = getPlatformMeta(platformId);
+    if (!meta) return;
+    setLinkFlowPlatform(meta);
+    setLinkFlowOpen(true);
+  };
+
+  const handleSaveLink = (url: string) => {
+    if (!linkFlowPlatform) return;
+    update(makeIntegrationUpdate(studio?.integrations, linkFlowPlatform.id, createLinkRecord(url)));
+    setLinkFlowOpen(false);
+    setLinkFlowPlatform(null);
+  };
+
+  const handleUnlink = (platformId: IntegrationPlatform) => {
+    update(removeIntegration(studio?.integrations, platformId));
+  };
 
   const allArtists = getArtistSearchResults();
   const filteredArtists = artistSearch
@@ -196,6 +229,7 @@ export function useStudioDashboard() {
   return {
     data,
     user,
+    studio,
     // Panels
     editStudioOpen,
     setEditStudioOpen,
@@ -232,5 +266,15 @@ export function useStudioDashboard() {
     handleSendEmailInvite,
     handleAcceptRequest,
     handleDeclineOrRemove,
+    // Integrations
+    integrationsOpen,
+    setIntegrationsOpen,
+    linkFlowOpen,
+    setLinkFlowOpen,
+    linkFlowPlatform,
+    connectedCount,
+    handleOpenLinkFlow,
+    handleSaveLink,
+    handleUnlink,
   };
 }
