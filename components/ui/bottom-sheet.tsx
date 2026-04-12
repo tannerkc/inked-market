@@ -10,11 +10,13 @@ export interface BottomSheetProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  /** "solid" uses --bg-raised background. "blur" uses transparent + backdrop-blur. */
+  variant?: "solid" | "blur";
   className?: string;
 }
 
 const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
-  ({ open, onClose, title, children, className }, ref) => {
+  ({ open, onClose, title, children, variant = "solid", className }, ref) => {
     const overlayEl = useOverlayContainer();
     // When context provides an overlay layer, portal into it (absolute positioning).
     // Fall back to document.body with fixed positioning for non-builder contexts.
@@ -56,27 +58,34 @@ const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
             `${posClass} inset-x-0 bottom-0 z-50`,
             "max-h-[80%] rounded-t-2xl",
             "flex flex-col",
-            "bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/60",
             "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
             open ? "translate-y-0 pointer-events-auto" : "translate-y-full pointer-events-none",
+            variant === "blur" ? "bg-white/10 backdrop-blur-xl" : "",
             className
           )}
-          style={{ color: "var(--text-primary, #ededed)" }}
+          style={variant === "solid" ? { backgroundColor: "var(--bg-raised)", color: "var(--text-primary)" } : { color: "var(--text-primary)" }}
         >
           <div className="flex justify-center pt-3 pb-1 shrink-0">
-            <div className="w-9 h-1 rounded-full bg-white/20" />
+            <div className="w-9 h-1 rounded-full" style={{ backgroundColor: "var(--border)" }} />
           </div>
-          <div className="flex items-center justify-between px-6 py-3 shrink-0 border-b border-white/[0.08]">
-            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-white/70">
+          <div
+            className="flex items-center justify-between px-6 py-3 shrink-0"
+            style={{ borderBottom: "1px solid var(--border)" }}
+          >
+            <span
+              className="text-[10px] font-bold tracking-[0.15em] uppercase"
+              style={{ color: "var(--text-muted)" }}
+            >
               {title}
             </span>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/10 text-white/60 hover:bg-white/15 hover:text-white transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
+              style={{ backgroundColor: "var(--bg-sunken)", color: "var(--text-secondary)" }}
             >
-              <span className="text-sm leading-none select-none">x</span>
+              <span className="text-sm leading-none select-none">×</span>
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-6">{children}</div>

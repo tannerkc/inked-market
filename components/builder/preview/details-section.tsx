@@ -133,6 +133,7 @@ function ReviewsWidget() {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
+        variant="blur"
         title={`${totalCount} Verified Reviews · 4.9 avg`}
       >
         <div className="flex flex-col">

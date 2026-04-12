@@ -200,6 +200,7 @@ function ArtistGallerySheet({
     <BottomSheet
       open={open}
       onClose={onClose}
+      variant="blur"
       title={artist.name}
     >
       {/* Artist mini-profile */}
