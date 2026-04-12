@@ -10,13 +10,11 @@ export interface BottomSheetProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  /** "solid" uses --bg-raised background. "blur" uses transparent + backdrop-blur. */
-  variant?: "solid" | "blur";
   className?: string;
 }
 
 const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
-  ({ open, onClose, title, children, variant = "solid", className }, ref) => {
+  ({ open, onClose, title, children, className }, ref) => {
     const overlayEl = useOverlayContainer();
     // When context provides an overlay layer, portal into it (absolute positioning).
     // Fall back to document.body with fixed positioning for non-builder contexts.
@@ -60,10 +58,10 @@ const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
             "flex flex-col",
             "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
             open ? "translate-y-0 pointer-events-auto" : "translate-y-full pointer-events-none",
-            variant === "blur" ? "bg-white/10 backdrop-blur-xl" : "",
+            "bg-white/10 backdrop-blur-xl",
             className
           )}
-          style={variant === "solid" ? { backgroundColor: "var(--bg-raised)", color: "var(--text-primary)" } : { color: "var(--text-primary)" }}
+          style={{ color: "var(--text-primary)" }}
         >
           <div className="flex justify-center pt-3 pb-1 shrink-0">
             <div className="w-9 h-1 rounded-full" style={{ backgroundColor: "var(--border)" }} />
