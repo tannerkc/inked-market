@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -20,6 +21,7 @@ import {
   MetaRow,
   MetaItem,
   MetaHighlight,
+  IntegrationBadges,
 } from "@/components/detail";
 import { getStudio, getStudioReviews } from "@/lib/data/shops";
 import {
@@ -38,6 +40,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const studio = getStudio(id);
+  if (!studio) return { title: "Studio Not Found | Inked Market" };
   return {
     title: `${studio.name} — Tattoo Studio | Inked Market`,
     description: studio.description,
@@ -47,6 +50,7 @@ export async function generateMetadata({
 export default async function StudioPage({ params }: PageProps) {
   const { id } = await params;
   const studio = getStudio(id);
+  if (!studio) notFound();
   const reviews = getStudioReviews(id);
 
   return (
@@ -91,9 +95,17 @@ export default async function StudioPage({ params }: PageProps) {
 
         {/* CTA Row */}
         <div className="flex flex-wrap gap-2.5 mt-7 relative z-10">
-          <Button variant="ink-red" size="sm" statusDot="bg-ink-cream shadow-ink-cream-glow">
-            Book Appointment
-          </Button>
+          {studio.integrations?.booking ? (
+            <Button as="a" href={studio.integrations.booking.bookingUrl}
+              target="_blank" rel="noopener noreferrer"
+              variant="ink-red" size="sm" statusDot="bg-ink-cream shadow-ink-cream-glow">
+              {studio.integrations.booking.label ?? "Book Appointment"}
+            </Button>
+          ) : (
+            <Button variant="ink-red" size="sm" statusDot="bg-ink-cream shadow-ink-cream-glow">
+              Book Appointment
+            </Button>
+          )}
           <Button variant="ink-light-outline" size="sm">
             Call
           </Button>
@@ -124,11 +136,19 @@ export default async function StudioPage({ params }: PageProps) {
         />
         <div className="grid grid-cols-1 min-[960px]:grid-cols-[1.2fr_1fr_1fr] gap-[3px] px-6 md:px-12">
           {/* Reviews */}
-          <ReviewPanel
-            reviews={reviews}
-            rating={studio.rating}
-            headingFont={bebasNeue.className}
-          />
+          <div>
+            <ReviewPanel
+              reviews={reviews}
+              rating={studio.rating}
+              headingFont={bebasNeue.className}
+            />
+            {studio.integrations && (
+              <IntegrationBadges
+                googleBusiness={studio.integrations.googleBusiness}
+                yelp={studio.integrations.yelp}
+              />
+            )}
+          </div>
 
           {/* Hours & Contact */}
           <WidgetPanel variant="alt">
@@ -211,7 +231,7 @@ export default async function StudioPage({ params }: PageProps) {
               ))}
             </div>
             <div className="mt-6 relative z-10">
-              <SocialLinks links={studio.socialLinks} />
+              <SocialLinks links={studio.socialLinks} integrations={studio.integrations} />
             </div>
           </WidgetPanel>
         </div>
@@ -221,7 +241,8 @@ export default async function StudioPage({ params }: PageProps) {
       <FooterCta
         heading={`Visit ${studio.name.split(" ")[0]}?`}
         subtitle={`${studio.location.address}, ${studio.location.city} · Walk-ins welcome`}
-        buttonLabel="Book an Appointment"
+        buttonLabel={studio.integrations?.booking?.label ?? "Book an Appointment"}
+        bookingUrl={studio.integrations?.booking?.bookingUrl}
         headingFont={bebasNeue.className}
       />
     </div>

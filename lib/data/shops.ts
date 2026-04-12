@@ -69,6 +69,23 @@ export const mockStudios: Record<string, StudioWithArtists> = {
       instagram: "https://instagram.com/inkparadise",
       facebook: "https://facebook.com/inkparadise",
     },
+    integrations: {
+      googleBusiness: {
+        profileUrl: "https://maps.google.com/?cid=12345",
+        rating: 4.8,
+        reviewCount: 312,
+      },
+      yelp: {
+        profileUrl: "https://www.yelp.com/biz/ink-paradise-studio-los-angeles",
+        rating: 4.5,
+        reviewCount: 87,
+      },
+      booking: {
+        platform: "Porter",
+        bookingUrl: "https://porter.ink/inkparadise/book",
+        label: "Book on Porter",
+      },
+    },
     createdAt: new Date("2023-01-01"),
     updatedAt: new Date("2026-03-01"),
   },
@@ -227,9 +244,9 @@ export const mockStudioReviews: Record<string, Review[]> = {
 };
 
 export function getStudio(id: string) {
-  return mockStudios[id] ?? mockStudios["1"];
+  return mockStudios[id] ?? undefined;
 }
 
 export function getStudioReviews(id: string) {
-  return mockStudioReviews[id] ?? mockStudioReviews["1"];
+  return mockStudioReviews[id] ?? [];
 }

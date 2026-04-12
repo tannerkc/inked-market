@@ -8,11 +8,12 @@ interface FooterCtaProps {
   subtitle: string;
   buttonLabel: string;
   headingFont: string;
+  bookingUrl?: string;
   className?: string;
 }
 
 const FooterCta = React.forwardRef<HTMLElement, FooterCtaProps>(
-  ({ heading, subtitle, buttonLabel, headingFont, className }, ref) => (
+  ({ heading, subtitle, buttonLabel, headingFont, bookingUrl, className }, ref) => (
     <section
       ref={ref}
       className={cn(
@@ -31,9 +32,16 @@ const FooterCta = React.forwardRef<HTMLElement, FooterCtaProps>(
       <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink-cream/30 mb-6 relative z-10">
         {subtitle}
       </p>
-      <Button variant="ink-red" size="md" statusDot="bg-ink-cream shadow-ink-cream-glow" className="relative z-10 mx-auto">
-        {buttonLabel}
-      </Button>
+      {bookingUrl ? (
+        <Button as="a" href={bookingUrl} target="_blank" rel="noopener noreferrer"
+          variant="ink-red" size="md" statusDot="bg-ink-cream shadow-ink-cream-glow" className="relative z-10 mx-auto">
+          {buttonLabel}
+        </Button>
+      ) : (
+        <Button variant="ink-red" size="md" statusDot="bg-ink-cream shadow-ink-cream-glow" className="relative z-10 mx-auto">
+          {buttonLabel}
+        </Button>
+      )}
     </section>
   )
 );

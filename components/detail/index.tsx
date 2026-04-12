@@ -9,3 +9,4 @@ export { IssueLabel } from "./issue-label";
 export { SplitName } from "./split-name";
 export { BioQuote } from "./bio-quote";
 export { MetaRow, MetaItem, MetaHighlight } from "./meta-row";
+export { IntegrationBadges } from "./integration-badges";
