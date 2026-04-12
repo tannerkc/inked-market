@@ -148,6 +148,7 @@ export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         title={`${count} Reviews · ${average.toFixed(1)} avg`}
+        className="bg-ink-black text-ink-cream [--bg-raised:var(--ink-black)] [--bg-sunken:#111] [--text-primary:var(--ink-cream)] [--text-muted:#888] [--text-secondary:#666] [--border:#222]"
       >
         <div className="flex flex-col">
           {sorted.map((review) => (
