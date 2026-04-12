@@ -134,6 +134,7 @@ function ReviewsWidget() {
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         title={`${totalCount} Verified Reviews · 4.9 avg`}
+        className="[--bg-raised:transparent] backdrop-blur-xl bg-white/10"
       >
         <div className="flex flex-col">
           {MOCK_REVIEWS.map((review, i) => (

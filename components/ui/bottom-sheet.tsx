@@ -58,10 +58,9 @@ const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
             "flex flex-col",
             "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
             open ? "translate-y-0 pointer-events-auto" : "translate-y-full pointer-events-none",
-            "bg-white/10 backdrop-blur-xl",
             className
           )}
-          style={{ color: "var(--text-primary)" }}
+          style={{ backgroundColor: "var(--bg-raised)", color: "var(--text-primary)" }}
         >
           <div className="flex justify-center pt-3 pb-1 shrink-0">
             <div className="w-9 h-1 rounded-full" style={{ backgroundColor: "var(--border)" }} />
