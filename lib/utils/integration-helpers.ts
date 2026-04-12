@@ -1,8 +1,8 @@
 import type {
   IntegrationPlatform,
   IntegrationRecord,
+  IntegrationMode,
   StudioIntegrations,
-  IntegrationFeature,
 } from "@/lib/types/integrations";
 import type { TierSlug } from "@/lib/types";
 import { getPlatformMeta } from "@/lib/data/integration-platforms";
@@ -11,22 +11,9 @@ import { getPlatformMeta } from "@/lib/data/integration-platforms";
 
 const TIER_ORDER: Record<TierSlug, number> = { liner: 0, shader: 1, magnum: 2 };
 
-const FEATURE_MIN_TIER: Record<IntegrationFeature, TierSlug> = {
-  "link": "liner",
-  "google-autofill": "liner",
-  "review-badges": "liner",
-  "booking-connect": "shader",
-  "client-import": "magnum",
-  "pos-connect": "magnum",
-};
-
 export function tierMeetsRequirement(userTier: TierSlug | null, required: TierSlug): boolean {
   if (!userTier) return false;
   return TIER_ORDER[userTier] >= TIER_ORDER[required];
-}
-
-export function isFeatureAvailable(userTier: TierSlug | null, feature: IntegrationFeature): boolean {
-  return tierMeetsRequirement(userTier, FEATURE_MIN_TIER[feature]);
 }
 
 // ─── URL validation ─────────────────────────────────────────────────────────
@@ -52,7 +39,7 @@ export function getIntegrationRecord(
 }
 
 export function isIntegrationActive(record: IntegrationRecord): boolean {
-  return record.status === "linked" || record.status === "connected" || record.status === "syncing";
+  return record.status === "connected" || record.status === "syncing";
 }
 
 export function countActiveIntegrations(integrations: StudioIntegrations | undefined): number {
@@ -60,27 +47,30 @@ export function countActiveIntegrations(integrations: StudioIntegrations | undef
   return Object.values(integrations).filter((r) => r && isIntegrationActive(r)).length;
 }
 
-// ─── Merge helpers for optimistic updates ───────────────────────────────────
+// ─── Connection helpers ─────────────────────────────────────────────────────
 
-export function makeIntegrationUpdate(
+export function connectIntegration(
   current: StudioIntegrations | undefined,
   platform: IntegrationPlatform,
-  record: IntegrationRecord,
+  mode: IntegrationMode,
+  url: string,
+  importSummary?: { count: number; label: string },
 ): { integrations: StudioIntegrations } {
+  const record: IntegrationRecord = {
+    status: "connected",
+    mode,
+    linkUrl: url,
+    connectedAt: new Date().toISOString(),
+    lastSyncAt: new Date().toISOString(),
+    importedCount: importSummary?.count,
+    importedLabel: importSummary?.label,
+  };
   return {
     integrations: { ...(current ?? {}), [platform]: record },
   };
 }
 
-export function createLinkRecord(url: string): IntegrationRecord {
-  return {
-    status: "linked",
-    linkUrl: url,
-    linkedAt: new Date().toISOString(),
-  };
-}
-
-export function removeIntegration(
+export function disconnectIntegration(
   current: StudioIntegrations | undefined,
   platform: IntegrationPlatform,
 ): { integrations: StudioIntegrations } {

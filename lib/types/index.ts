@@ -111,6 +111,8 @@ export interface Customer extends BaseEntity {
   };
 }
 
+export type ReviewSource = "inked-market" | "google" | "yelp" | "trustpilot";
+
 export interface Review extends BaseEntity {
   authorId: string;
   authorName: string;
@@ -122,6 +124,8 @@ export interface Review extends BaseEntity {
   content: string;
   images?: string[];
   verified: boolean; // Verified customer
+  /** Where this review originated. Defaults to "inked-market" for local reviews. */
+  source?: ReviewSource;
 }
 
 export interface Message extends BaseEntity {

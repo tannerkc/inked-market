@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useStudio } from "@/lib/providers/studio-provider";
 import { getStudioDashboardData, getArtistSearchResults, getStudioRoster } from "@/lib/data/dashboard";
@@ -8,12 +8,11 @@ import { computeAutoSpecialties } from "@/lib/utils/compute-auto-specialties";
 import type { Affiliation, StudioService } from "@/lib/types";
 import {
   countActiveIntegrations,
-  makeIntegrationUpdate,
-  createLinkRecord,
-  removeIntegration,
+  connectIntegration,
+  disconnectIntegration,
 } from "@/lib/utils/integration-helpers";
 import { getPlatformMeta } from "@/lib/data/integration-platforms";
-import type { IntegrationPlatform, IntegrationPlatformMeta } from "@/lib/types/integrations";
+import type { IntegrationPlatform, IntegrationPlatformMeta, IntegrationMode } from "@/lib/types/integrations";
 
 export function useStudioDashboard() {
   const { user } = useAuth();
@@ -80,25 +79,39 @@ export function useStudioDashboard() {
   const [integrationsOpen, setIntegrationsOpen] = useState(false);
   const [linkFlowOpen, setLinkFlowOpen] = useState(false);
   const [linkFlowPlatform, setLinkFlowPlatform] = useState<IntegrationPlatformMeta | null>(null);
+  const [linkFlowMode, setLinkFlowMode] = useState<IntegrationMode | null>(null);
 
   const connectedCount = countActiveIntegrations(studio?.integrations);
 
-  const handleOpenLinkFlow = (platformId: IntegrationPlatform) => {
+  const handleConnect = (platformId: IntegrationPlatform, mode: IntegrationMode) => {
     const meta = getPlatformMeta(platformId);
     if (!meta) return;
     setLinkFlowPlatform(meta);
+    setLinkFlowMode(mode);
     setLinkFlowOpen(true);
   };
 
-  const handleSaveLink = (url: string) => {
-    if (!linkFlowPlatform) return;
-    update(makeIntegrationUpdate(studio?.integrations, linkFlowPlatform.id, createLinkRecord(url)));
-    setLinkFlowOpen(false);
-    setLinkFlowPlatform(null);
+  // Mock import summaries — when the backend ships, these come from real API responses
+  const MOCK_IMPORT_SUMMARIES: Partial<Record<IntegrationPlatform, { count: number; label: string }>> = {
+    google: { count: 47, label: "reviews" },
+    yelp: { count: 23, label: "reviews" },
+    trustpilot: { count: 12, label: "reviews" },
+    facebook: { count: 8, label: "recommendations" },
+    square: { count: 156, label: "appointments" },
+    acuity: { count: 89, label: "appointments" },
   };
 
-  const handleUnlink = (platformId: IntegrationPlatform) => {
-    update(removeIntegration(studio?.integrations, platformId));
+  const handleSaveConnection = (url: string) => {
+    if (!linkFlowPlatform || !linkFlowMode) return;
+    const summary = linkFlowMode === "import" ? MOCK_IMPORT_SUMMARIES[linkFlowPlatform.id] : undefined;
+    update(connectIntegration(studio?.integrations, linkFlowPlatform.id, linkFlowMode, url, summary));
+    setLinkFlowOpen(false);
+    setLinkFlowPlatform(null);
+    setLinkFlowMode(null);
+  };
+
+  const handleDisconnect = (platformId: IntegrationPlatform) => {
+    update(disconnectIntegration(studio?.integrations, platformId));
   };
 
   const allArtists = getArtistSearchResults();
@@ -272,9 +285,10 @@ export function useStudioDashboard() {
     linkFlowOpen,
     setLinkFlowOpen,
     linkFlowPlatform,
+    linkFlowMode,
     connectedCount,
-    handleOpenLinkFlow,
-    handleSaveLink,
-    handleUnlink,
+    handleConnect,
+    handleSaveConnection,
+    handleDisconnect,
   };
 }

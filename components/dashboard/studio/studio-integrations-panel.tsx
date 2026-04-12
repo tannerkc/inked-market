@@ -10,22 +10,22 @@ import {
   INTEGRATION_CATEGORIES,
   getPlatformsByCategory,
 } from "@/lib/data/integration-platforms";
-import type { StudioIntegrations, IntegrationPlatform } from "@/lib/types/integrations";
+import type { StudioIntegrations, IntegrationPlatform, IntegrationMode } from "@/lib/types/integrations";
 
 interface StudioIntegrationsPanelProps {
   open: boolean;
   onClose: () => void;
   integrations: StudioIntegrations | undefined;
-  onLink: (platformId: IntegrationPlatform) => void;
-  onUnlink: (platformId: IntegrationPlatform) => void;
+  onConnect: (platformId: IntegrationPlatform, mode: IntegrationMode) => void;
+  onDisconnect: (platformId: IntegrationPlatform) => void;
 }
 
 export function StudioIntegrationsPanel({
   open,
   onClose,
   integrations,
-  onLink,
-  onUnlink,
+  onConnect,
+  onDisconnect,
 }: StudioIntegrationsPanelProps) {
   const { mode } = useTheme();
   const isDark = mode === "dark";
@@ -65,9 +65,8 @@ export function StudioIntegrationsPanel({
                       <StudioIntegrationRow
                         platform={platform}
                         record={record}
-                        locked={false}
-                        onLink={() => onLink(platform.id)}
-                        onUnlink={() => onUnlink(platform.id)}
+                        onConnect={(m) => onConnect(platform.id, m)}
+                        onDisconnect={() => onDisconnect(platform.id)}
                       />
                     </div>
                   );

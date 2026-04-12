@@ -154,6 +154,7 @@ export const mockStudios: Record<string, StudioWithArtists> = {
 
 export const mockStudioReviews: Record<string, Review[]> = {
   "1": [
+    // ── Inked Market (local, verified) ──────────────────────────────
     {
       id: "sr1",
       authorId: "c10",
@@ -165,6 +166,7 @@ export const mockStudioReviews: Record<string, Review[]> = {
       content:
         "The whole team at Ink Paradise is talented and professional. The studio is immaculately clean and the vibe is relaxed and welcoming.",
       verified: true,
+      source: "inked-market",
       createdAt: new Date("2026-03-12"),
       updatedAt: new Date("2026-03-12"),
     },
@@ -179,6 +181,7 @@ export const mockStudioReviews: Record<string, Review[]> = {
       content:
         "Got my first tattoo here and couldn't have asked for a better experience. They walked me through everything and the result is gorgeous.",
       verified: true,
+      source: "inked-market",
       createdAt: new Date("2026-02-20"),
       updatedAt: new Date("2026-02-20"),
     },
@@ -193,8 +196,117 @@ export const mockStudioReviews: Record<string, Review[]> = {
       content:
         "Fourth visit and every single time the quality has been exceptional. This is the only studio I trust.",
       verified: true,
+      source: "inked-market",
       createdAt: new Date("2026-01-15"),
       updatedAt: new Date("2026-01-15"),
+    },
+    // ── Google Reviews (imported) ───────────────────────────────────
+    {
+      id: "gr1",
+      authorId: "g-user-1",
+      authorName: "Alex Rivera",
+      targetId: "1",
+      targetType: "studio",
+      rating: 5,
+      title: "",
+      content:
+        "Absolutely love this place. Sarah did my half sleeve over three sessions and every single detail is perfect. The line work is insane. Already planning my next piece.",
+      verified: false,
+      source: "google",
+      createdAt: new Date("2026-03-28"),
+      updatedAt: new Date("2026-03-28"),
+    },
+    {
+      id: "gr2",
+      authorId: "g-user-2",
+      authorName: "Priya Nair",
+      targetId: "1",
+      targetType: "studio",
+      rating: 4,
+      title: "",
+      content:
+        "Great studio, very clean and professional. Wait times can be long for walk-ins but the quality makes up for it. Yuki did my watercolor piece and it turned out beautiful.",
+      verified: false,
+      source: "google",
+      createdAt: new Date("2026-03-05"),
+      updatedAt: new Date("2026-03-05"),
+    },
+    {
+      id: "gr3",
+      authorId: "g-user-3",
+      authorName: "Marcus Johnson",
+      targetId: "1",
+      targetType: "studio",
+      rating: 5,
+      title: "",
+      content:
+        "Best tattoo experience I've ever had. They take their time to get the design right before starting. No rushing, no pressure. Five stars isn't enough.",
+      verified: false,
+      source: "google",
+      createdAt: new Date("2026-02-10"),
+      updatedAt: new Date("2026-02-10"),
+    },
+    // ── Yelp Reviews (imported) ─────────────────────────────────────
+    {
+      id: "yr1",
+      authorId: "y-user-1",
+      authorName: "Tanya L.",
+      targetId: "1",
+      targetType: "studio",
+      rating: 5,
+      title: "My go-to studio",
+      content:
+        "I've been coming here for two years now and have gotten four tattoos. Every artist in this studio is incredibly talented. The aftercare instructions they give are super thorough too.",
+      verified: false,
+      source: "yelp",
+      createdAt: new Date("2026-03-18"),
+      updatedAt: new Date("2026-03-18"),
+    },
+    {
+      id: "yr2",
+      authorId: "y-user-2",
+      authorName: "David Chen",
+      targetId: "1",
+      targetType: "studio",
+      rating: 4,
+      title: "Solid work, premium price",
+      content:
+        "Quality is top notch but expect to pay for it. Not the cheapest in LA but you get what you pay for. My Japanese-style piece is stunning. Book ahead, they stay busy.",
+      verified: false,
+      source: "yelp",
+      createdAt: new Date("2026-02-25"),
+      updatedAt: new Date("2026-02-25"),
+    },
+    // ── Trustpilot Reviews (imported) ───────────────────────────────
+    {
+      id: "tr1",
+      authorId: "t-user-1",
+      authorName: "Olivia Grant",
+      targetId: "1",
+      targetType: "studio",
+      rating: 5,
+      title: "Worth every penny",
+      content:
+        "Flew in from Seattle specifically to get tattooed here after seeing their work on Instagram. The consultation process was so detailed and thoughtful. The final piece exceeded my expectations. Already booked my next session.",
+      verified: false,
+      source: "trustpilot",
+      createdAt: new Date("2026-03-22"),
+      updatedAt: new Date("2026-03-22"),
+    },
+    {
+      id: "tr2",
+      authorId: "t-user-2",
+      authorName: "Kyle Morrison",
+      targetId: "1",
+      targetType: "studio",
+      rating: 5,
+      title: "Flawless experience",
+      content:
+        "From booking to aftercare, everything was seamless. The studio has a great atmosphere and the artists clearly love what they do. My fine-line piece healed perfectly.",
+      verified: false,
+      source: "trustpilot",
+      createdAt: new Date("2026-01-28"),
+      updatedAt: new Date("2026-01-28"),
     },
   ],
   "2": [

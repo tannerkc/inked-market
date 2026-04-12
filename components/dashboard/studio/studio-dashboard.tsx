@@ -141,14 +141,15 @@ export function StudioDashboard() {
               open={dashboard.integrationsOpen}
               onClose={() => dashboard.setIntegrationsOpen(false)}
               integrations={dashboard.studio?.integrations}
-              onLink={dashboard.handleOpenLinkFlow}
-              onUnlink={dashboard.handleUnlink}
+              onConnect={dashboard.handleConnect}
+              onDisconnect={dashboard.handleDisconnect}
             />
             <StudioLinkFlowPanel
               open={dashboard.linkFlowOpen}
               onClose={() => dashboard.setLinkFlowOpen(false)}
               platform={dashboard.linkFlowPlatform}
-              onSave={dashboard.handleSaveLink}
+              mode={dashboard.linkFlowMode}
+              onSave={dashboard.handleSaveConnection}
             />
           </>
         }

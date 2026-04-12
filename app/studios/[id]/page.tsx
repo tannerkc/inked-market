@@ -21,7 +21,6 @@ import {
   MetaRow,
   MetaItem,
   MetaHighlight,
-  IntegrationBadges,
 } from "@/components/detail";
 import { getStudio, getStudioReviews } from "@/lib/data/shops";
 import {
@@ -135,20 +134,11 @@ export default async function StudioPage({ params }: PageProps) {
           className="px-6 md:px-12 mb-4"
         />
         <div className="grid grid-cols-1 min-[960px]:grid-cols-[1.2fr_1fr_1fr] gap-[3px] px-6 md:px-12">
-          {/* Reviews */}
-          <div>
-            <ReviewPanel
-              reviews={reviews}
-              rating={studio.rating}
-              headingFont={bebasNeue.className}
-            />
-            {studio.integrations && (
-              <IntegrationBadges
-                googleBusiness={studio.integrations.googleBusiness}
-                yelp={studio.integrations.yelp}
-              />
-            )}
-          </div>
+          {/* Reviews (unified: local + imported from Google, Yelp, Trustpilot) */}
+          <ReviewPanel
+            reviews={reviews}
+            headingFont={bebasNeue.className}
+          />
 
           {/* Hours & Contact */}
           <WidgetPanel variant="alt">

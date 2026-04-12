@@ -2,13 +2,15 @@ import type { TierSlug } from "@/lib/types";
 
 // ─── Integration categories ─────────────────────────────────────────────────
 
-export type IntegrationCategory = "business-profile" | "reviews" | "booking" | "pos";
+export type IntegrationCategory = "reviews" | "booking" | "business-profile" | "pos";
 
 // ─── Platform identifiers ───────────────────────────────────────────────────
 
-export type BusinessProfilePlatform = "google-business" | "yelp" | "facebook";
-export type ReviewPlatform = "google-reviews" | "yelp-reviews";
-export type BookingPlatform =
+export type IntegrationPlatform =
+  | "google"
+  | "yelp"
+  | "trustpilot"
+  | "facebook"
   | "square"
   | "acuity"
   | "calendly"
@@ -16,43 +18,40 @@ export type BookingPlatform =
   | "fresha"
   | "daysmart"
   | "vagaro"
-  | "other-booking";
-export type PosPlatform = "square-pos" | "clover" | "shopify-pos" | "sumup";
+  | "other-booking"
+  | "square-pos"
+  | "clover"
+  | "shopify-pos"
+  | "sumup";
 
-export type IntegrationPlatform =
-  | BusinessProfilePlatform
-  | ReviewPlatform
-  | BookingPlatform
-  | PosPlatform;
+// ─── Integration modes ──────────────────────────────────────────────────────
+
+export type IntegrationMode = "integrate" | "import";
 
 // ─── Connection states ──────────────────────────────────────────────────────
 
 export type IntegrationStatus =
   | "not-connected"
-  | "linked"      // URL pasted (all tiers)
-  | "connected"   // OAuth complete (tier-gated, future)
-  | "syncing"     // Data import in progress (future)
-  | "error";      // Last sync or connection failed (future)
+  | "connected"   // Active integration/import
+  | "syncing"     // Data import in progress
+  | "error";      // Last sync failed
 
 // ─── Per-integration record ─────────────────────────────────────────────────
 
 export interface IntegrationRecord {
   status: IntegrationStatus;
+  /** Which mode is active for this integration. */
+  mode?: IntegrationMode;
 
-  // Link mode
+  // Connection
   linkUrl?: string;
-  linkedAt?: string;
-
-  // Connect mode (future OAuth)
-  accountName?: string;
   connectedAt?: string;
   lastSyncAt?: string;
   errorMessage?: string;
 
-  // Display data (rating badge, sync summary)
-  displayRating?: number;
-  displayReviewCount?: number;
-  displayValue?: string;
+  // Import summary
+  importedCount?: number;
+  importedLabel?: string;
 }
 
 // ─── Integrations map ───────────────────────────────────────────────────────
@@ -66,12 +65,15 @@ export interface IntegrationPlatformMeta {
   category: IntegrationCategory;
   name: string;
   description: string;
+  /** What "Integrate" mode does for this platform. null = not available. */
+  integrateLabel: string | null;
+  /** What "Import" mode does for this platform. null = not available. */
+  importLabel: string | null;
+  /** URL placeholder for link/connect input. */
   urlPlaceholder: string;
   urlPattern: RegExp;
-  /** Whether OAuth connect mode is supported (future). Link mode always works. */
-  supportsConnect: boolean;
-  /** Minimum tier for connect mode. null = link-only. */
-  connectMinTier: TierSlug | null;
+  /** Minimum tier required. null = available to all. */
+  minTier: TierSlug | null;
 }
 
 // ─── Category display metadata ──────────────────────────────────────────────
@@ -81,13 +83,3 @@ export interface IntegrationCategoryMeta {
   label: string;
   description: string;
 }
-
-// ─── Tier gating ────────────────────────────────────────────────────────────
-
-export type IntegrationFeature =
-  | "link"
-  | "google-autofill"
-  | "review-badges"
-  | "booking-connect"
-  | "client-import"
-  | "pos-connect";
