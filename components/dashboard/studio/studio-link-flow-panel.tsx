@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,12 +22,11 @@ export function StudioLinkFlowPanel({ open, onClose, platform, onSave }: StudioL
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (open) {
-      setUrl("");
-      setError("");
-    }
-  }, [open, platform?.id]);
+  function handleClose() {
+    setUrl("");
+    setError("");
+    onClose();
+  }
 
   function handleSave() {
     if (!platform) return;
@@ -44,7 +43,7 @@ export function StudioLinkFlowPanel({ open, onClose, platform, onSave }: StudioL
   }
 
   return (
-    <SlideOverPanel open={open} onClose={onClose} title={platform ? `Link ${platform.name}` : "Link Service"}>
+    <SlideOverPanel open={open} onClose={handleClose} title={platform ? `Link ${platform.name}` : "Link Service"}>
       {platform && (
         <div className="space-y-6">
           <div>
@@ -77,7 +76,7 @@ export function StudioLinkFlowPanel({ open, onClose, platform, onSave }: StudioL
             <Button variant="ink" size="lg" className="w-full" onClick={handleSave}>
               Save Link
             </Button>
-            <Button variant={isDark ? "ink-light-outline" : "ink-outline"} size="lg" className="w-full" onClick={onClose}>
+            <Button variant={isDark ? "ink-light-outline" : "ink-outline"} size="lg" className="w-full" onClick={handleClose}>
               Cancel
             </Button>
           </div>

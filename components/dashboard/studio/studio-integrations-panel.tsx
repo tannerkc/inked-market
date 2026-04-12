@@ -11,13 +11,11 @@ import {
   getPlatformsByCategory,
 } from "@/lib/data/integration-platforms";
 import type { StudioIntegrations, IntegrationPlatform } from "@/lib/types/integrations";
-import type { TierSlug } from "@/lib/types";
 
 interface StudioIntegrationsPanelProps {
   open: boolean;
   onClose: () => void;
   integrations: StudioIntegrations | undefined;
-  currentTier: TierSlug | null;
   onLink: (platformId: IntegrationPlatform) => void;
   onUnlink: (platformId: IntegrationPlatform) => void;
 }
@@ -26,7 +24,6 @@ export function StudioIntegrationsPanel({
   open,
   onClose,
   integrations,
-  currentTier,
   onLink,
   onUnlink,
 }: StudioIntegrationsPanelProps) {

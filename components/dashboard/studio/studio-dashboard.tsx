@@ -17,7 +17,7 @@ import { StudioIntegrationsCard } from "./studio-integrations-card";
 import { StudioIntegrationsPanel } from "./studio-integrations-panel";
 import { StudioLinkFlowPanel } from "./studio-link-flow-panel";
 import { useStudioDashboard } from "./use-studio-dashboard";
-import type { QuickAction, TierSlug } from "@/lib/types";
+import type { QuickAction } from "@/lib/types";
 
 export function StudioDashboard() {
   const { mode } = useTheme();
@@ -141,7 +141,6 @@ export function StudioDashboard() {
               open={dashboard.integrationsOpen}
               onClose={() => dashboard.setIntegrationsOpen(false)}
               integrations={dashboard.studio?.integrations}
-              currentTier={(dashboard.user?.billing?.plan as TierSlug) ?? null}
               onLink={dashboard.handleOpenLinkFlow}
               onUnlink={dashboard.handleUnlink}
             />
