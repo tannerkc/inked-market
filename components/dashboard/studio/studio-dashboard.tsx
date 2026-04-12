@@ -89,16 +89,16 @@ export function StudioDashboard() {
               onEdit={() => dashboard.setHoursOpen(true)}
             />
             <StudioServicesCard services={dashboard.services} onToggleService={dashboard.handleToggleService} />
+            <StudioIntegrationsCard
+              connectedCount={dashboard.connectedCount}
+              onOpen={() => dashboard.setIntegrationsOpen(true)}
+            />
           </>
         }
         rightColumn={
           <>
             <StudioPageCard />
             <StudioArtistsSection onInvite={() => dashboard.setInviteOpen(true)} />
-            <StudioIntegrationsCard
-              connectedCount={dashboard.connectedCount}
-              onOpen={() => dashboard.setIntegrationsOpen(true)}
-            />
             <QuickActionsGrid actions={quickActions} />
           </>
         }

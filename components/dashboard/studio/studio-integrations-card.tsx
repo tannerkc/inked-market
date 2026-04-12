@@ -16,18 +16,14 @@ export function StudioIntegrationsCard({ connectedCount, onOpen }: StudioIntegra
   const totalCount = INTEGRATION_PLATFORMS.length;
 
   return (
-    <div className="mb-6">
-      <h3 className={cn(
-        "font-mono text-[9px] tracking-[0.2em] uppercase mb-2.5",
-        isDark ? "text-ink-cream/35" : "text-ink-black/35"
-      )}>
-        Integrations
-      </h3>
-
-      <div className={cn(
+    <div className={cn(
         "rounded-[20px] border p-5",
         isDark ? "bg-ink-cream/[0.02] border-ink-cream/[0.06]" : "bg-ink-black/[0.02] border-ink-black/[0.06]"
       )}>
+        <p className={cn("font-mono text-[9px] tracking-[0.2em] uppercase mb-3", isDark ? "text-ink-cream/35" : "text-ink-black/35")}>
+          Integrations
+        </p>
+
         {/* Icon */}
         <div className={cn(
           "w-9 h-9 rounded-xl flex items-center justify-center mb-3 border",
@@ -67,6 +63,5 @@ export function StudioIntegrationsCard({ connectedCount, onOpen }: StudioIntegra
           Manage Integrations
         </Button>
       </div>
-    </div>
   );
 }
