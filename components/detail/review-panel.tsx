@@ -1,12 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { cn } from "@/lib/utils";
 import type { Review, ReviewSource } from "@/lib/types";
 
-interface ReviewPanelProps {
-  reviews: Review[];
-  headingFont: string;
-}
+const PREVIEW_COUNT = 3;
 
 const SOURCE_LABELS: Record<ReviewSource, string> = {
   "inked-market": "Verified Booking",
@@ -27,27 +27,76 @@ function sortByDateDesc(reviews: Review[]): Review[] {
   );
 }
 
-const ReviewPanel = React.forwardRef<HTMLDivElement, ReviewPanelProps>(
-  ({ reviews, headingFont }, ref) => {
-    const sorted = sortByDateDesc(reviews);
-    const { average, count } = computeAggregateRating(reviews);
+interface ReviewItemProps {
+  review: Review;
+}
 
-    // Count reviews by source for the summary
-    const sourceCounts = reviews.reduce<Partial<Record<ReviewSource, number>>>((acc, r) => {
-      const src = r.source ?? "inked-market";
-      acc[src] = (acc[src] ?? 0) + 1;
-      return acc;
-    }, {});
-    const sourceNames = Object.keys(sourceCounts) as ReviewSource[];
-    const hasMultipleSources = sourceNames.length > 1;
+function ReviewItem({ review }: ReviewItemProps) {
+  const source = review.source ?? "inked-market";
+  const isLocal = source === "inked-market";
 
-    return (
-      <div
-        ref={ref}
-        className="relative bg-ink-black border border-ink-cream/[0.06] rounded-xl p-6 md:p-8 overflow-hidden"
-      >
-        <FilmGrainOverlay className="opacity-[0.04]" />
+  return (
+    <div className="py-4 border-b border-ink-cream/[0.06] last:border-0">
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="w-8 h-8 rounded-full bg-ink-cream/[0.08] shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="text-[13px] font-semibold text-ink-cream">
+            {review.authorName}
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-mono text-[9px] tracking-[0.1em] text-ink-cream/30">
+              {review.createdAt.toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+            <span className={cn(
+              "font-mono text-[7px] tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-full",
+              isLocal
+                ? "bg-ink-sage/[0.12] text-ink-sage/70"
+                : "bg-ink-cream/[0.05] text-ink-cream/25"
+            )}>
+              {SOURCE_LABELS[source]}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="text-xs text-ink-red mb-1.5" aria-label={`${Math.min(5, Math.max(0, Math.round(review.rating) || 0))} out of 5 stars`}>
+        {"\u2605".repeat(Math.min(5, Math.max(0, Math.round(review.rating) || 0)))}
+      </div>
+      <p className="text-[13px] text-ink-cream/55 leading-[1.7]">
+        {review.content}
+      </p>
+    </div>
+  );
+}
 
+interface ReviewPanelProps {
+  reviews: Review[];
+  headingFont: string;
+}
+
+export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const sorted = sortByDateDesc(reviews);
+  const { average, count } = computeAggregateRating(reviews);
+  const preview = sorted.slice(0, PREVIEW_COUNT);
+  const hasMore = count > PREVIEW_COUNT;
+
+  // Count reviews by source for the summary
+  const sourceCounts = reviews.reduce<Partial<Record<ReviewSource, number>>>((acc, r) => {
+    const src = r.source ?? "inked-market";
+    acc[src] = (acc[src] ?? 0) + 1;
+    return acc;
+  }, {});
+  const sourceNames = Object.keys(sourceCounts) as ReviewSource[];
+  const hasMultipleSources = sourceNames.length > 1;
+
+  return (
+    <div className="relative bg-ink-black border border-ink-cream/[0.06] rounded-xl overflow-hidden">
+      <FilmGrainOverlay className="opacity-[0.04]" />
+
+      <div className="p-6 md:p-8">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4 relative z-10">
           <div className="w-4 h-px bg-ink-rust/40" />
@@ -72,55 +121,40 @@ const ReviewPanel = React.forwardRef<HTMLDivElement, ReviewPanelProps>(
           </p>
         )}
 
-        {/* Reviews */}
+        {/* Preview reviews */}
         <div className="space-y-0 relative z-10">
-          {sorted.map((review) => {
-            const source = review.source ?? "inked-market";
-            const isLocal = source === "inked-market";
-
-            return (
-              <div
-                key={review.id}
-                className="py-4 border-b border-ink-cream/[0.06] last:border-0"
-              >
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-ink-cream/[0.08]" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-ink-cream">
-                      {review.authorName}
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-mono text-[9px] tracking-[0.1em] text-ink-cream/30">
-                        {review.createdAt.toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                      <span className={cn(
-                        "font-mono text-[7px] tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-full",
-                        isLocal
-                          ? "bg-ink-sage/[0.12] text-ink-sage/70"
-                          : "bg-ink-cream/[0.05] text-ink-cream/25"
-                      )}>
-                        {SOURCE_LABELS[source]}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs text-ink-red mb-1.5" aria-label={`${Math.min(5, Math.max(0, Math.round(review.rating) || 0))} out of 5 stars`}>
-                  {"\u2605".repeat(Math.min(5, Math.max(0, Math.round(review.rating) || 0)))}
-                </div>
-                <p className="text-[13px] text-ink-cream/55 leading-[1.7]">
-                  {review.content}
-                </p>
-              </div>
-            );
-          })}
+          {preview.map((review) => (
+            <ReviewItem key={review.id} review={review} />
+          ))}
         </div>
       </div>
-    );
-  }
-);
-ReviewPanel.displayName = "ReviewPanel";
 
-export { ReviewPanel };
+      {/* See all link */}
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="flex items-center justify-between w-full px-6 md:px-8 py-3.5 border-t border-ink-cream/[0.06] transition-colors hover:bg-ink-cream/[0.03] relative z-10 cursor-pointer"
+        >
+          <span className="font-mono text-[11px] font-medium text-ink-rust">
+            See all {count} reviews
+          </span>
+          <span className="text-[12px] text-ink-rust">{"\u2191"}</span>
+        </button>
+      )}
+
+      {/* Full reviews bottom sheet */}
+      <BottomSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={`${count} Reviews · ${average.toFixed(1)} avg`}
+      >
+        <div className="flex flex-col">
+          {sorted.map((review) => (
+            <ReviewItem key={review.id} review={review} />
+          ))}
+        </div>
+      </BottomSheet>
+    </div>
+  );
+}
