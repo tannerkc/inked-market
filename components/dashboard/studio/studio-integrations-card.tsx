@@ -24,17 +24,6 @@ export function StudioIntegrationsCard({ connectedCount, onOpen }: StudioIntegra
           Integrations
         </p>
 
-        {/* Icon */}
-        <div className={cn(
-          "w-9 h-9 rounded-xl flex items-center justify-center mb-3 border",
-          "bg-ink-sage/[0.06] border-ink-sage/[0.1]"
-        )}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="text-ink-sage">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-        </div>
-
         {/* Count */}
         <p className={cn("text-[13px] font-medium mb-0.5", isDark ? "text-ink-cream/70" : "text-ink-black/70")}>
           {connectedCount > 0 ? `${connectedCount} linked` : "No services linked"}
