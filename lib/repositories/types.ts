@@ -1,3 +1,5 @@
+import type { StudioIntegrations } from "@/lib/types/integrations";
+
 // ─── Repository base interface ────────────────────────────────────────────────
 // All methods are async (Promise-returning) so LocalStorage and API
 // implementations are drop-in swaps — callers never change.
@@ -56,4 +58,7 @@ export interface StudioData {
   website?: string;
   tiktok?: string;
   facebook?: string;
+
+  // Integrations
+  integrations?: StudioIntegrations;
 }

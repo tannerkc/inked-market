@@ -44,6 +44,11 @@ export interface Studio extends BaseEntity {
   openHours?: {
     [key: string]: { open: string; close: string; closed?: boolean };
   };
+  integrations?: {
+    googleBusiness?: { profileUrl: string; rating: number; reviewCount: number };
+    yelp?: { profileUrl: string; rating: number; reviewCount: number };
+    booking?: { platform: string; bookingUrl: string; label?: string };
+  };
 }
 
 export interface Artist extends BaseEntity {
@@ -61,6 +66,7 @@ export interface Artist extends BaseEntity {
   verified: boolean;
   yearsOfExperience: number;
   certifications?: string[];
+  location?: { city: string; state: string };
 }
 
 export interface PortfolioImage {
