@@ -201,7 +201,7 @@ function ArtistGallerySheet({
       open={open}
       onClose={onClose}
       title={artist.name}
-      className="[--bg-raised:transparent] backdrop-blur-xl bg-white/10"
+      className="[--bg-raised:transparent] [--bg-sunken:rgba(255,255,255,0.1)] [--text-muted:#ffffff] [--text-secondary:#ffffff] [--border:rgba(255,255,255,0.1)]"
     >
       {/* Artist mini-profile */}
       <div
