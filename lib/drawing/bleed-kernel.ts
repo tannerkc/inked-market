@@ -59,7 +59,7 @@ export function gaussianBlur(
   // Vertical pass
   const final = applyKernel1D(horizontal, width, height, kernel, false);
 
-  return new ImageData(final, width, height);
+  return new ImageData(final as unknown as Uint8ClampedArray<ArrayBuffer>, width, height);
 }
 
 function buildGaussianKernel(size: number, sigma: number): Float32Array {

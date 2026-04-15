@@ -24,7 +24,6 @@ const FlashCard = React.forwardRef<HTMLAnchorElement, FlashCardProps>(
   ({ badges = [], ...props }, ref) => (
     <ProfileCard
       ref={ref}
-      image={props.image}
       badges={badges}
       aspect="3/4"
       {...props}

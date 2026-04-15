@@ -1447,7 +1447,6 @@ export default function ComponentLibraryPage() {
               </p>
               <div className="max-w-lg">
                 <ReviewPanel
-                  rating={4.9}
                   headingFont={bebasNeue.className}
                   reviews={[
                     {

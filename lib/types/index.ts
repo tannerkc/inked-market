@@ -42,7 +42,7 @@ export interface Studio extends BaseEntity {
   verified: boolean;
   artistIds: string[]; // IDs of artists working at this studio
   openHours?: {
-    [key: string]: { open: string; close: string; closed?: boolean };
+    [key: string]: { open: string; close: string; closed?: boolean } | { closed: true };
   };
   integrations?: {
     googleBusiness?: { profileUrl: string; rating: number; reviewCount: number };

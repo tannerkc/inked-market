@@ -160,7 +160,6 @@ export default async function ArtistPage({ params }: PageProps) {
           {/* Reviews */}
           <ReviewPanel
             reviews={reviews}
-            rating={artist.rating}
             headingFont={bebasNeue.className}
           />
 
