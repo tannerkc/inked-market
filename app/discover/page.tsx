@@ -3,11 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Bebas_Neue,
-  Permanent_Marker,
-  UnifrakturCook,
-} from "next/font/google";
 import { FlashCard } from "@/components/ui/flash-card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
@@ -21,10 +16,7 @@ import {
   mockArtists,
   discoverFilters,
 } from "@/lib/data/discover";
-
-const bebasNeue = Bebas_Neue({ weight: "400", subsets: ["latin"] });
-const permanentMarker = Permanent_Marker({ weight: "400", subsets: ["latin"] });
-const unifrakturCook = UnifrakturCook({ weight: "700", subsets: ["latin"] });
+import { bebasNeue, permanentMarker, unifrakturCook } from "@/lib/fonts";
 
 export default function DiscoverPage() {
   const router = useRouter();

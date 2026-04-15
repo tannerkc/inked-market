@@ -29,6 +29,7 @@ import {
   pirataOne,
   abrilFatface,
 } from "@/lib/fonts";
+import { formatRating } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -87,7 +88,7 @@ export default async function StudioPage({ params }: PageProps) {
           <MetaItem>
             {studio.location.city}, {studio.location.state}
           </MetaItem>
-          <MetaHighlight>★ {studio.rating.toFixed(1)}</MetaHighlight>
+          <MetaHighlight>★ {formatRating(studio.rating)}</MetaHighlight>
           <MetaItem>({studio.reviewCount} Reviews)</MetaItem>
         </MetaRow>
         <BioQuote bio={studio.bio} />

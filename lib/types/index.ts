@@ -404,3 +404,5 @@ export interface ConversationParticipant {
   avatarUrl?: string;
   role: "artist" | "studio";
 }
+
+export type InkAccentColor = "sage" | "rust" | "red";

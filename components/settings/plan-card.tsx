@@ -4,6 +4,10 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/providers/theme-provider";
 import type { BillingCycle, BillingStatus, TierSlug } from "@/lib/types";
+import {
+  artistTiers as signupArtistTiers,
+  studioTiers as signupStudioTiers,
+} from "@/lib/data/signup-tiers";
 
 interface PlanCardProps {
   plan: TierSlug | null;
@@ -21,16 +25,16 @@ const TIER_LABELS: Record<string, string> = {
   magnum: "Magnum",
 };
 
+const tierPrices: Record<string, { monthly: number; annual: number }> = Object.fromEntries(
+  [...signupStudioTiers, ...signupArtistTiers]
+    .filter((t) => t.price > 0)
+    .map((t) => [t.slug, { monthly: t.price, annual: t.annualPrice ?? t.price }])
+);
+
 function formatPrice(plan: TierSlug | null, cycle: BillingCycle, isFree: boolean): string {
   if (isFree) return "Free";
-  const prices: Record<string, { monthly: number; annual: number }> = {
-    liner: { monthly: 19.85, annual: 15.85 },
-    shader: { monthly: 14.85, annual: 11.85 },
-    magnum: { monthly: 79.85, annual: 63.85 },
-  };
-  // Artist shader vs studio liner/shader/magnum
-  if (!plan || !prices[plan]) return "Free";
-  const p = prices[plan];
+  if (!plan || !tierPrices[plan]) return "Free";
+  const p = tierPrices[plan];
   return `$${cycle === "annual" ? p.annual : p.monthly}/mo`;
 }
 

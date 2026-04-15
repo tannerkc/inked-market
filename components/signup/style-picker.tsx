@@ -2,8 +2,9 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import type { InkAccentColor } from "@/lib/types";
 
-type AccentColor = "red" | "rust" | "sage";
+type AccentColor = InkAccentColor;
 
 interface StylePickerProps {
   options: string[];

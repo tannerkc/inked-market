@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
+import type { InkAccentColor } from "@/lib/types";
 
 // ─── Badge ───────────────────────────────────────────────────────────────────
 
-type BadgeColor = "sage" | "rust" | "red";
+type BadgeColor = InkAccentColor;
 
 interface CardBadge {
   label: string;
@@ -154,7 +155,7 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
             {rating !== undefined && reviewCount !== undefined && (
               <p className="font-mono text-[9px]">
                 <span className="text-ink-red">
-                  &#9733; {rating.toFixed(1)}
+                  &#9733; {formatRating(rating)}
                 </span>
                 <span className="text-ink-cream/35 ml-1">({reviewCount})</span>
               </p>

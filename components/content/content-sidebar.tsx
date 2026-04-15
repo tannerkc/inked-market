@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Divider } from "@/components/ui/divider";
+import type { InkAccentColor } from "@/lib/types";
 
 interface SidebarSection {
   id: string;
@@ -10,7 +11,7 @@ interface SidebarSection {
   title: string;
 }
 
-type SidebarAccentColor = "sage" | "rust" | "red";
+type SidebarAccentColor = InkAccentColor;
 
 interface ContentSidebarProps {
   sections: SidebarSection[];

@@ -13,8 +13,12 @@ import {
 } from "@/components/pricing";
 import type { PricingFeature } from "@/components/pricing/pricing-tier-card";
 import type { Audience } from "@/components/pricing/pricing-toggle";
+import {
+  artistTiers as signupArtistTiers,
+  studioTiers as signupStudioTiers,
+} from "@/lib/data/signup-tiers";
 
-/* ─── Tier data ──────────────────────────────────────────────── */
+/* ─── Tier data (prices from signup-tiers.ts, features expanded for pricing page) */
 
 interface TierData {
   name: string;
@@ -28,8 +32,9 @@ interface TierData {
 
 const artistTiers: TierData[] = [
   {
-    name: "Liner",
-    price: 0,
+    name: signupArtistTiers[0].name,
+    price: signupArtistTiers[0].price,
+    annualPrice: signupArtistTiers[0].annualPrice,
     description:
       "Manage your profile and gallery on your studio\u2019s page.",
     features: [
@@ -42,9 +47,9 @@ const artistTiers: TierData[] = [
     ctaLabel: "Get Started Free",
   },
   {
-    name: "Shader",
-    price: 14.85,
-    annualPrice: 11.85,
+    name: signupArtistTiers[1].name,
+    price: signupArtistTiers[1].price,
+    annualPrice: signupArtistTiers[1].annualPrice,
     description:
       "Go independent. Get your own listing and be discovered by clients.",
     features: [
@@ -60,9 +65,9 @@ const artistTiers: TierData[] = [
 
 const studioTiers: TierData[] = [
   {
-    name: "Liner",
-    price: 19.85,
-    annualPrice: 15.85,
+    name: signupStudioTiers[0].name,
+    price: signupStudioTiers[0].price,
+    annualPrice: signupStudioTiers[0].annualPrice,
     description:
       "A professional profile page to showcase your studio on the marketplace.",
     features: [
@@ -76,9 +81,9 @@ const studioTiers: TierData[] = [
     ],
   },
   {
-    name: "Shader",
-    price: 59.85,
-    annualPrice: 47.85,
+    name: signupStudioTiers[1].name,
+    price: signupStudioTiers[1].price,
+    annualPrice: signupStudioTiers[1].annualPrice,
     description:
       "A fully customizable template website to represent your brand.",
     features: [
@@ -93,9 +98,9 @@ const studioTiers: TierData[] = [
     recommended: true,
   },
   {
-    name: "Magnum",
-    price: 79.85,
-    annualPrice: 63.85,
+    name: signupStudioTiers[2].name,
+    price: signupStudioTiers[2].price,
+    annualPrice: signupStudioTiers[2].annualPrice,
     description:
       "Full creative control with exclusive templates and premium search placement.",
     features: [

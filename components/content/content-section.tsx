@@ -1,8 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { bebasNeue } from "@/lib/fonts";
+import type { InkAccentColor } from "@/lib/types";
 
-type SectionAccentColor = "sage" | "rust" | "red";
+type SectionAccentColor = InkAccentColor;
 
 interface ContentSectionProps {
   id: string;

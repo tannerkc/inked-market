@@ -27,6 +27,7 @@ import {
   pirataOne,
   abrilFatface,
 } from "@/lib/fonts";
+import { formatRating } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -110,7 +111,7 @@ export default async function ArtistPage({ params }: PageProps) {
             </MetaItem>
           )}
           <MetaItem>{artist.yearsOfExperience} Years</MetaItem>
-          <MetaHighlight>★ {artist.rating.toFixed(1)}</MetaHighlight>
+          <MetaHighlight>★ {formatRating(artist.rating)}</MetaHighlight>
           <MetaItem>({artist.reviewCount} Reviews)</MetaItem>
         </MetaRow>
         <BioQuote bio={artist.bio} />

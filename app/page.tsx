@@ -12,42 +12,15 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { ZineSpread } from "@/components/discover/zine-spread";
 import { mockArtists, mockStudios } from "@/lib/data/discover";
 import { useEffect, useState } from "react";
-import { Permanent_Marker, Bebas_Neue, Pirata_One, Limelight, Rye, Abril_Fatface, UnifrakturCook } from "next/font/google";
-
-const permanentMarker = Permanent_Marker({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const bebasNeue = Bebas_Neue({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const pirataOne = Pirata_One({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const limelight = Limelight({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const rye = Rye({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const abrilFatface = Abril_Fatface({
-  weight: "400",
-  subsets: ["latin"],
-});
-
-const unifrakturCook = UnifrakturCook({
-  weight: "700",
-  subsets: ["latin"],
-});
+import {
+  permanentMarker,
+  bebasNeue,
+  pirataOne,
+  limelight,
+  rye,
+  abrilFatface,
+  unifrakturCook,
+} from "@/lib/fonts";
 
 const heroDecorations = [
   { src: "/tattoos/bird-svgrepo-com.svg", alt: "Bird", w: 80, h: 80, pos: "top-12 left-12", opacity: "opacity-30", speed: 0.15 },

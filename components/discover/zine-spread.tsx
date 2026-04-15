@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { Button } from "@/components/ui/button";
 import { badgeColorMap } from "@/lib/data/discover";
@@ -105,7 +105,7 @@ const ZineSpread = React.forwardRef<HTMLDivElement, ZineSpreadProps>(
               isDark ? "text-ink-cream/35" : "text-ink-black/40"
             )}
           >
-            {location} &middot; &#9733; {rating.toFixed(1)} &middot;{" "}
+            {location} &middot; &#9733; {formatRating(rating)} &middot;{" "}
             {reviewCount} reviews
           </p>
           <p

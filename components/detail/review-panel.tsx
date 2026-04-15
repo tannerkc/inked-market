@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { cn } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
 import type { Review, ReviewSource } from "@/lib/types";
 
 const PREVIEW_COUNT = 3;
@@ -101,7 +101,7 @@ export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
         <div className="flex items-center gap-2 mb-4 relative z-10">
           <div className="w-4 h-px bg-ink-rust/40" />
           <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink-rust">
-            Reviews — {average.toFixed(1)} Average
+            Reviews — {formatRating(average)} Average
           </span>
         </div>
 
@@ -147,7 +147,7 @@ export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title={`${count} Reviews · ${average.toFixed(1)} avg`}
+        title={`${count} Reviews · ${formatRating(average)} avg`}
       >
         <div className="flex flex-col">
           {sorted.map((review) => (

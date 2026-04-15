@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/data/saved";
 import { UnsaveButton } from "./unsave-button";
 import type { CardBadge, BadgeColor } from "@/components/ui/profile-card";
@@ -188,7 +188,7 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
                         &middot;
                       </span>
                       <span className="font-mono text-[8px] text-ink-red">
-                        &#9733; {rating.toFixed(1)}
+                        &#9733; {formatRating(rating)}
                       </span>
                     </>
                   )}

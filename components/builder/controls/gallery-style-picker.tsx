@@ -4,6 +4,7 @@ import { useBuilder } from "@/components/builder/builder-provider";
 import { galleryOptions, galleryPhotosOptions } from "@/lib/data/builder-options";
 import type { GalleryLayout, GalleryPhotosPerArtist } from "@/lib/types/builder";
 import { cn } from "@/lib/utils";
+import { PickerCheckmark } from "./picker-checkmark";
 
 // ─── Gallery Layout (mixed gallery preview) ───────────────────────────────────
 
@@ -95,10 +96,8 @@ export function GalleryStylePicker() {
               </div>
 
               {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red">
-                  <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-                    <path d="M2 5.5L4 7.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
+                  <PickerCheckmark />
                 </div>
               )}
             </button>
@@ -167,16 +166,8 @@ export function GalleryPhotosPicker() {
                 </span>
               </div>
               {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red">
-                  <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-                    <path
-                      d="M2 5.5L4 7.5L8 3"
-                      stroke="white"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
+                  <PickerCheckmark />
                 </div>
               )}
             </button>

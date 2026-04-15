@@ -4,8 +4,9 @@ import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Headline } from "@/components/ui/headline";
 import { Subtitle } from "@/components/ui/subtitle";
+import type { InkAccentColor } from "@/lib/types";
 
-type AccentColor = "sage" | "rust" | "red";
+type AccentColor = InkAccentColor;
 
 interface PageHeroProps {
   headline: string;

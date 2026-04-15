@@ -1,6 +1,8 @@
+import type { InkAccentColor } from "@/lib/types";
+
 export interface Badge {
   label: string;
-  color: "sage" | "rust" | "red";
+  color: InkAccentColor;
 }
 
 export const badgeColorMap: Record<Badge["color"], string> = {

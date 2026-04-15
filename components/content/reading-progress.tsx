@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import type { InkAccentColor } from "@/lib/types";
 
-type ProgressAccentColor = "sage" | "rust" | "red";
+type ProgressAccentColor = InkAccentColor;
 
 interface ReadingProgressProps {
   accentColor?: ProgressAccentColor;
