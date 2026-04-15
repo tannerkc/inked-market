@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { cssVarsToStyle } from "@/lib/utils/builder";
 import { TemplateNavBar } from "@/components/builder/preview/template-nav-bar";
 import { HeroSection } from "@/components/builder/preview/hero-section";
 import { GallerySection } from "@/components/builder/preview/gallery-section";
@@ -33,12 +34,7 @@ export function StudioPagePreview({
   const { config, resolvedVars, replayKey } = useBuilder();
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const cssVarStyle = Object.entries(resolvedVars).reduce<
-    Record<string, string>
-  >((acc, [key, value]) => {
-    acc[key] = value;
-    return acc;
-  }, {});
+  const cssVarStyle = cssVarsToStyle(resolvedVars);
 
   const animationStyle = config.animationStyle ?? "none";
   const dividerStyle = config.dividerStyle ?? "solid";

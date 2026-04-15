@@ -16,55 +16,32 @@ import { AboutSection } from "@/components/builder/preview/about-section";
 import { DetailsSection } from "@/components/builder/preview/details-section";
 import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
 import { TemplateFooter } from "@/components/builder/preview/template-footer";
-import { TemplateSwitcher } from "@/components/builder/template-switcher";
-import {
-  ThemePresetPicker,
-  AccentColorPicker,
-  BackgroundPicker,
-  TypographyPairPicker,
-  HeroStylePicker,
-  GalleryStylePicker,
-  GalleryPhotosPicker,
-  AboutLayoutPicker,
-  DetailsLayoutPicker,
-  FooterStylePicker,
-  FooterLayoutPicker,
-  NavStylePicker,
-  NavLayoutPicker,
-  TagStylePicker,
-  AdvancedColorPanel,
-  TypographyTuner,
-  VibePicker,
-  PageStyleGroup,
-  TexturePicker,
-  ImageTreatmentPicker,
-  LogoUpload,
-  LogoPlacementPicker,
-  ToggleRow,
-} from "@/components/builder/controls";
+import { GlobalTabContent } from "@/components/builder/builder-global-controls";
+import { SectionControls } from "@/components/builder/builder-section-controls";
+import { SECTION_DEFS } from "@/lib/config/builder-sections";
+import { FLASH_TABS, CUSTOM_TABS } from "@/lib/config/builder-toolbar-tabs";
+import { cssVarsToStyle, syncCssVarsToElement } from "@/lib/utils/builder";
 import type { DevicePreview } from "@/lib/types/builder";
 
-interface SectionConfig {
-  id: string;
-  name: string;
-  component: React.ReactNode;
-  popoverTitle: string;
-  controls: React.ReactNode;
-}
+const TAB_ICONS: Record<string, string> = {
+  theme: "◐",
+  type: "Aa",
+  sections: "▤",
+  effects: "◎",
+  brand: "◇",
+};
 
-const FLASH_BUTTONS: ToolbarButtonDef[] = [
-  { id: "theme", icon: "◐", label: "Theme & Colors" },
-  { id: "type", icon: "Aa", label: "Type" },
-  { id: "sections", icon: "▤", label: "Sections" },
-];
+const FLASH_BUTTONS: ToolbarButtonDef[] = FLASH_TABS.map((t) => ({
+  id: t.id,
+  icon: TAB_ICONS[t.id],
+  label: t.label,
+}));
 
-const CUSTOM_BUTTONS: ToolbarButtonDef[] = [
-  { id: "theme", icon: "◐", label: "Theme" },
-  { id: "type", icon: "Aa", label: "Type" },
-  { id: "sections", icon: "▤", label: "Sections" },
-  { id: "effects", icon: "◎", label: "Effects" },
-  { id: "brand", icon: "◇", label: "Brand" },
-];
+const CUSTOM_BUTTONS: ToolbarButtonDef[] = CUSTOM_TABS.map((t) => ({
+  id: t.id,
+  icon: TAB_ICONS[t.id],
+  label: t.label,
+}));
 
 export function InlineOverlayBuilder() {
   const editor = useBuilder();
@@ -82,13 +59,8 @@ export function InlineOverlayBuilder() {
 
   const overlayEl = useOverlayContainer();
 
-  // Sync template CSS vars to the overlay portal container so portaled components
-  // (BottomSheet, PhotoLightbox) inherit the active template's color scheme.
   useEffect(() => {
-    if (!overlayEl) return;
-    Object.entries(resolvedVars).forEach(([key, value]) => {
-      overlayEl.style.setProperty(key, value);
-    });
+    if (overlayEl) syncCssVarsToElement(overlayEl, resolvedVars);
   }, [overlayEl, resolvedVars]);
 
   // Constrain overlay to device frame width so bottom sheets stay within bounds
@@ -150,87 +122,32 @@ export function InlineOverlayBuilder() {
     setActiveFlyout((prev) => (prev === name ? null : name));
   }, []);
 
-  const cssVarStyle = Object.entries(resolvedVars).reduce<
-    Record<string, string>
-  >((acc, [key, value]) => {
-    acc[key] = value;
-    return acc;
-  }, {});
+  const cssVarStyle = cssVarsToStyle(resolvedVars);
 
   const surfaceTexture = config.surfaceTexture ?? "none";
   const animationStyle = config.animationStyle ?? "none";
   const toolbarButtons = tier === "custom" ? CUSTOM_BUTTONS : FLASH_BUTTONS;
 
-  const sections: SectionConfig[] = useMemo(
-    () => [
-      {
-        id: "nav",
-        name: "Navigation",
-        component: <TemplateNavBar />,
-        popoverTitle: "Navigation Bar",
-        controls: (
-          <>
-            <NavStylePicker />
-            {tier === "custom" && <NavLayoutPicker />}
-          </>
-        ),
-      },
-      {
-        id: "hero",
-        name: "Hero",
-        component: <HeroSection />,
-        popoverTitle: "Hero Section",
-        controls: <HeroStylePicker />,
-      },
-      ...(config.galleryBeforeAbout ? [{
-        id: "gallery",
-        name: "Gallery",
-        component: <GallerySection />,
-        popoverTitle: "Gallery Style",
-        controls: <GalleryStylePicker />,
-      }] : []),
-      {
-        id: "about",
-        name: "About",
-        component: <AboutSection />,
-        popoverTitle: "About Section",
-        controls: (
-          <>
-            <AboutLayoutPicker />
-            <TagStylePicker />
-          </>
-        ),
-      },
-      {
-        id: "artist-strips",
-        name: "Artists",
-        component: <ArtistStripsSection />,
-        popoverTitle: "Artist Strips",
-        controls: <GalleryPhotosPicker />,
-      },
-      {
-        id: "details",
-        name: "Details",
-        component: <DetailsSection />,
-        popoverTitle: "Details Section",
-        controls: <DetailsLayoutPicker />,
-      },
-      {
-        id: "footer-cta",
-        name: "CTA",
-        component: <FooterCTASection />,
-        popoverTitle: "CTA Section",
-        controls: <FooterStylePicker />,
-      },
-      {
-        id: "footer",
-        name: "Footer",
-        component: <TemplateFooter />,
-        popoverTitle: "Footer",
-        controls: <FooterLayoutPicker />,
-      },
-    ],
-    [config.galleryBeforeAbout, tier],
+  const sectionComponents: Record<string, React.ReactNode> = useMemo(
+    () => ({
+      nav: <TemplateNavBar />,
+      hero: <HeroSection />,
+      gallery: <GallerySection />,
+      about: <AboutSection />,
+      "artist-strips": <ArtistStripsSection />,
+      details: <DetailsSection />,
+      "footer-cta": <FooterCTASection />,
+      footer: <TemplateFooter />,
+    }),
+    [],
+  );
+
+  const visibleSections = useMemo(
+    () =>
+      SECTION_DEFS.filter(
+        (s) => s.id !== "gallery" || config.galleryBeforeAbout,
+      ),
+    [config.galleryBeforeAbout],
   );
 
   const closeFlyout = useCallback(() => setActiveFlyout(null), []);
@@ -251,7 +168,7 @@ export function InlineOverlayBuilder() {
         } as React.CSSProperties & Record<string, string>}
       >
         <DeviceFrameWrapper device={device}>
-          {sections.map((section) => (
+          {visibleSections.map((section) => (
             <EditableSection
               key={section.id}
               name={section.name}
@@ -259,14 +176,14 @@ export function InlineOverlayBuilder() {
               isActive={activeSection === section.id}
               onClick={() => handleSectionClick(section.id)}
             >
-              {section.component}
+              {sectionComponents[section.id]}
 
               <SectionPopover
-                title={section.popoverTitle}
+                title={section.title}
                 isOpen={activeSection === section.id}
                 onClose={() => setActiveSection(null)}
               >
-                {section.controls}
+                <SectionControls sectionId={section.id} />
               </SectionPopover>
             </EditableSection>
           ))}
@@ -285,125 +202,17 @@ export function InlineOverlayBuilder() {
         onTierChange={handleTierChange}
       />
 
-      {/* ─── Shared flyouts (both tiers) ─────────────────────── */}
-      <ToolbarFlyout
-        title={tier === "flash" ? "Theme & Colors" : "Theme"}
-        isOpen={activeFlyout === "theme"}
-        onClose={closeFlyout}
-      >
-        <TemplateSwitcher />
-        <ThemePresetPicker />
-        {tier === "flash" && (
-          <>
-            <AccentColorPicker />
-            <BackgroundPicker />
-          </>
-        )}
-        {tier === "custom" && (
-          <>
-            <AccentColorPicker />
-            <BackgroundPicker />
-            <AdvancedColorPanel />
-          </>
-        )}
-      </ToolbarFlyout>
-
-      <ToolbarFlyout
-        title="Typography"
-        isOpen={activeFlyout === "type"}
-        onClose={closeFlyout}
-      >
-        <TypographyPairPicker />
-        {tier === "custom" && <TypographyTuner />}
-      </ToolbarFlyout>
-
-      <ToolbarFlyout
-        title="Sections"
-        isOpen={activeFlyout === "sections"}
-        onClose={closeFlyout}
-      >
-        {tier === "flash" ? (
-          <div className="space-y-6">
-            <VibePicker />
-            <div>
-              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-                Show / Hide
-              </div>
-              <div className="space-y-1">
-                <ToggleRow
-                  label="Hero Tagline"
-                  checked={config.showHeroSubtext}
-                  onChange={(v) => applyChange({ showHeroSubtext: v })}
-                />
-                <ToggleRow
-                  label="Hero CTA"
-                  checked={config.showHeroCta}
-                  onChange={(v) => applyChange({ showHeroCta: v })}
-                />
-                <ToggleRow
-                  label="About Section"
-                  checked={config.aboutLayout !== "none"}
-                  onChange={(v) => applyChange({ aboutLayout: v ? "split" : "none" })}
-                />
-                <ToggleRow
-                  label="Specialties"
-                  checked={config.showSpecialties}
-                  onChange={(v) => applyChange({ showSpecialties: v })}
-                />
-                <ToggleRow
-                  label="Studio Details"
-                  checked={config.showStudioDetails}
-                  onChange={(v) => applyChange({ showStudioDetails: v })}
-                />
-                <ToggleRow
-                  label="CTA Glow"
-                  checked={config.ctaGlow}
-                  onChange={(v) => applyChange({ ctaGlow: v })}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <PageStyleGroup />
-          </div>
-        )}
-      </ToolbarFlyout>
-
-      {/* ─── Custom-only flyouts ─────────────────────────────── */}
-      {tier === "custom" && (
-        <>
-          <ToolbarFlyout
-            title="Effects"
-            isOpen={activeFlyout === "effects"}
-            onClose={closeFlyout}
-          >
-            <TexturePicker />
-            <ImageTreatmentPicker />
-          </ToolbarFlyout>
-
-          <ToolbarFlyout
-            title="Brand"
-            isOpen={activeFlyout === "brand"}
-            onClose={closeFlyout}
-          >
-            <LogoUpload />
-            {config.logoUrl && <LogoPlacementPicker />}
-            <div className="space-y-1">
-              <ToggleRow
-                label="Gallery Watermarks"
-                checked={config.galleryWatermarks ?? false}
-                onChange={(v) => applyChange({ galleryWatermarks: v })}
-              />
-              <ToggleRow
-                label="Custom Social Preview"
-                checked={config.customSocialPreview ?? false}
-                onChange={(v) => applyChange({ customSocialPreview: v })}
-              />
-            </div>
-          </ToolbarFlyout>
-        </>
-      )}
+      {/* Flyouts — content from shared GlobalTabContent */}
+      {toolbarButtons.map((btn) => (
+        <ToolbarFlyout
+          key={btn.id}
+          title={btn.id === "theme" && tier === "flash" ? "Theme & Colors" : btn.label}
+          isOpen={activeFlyout === btn.id}
+          onClose={closeFlyout}
+        >
+          <GlobalTabContent tab={btn.id} />
+        </ToolbarFlyout>
+      ))}
     </>
   );
 }

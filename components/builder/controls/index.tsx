@@ -28,3 +28,4 @@ export { LogoPlacementPicker } from "./logo-placement-picker";
 export { CtaStylePicker } from "./cta-style-picker";
 export { ToggleRow } from "./toggle-row";
 export { SegmentedPicker } from "./segmented-picker";
+export { PickerCheckmark } from "./picker-checkmark";

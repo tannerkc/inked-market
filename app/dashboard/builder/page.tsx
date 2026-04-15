@@ -1,15 +1,33 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { BuilderProvider } from "@/components/builder/builder-provider";
 import { BuilderTopBar } from "@/components/builder/builder-top-bar";
 import { SplitScreenBuilder } from "@/components/builder/split-screen-builder";
 import { InlineOverlayBuilder } from "@/components/builder/inline-overlay-builder";
+import { MobileBuilder } from "@/components/builder/mobile";
 import { TemplatePicker } from "@/components/builder/template-picker";
 import { TierSelector } from "@/components/builder/tier-selector";
 import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
 import { OverlayContext } from "@/lib/contexts/overlay-context";
+
+/* ── Mobile viewport detection ── */
+const mobileQuery =
+  typeof window !== "undefined"
+    ? window.matchMedia("(max-width: 767px)")
+    : null;
+
+function subscribeMobile(cb: () => void) {
+  mobileQuery?.addEventListener("change", cb);
+  return () => mobileQuery?.removeEventListener("change", cb);
+}
+function getIsMobile() {
+  return mobileQuery?.matches ?? false;
+}
+function getIsMobileServer() {
+  return false;
+}
 
 const BUILDER_MODE_KEY = "inked-builder-mode";
 const BUILDER_TIER_KEY = "inked-builder-tier";
@@ -46,6 +64,7 @@ function getExistingDraft(): StudioThemeConfig | null {
 }
 
 export default function BuilderPage() {
+  const isMobile = useSyncExternalStore(subscribeMobile, getIsMobile, getIsMobileServer);
   const [mode, setMode] = useState<BuilderMode>("inline");
   const [mounted, setMounted] = useState(false);
   const [overlayEl, setOverlayEl] = useState<HTMLElement | null>(null);
@@ -147,6 +166,22 @@ export default function BuilderPage() {
       <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a]">
         <TierSelector onSelect={handleSelectTier} />
       </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <BuilderProvider initial={initialConfig}>
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#0a0a0a]">
+          <OverlayContext.Provider value={overlayEl}>
+            <MobileBuilder />
+            <div
+              ref={setOverlayEl}
+              className="absolute inset-0 pointer-events-none z-[100]"
+            />
+          </OverlayContext.Provider>
+        </div>
+      </BuilderProvider>
     );
   }
 
