@@ -48,7 +48,7 @@ export function AnimationStylePicker() {
               className={cn(
                 "relative flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors",
                 selected
-                  ? "border-ink-red bg-[rgba(255,51,51,0.1)] ring-1 ring-ink-red/30"
+                  ? "border-ink-red bg-ink-red/10 ring-1 ring-ink-red/30"
                   : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
               )}
             >

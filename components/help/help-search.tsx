@@ -61,6 +61,11 @@ function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
     [query]
   );
 
+  // Reset activeIndex when suggestions change to prevent out-of-bounds
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [suggestions]);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {

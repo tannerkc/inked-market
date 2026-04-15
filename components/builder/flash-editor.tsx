@@ -17,14 +17,16 @@ import {
   GalleryPhotosPicker,
   FooterStylePicker,
   ToggleRow,
+  PoliciesEditor,
 } from "@/components/builder/controls";
 
-type FlashTab = "theme" | "type" | "sections";
+type FlashTab = "theme" | "type" | "sections" | "policies";
 
 const tabs: { label: string; value: FlashTab }[] = [
   { label: "Theme", value: "theme" },
   { label: "Typography", value: "type" },
   { label: "Sections", value: "sections" },
+  { label: "Policies", value: "policies" },
 ];
 
 export function FlashEditor() {
@@ -35,14 +37,14 @@ export function FlashEditor() {
 
   return (
     <>
-      <div className="flex border-b border-chrome-border">
+      <div className="flex overflow-x-auto border-b border-chrome-border scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.value}
             type="button"
             onClick={() => setActiveTab(tab.value)}
             className={cn(
-              "flex-1 py-3 text-[11px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2",
+              "shrink-0 px-3 py-3 text-[11px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2 whitespace-nowrap",
               activeTab === tab.value
                 ? "text-red-500 border-red-500"
                 : "text-chrome-text-dim border-transparent hover:text-chrome-text-secondary"
@@ -136,6 +138,8 @@ export function FlashEditor() {
             )}
           </>
         )}
+
+        {activeTab === "policies" && <PoliciesEditor />}
       </div>
     </>
   );

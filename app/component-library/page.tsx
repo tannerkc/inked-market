@@ -1852,7 +1852,7 @@ export default function ComponentLibraryPage() {
               </p>
               <div className="flex flex-wrap gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-ink-red shadow-[0_0_20px_rgba(255,51,51,0.4)] mx-auto" />
+                  <div className="w-16 h-16 rounded-full bg-ink-red shadow-[0_0_20px_color-mix(in_srgb,var(--ink-red)_40%,transparent)] mx-auto" />
                   <p className="font-mono text-[9px] text-ink-cream/30 mt-2">ink-red-glow</p>
                 </div>
                 <div className="text-center">

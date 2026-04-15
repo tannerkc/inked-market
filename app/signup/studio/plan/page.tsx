@@ -12,13 +12,17 @@ import {
 } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { studioTiers } from "@/lib/data/signup-tiers";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function StudioPlanPage() {
+  const { updateSignupProgress, completeSignup, signupProgress } = useAuth();
   const [isAnnual, setIsAnnual] = useState(false);
-  const [selectedTier, setSelectedTier] = useState("Liner");
+  const [selectedTier, setSelectedTier] = useState(signupProgress.plan || "Liner");
 
   const handleActivate = () => {
-    window.location.href = "/";
+    updateSignupProgress({ plan: selectedTier });
+    completeSignup();
+    window.location.href = "/dashboard";
   };
 
   return (

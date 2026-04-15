@@ -26,7 +26,7 @@ function PresetCard({
       className={cn(
         "w-full rounded-lg border text-left transition-colors overflow-hidden",
         selected
-          ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+          ? "border-ink-red bg-ink-red/10"
           : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover"
       )}
     >

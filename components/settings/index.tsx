@@ -13,3 +13,4 @@ export { PlanCard } from "./plan-card";
 export { PlanComparison } from "./plan-comparison";
 export { BillingCycleToggle } from "./billing-cycle-toggle";
 export { ConfirmationDialog } from "./confirmation-dialog";
+export { SettingsToggleRow, SettingsGroupLabel } from "./settings-toggle-row";

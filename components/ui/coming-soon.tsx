@@ -89,11 +89,11 @@ export function ComingSoon({
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild>
-              <Link href="/discover">Explore Marketplace</Link>
+            <Button size="lg" as={Link} href="/discover">
+              Explore Marketplace
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/">Back to Home</Link>
+            <Button size="lg" variant="outline" as={Link} href="/">
+              Back to Home
             </Button>
           </div>
 

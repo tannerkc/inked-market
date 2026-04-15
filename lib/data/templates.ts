@@ -1,4 +1,13 @@
 import type { TemplateDefinition, TemplateSlug } from "@/lib/types/builder";
+import { createDefaultPolicies } from "@/lib/data/policy-templates";
+
+const defaultPolicyConfig = {
+  showPoliciesSection: true,
+  policiesDisplayMode: "section" as const,
+  policiesCardStyle: "glass" as const,
+  policiesPageLayout: "tabs" as const,
+  policies: createDefaultPolicies(),
+};
 
 export const templates: Record<TemplateSlug, TemplateDefinition> = {
   "bold-editorial": {
@@ -33,6 +42,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       navStyle: "none",
       navLayout: "standard",
       builderTier: "flash",
+      ...defaultPolicyConfig,
     },
   },
   "clean-minimal": {
@@ -69,6 +79,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       navStyle: "static",
       navLayout: "standard",
       builderTier: "flash",
+      ...defaultPolicyConfig,
     },
   },
   "immersive-dark": {
@@ -102,6 +113,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       navStyle: "none",
       navLayout: "standard",
       builderTier: "flash",
+      ...defaultPolicyConfig,
     },
   },
   "warm-artisan": {
@@ -135,6 +147,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       navStyle: "static",
       navLayout: "standard",
       builderTier: "flash",
+      ...defaultPolicyConfig,
     },
   },
   "gutter-punk": {
@@ -180,6 +193,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       imageTreatment: "bw",
       surfaceTexture: "concrete",
       vibe: "raw",
+      ...defaultPolicyConfig,
     },
   },
   "dark-cinematic": {
@@ -225,6 +239,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       imageTreatment: "vignette",
       surfaceTexture: "film-grain",
       vibe: "noir",
+      ...defaultPolicyConfig,
     },
   },
   "studio-minimal": {
@@ -273,6 +288,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       imageTreatment: "none",
       surfaceTexture: "none",
       vibe: "void",
+      ...defaultPolicyConfig,
     },
   },
   "fine-line": {
@@ -321,6 +337,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       imageTreatment: "desat",
       surfaceTexture: "none",
       vibe: "ghost",
+      ...defaultPolicyConfig,
     },
   },
   "traditional-flash": {
@@ -366,6 +383,7 @@ export const templates: Record<TemplateSlug, TemplateDefinition> = {
       imageTreatment: "film",
       surfaceTexture: "parchment",
       vibe: "americana",
+      ...defaultPolicyConfig,
     },
   },
 };

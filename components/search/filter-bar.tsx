@@ -6,28 +6,14 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FilterDropdown } from "./filter-dropdown";
 import { FilterChips } from "./filter-chips";
+import { tattooStyleOptions } from "@/lib/data/signup-styles";
 
 export interface FilterBarProps {
   variant?: "light" | "dark";
   className?: string;
 }
 
-const TATTOO_STYLES = [
-  "Traditional",
-  "Realism",
-  "Watercolor",
-  "Tribal",
-  "Geometric",
-  "Blackwork",
-  "Japanese",
-  "Minimalist",
-  "Portrait",
-  "Fine Line",
-  "Neo-Traditional",
-  "Dotwork",
-  "Sketch",
-  "Abstract",
-];
+const TATTOO_STYLES = tattooStyleOptions;
 
 const LOCATION_SUGGESTIONS = [
   "Los Angeles, CA",
@@ -68,11 +54,14 @@ function FilterBarInner({ variant = "dark", className }: FilterBarProps) {
   const isBookingOpen = searchParams.get("booking") === "true";
 
   // Sync pending styles when dropdown opens
+  const currentStylesRef = React.useRef(currentStyles);
+  currentStylesRef.current = currentStyles;
+
   React.useEffect(() => {
     if (openDropdown === "style") {
-      setPendingStyles(currentStyles);
+      setPendingStyles(currentStylesRef.current);
     }
-  }, [openDropdown]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openDropdown]);
 
   function updateParams(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());

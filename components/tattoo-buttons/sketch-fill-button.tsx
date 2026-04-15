@@ -51,13 +51,7 @@ export const SketchFillButton: React.FC<SketchFillButtonProps> = ({
 
       <span className="relative z-10">{children}</span>
 
-      <style jsx>{`
-        @keyframes draw {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
+      {/* draw keyframes defined in globals.css */}
     </button>
   );
 };

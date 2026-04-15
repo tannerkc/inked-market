@@ -4,6 +4,7 @@ import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/components/providers/theme-provider";
+import { tattooStyleOptions } from "@/lib/data/signup-styles";
 
 interface CustomerProfileForm {
   firstName: string;
@@ -21,22 +22,7 @@ interface CustomerEditProfilePanelProps {
   onSave: () => void;
 }
 
-const STYLE_PREFERENCES = [
-  "Traditional",
-  "Realism",
-  "Watercolor",
-  "Tribal",
-  "Geometric",
-  "Blackwork",
-  "Japanese",
-  "Minimalist",
-  "Portrait",
-  "Fine Line",
-  "Neo-Traditional",
-  "Dotwork",
-  "Sketch",
-  "Abstract",
-];
+const STYLE_PREFERENCES = tattooStyleOptions;
 
 export function CustomerEditProfilePanel({
   open,

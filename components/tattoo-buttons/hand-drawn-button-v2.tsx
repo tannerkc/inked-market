@@ -26,7 +26,7 @@ const AnimatedBorder: React.FC<{ className?: string }> = ({ className }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       vectorEffect="non-scaling-stroke"
-      className="transition-all duration-500 group-hover:stroke-[3]"
+      className="transition-all duration-500 group-hover:stroke-[3] group-hover:animate-[redraw_0.8s_ease-out]"
       style={{
         strokeDasharray: '600',
         strokeDashoffset: '0',
@@ -110,21 +110,7 @@ export const HandDrawnButtonV2: React.FC<HandDrawnButtonV2Props> = ({
         {children}
       </span>
 
-      {/* Border redraw animation */}
-      <style jsx>{`
-        button:hover svg path {
-          animation: redraw 0.8s ease-out;
-        }
-
-        @keyframes redraw {
-          0% {
-            stroke-dashoffset: 600;
-          }
-          100% {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
+      {/* Border redraw animation — keyframes defined in globals.css */}
     </button>
   );
 };

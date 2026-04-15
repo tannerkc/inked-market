@@ -16,6 +16,7 @@ export function ToggleRow({ label, checked, onChange }: ToggleRowProps) {
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={label}
         onClick={() => onChange(!checked)}
         className={cn(
           "relative h-5 w-9 shrink-0 rounded-full transition-colors",

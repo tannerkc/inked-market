@@ -117,7 +117,7 @@ export function FooterStylePicker() {
               className={cn(
                 "group relative flex items-center gap-3 overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-all",
                 selected
-                  ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+                  ? "border-ink-red bg-ink-red/10"
                   : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover",
               )}
             >
@@ -179,10 +179,9 @@ export function FooterStylePicker() {
             <div className="relative flex h-9 w-[52px] flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-chrome-raised">
               <div
                 className={cn(
-                  "h-4 w-4 rounded-full blur-[3px] transition-opacity",
+                  "h-4 w-4 rounded-full bg-ink-red blur-[3px] transition-opacity",
                   config.ctaGlow ? "opacity-60" : "opacity-20",
                 )}
-                className="bg-ink-red"
               />
             </div>
             <div className="flex flex-col text-left">

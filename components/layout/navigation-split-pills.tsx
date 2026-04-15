@@ -50,7 +50,7 @@ export function NavigationSplitPills() {
               href="#"
               className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-ink-black text-ink-cream text-xs font-semibold transition-colors hover:bg-ink-black/90"
             >
-              <span className="w-[5px] h-[5px] rounded-full bg-ink-red shadow-[0_0_6px_rgba(255,51,51,0.4)]" />
+              <span className="w-[5px] h-[5px] rounded-full bg-ink-red shadow-[0_0_6px_color-mix(in_srgb,var(--ink-red)_40%,transparent)]" />
               Get Started
             </Link>
           </div>

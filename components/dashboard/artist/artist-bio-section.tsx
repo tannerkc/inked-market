@@ -10,9 +10,10 @@ interface ArtistBioSectionProps {
   setBioEditing: (editing: boolean) => void;
   bioText: string;
   setBioText: (text: string) => void;
+  onSave?: () => void;
 }
 
-export function ArtistBioSection({ bioEditing, setBioEditing, bioText, setBioText }: ArtistBioSectionProps) {
+export function ArtistBioSection({ bioEditing, setBioEditing, bioText, setBioText, onSave }: ArtistBioSectionProps) {
   const { mode } = useTheme();
   const isDark = mode === "dark";
 
@@ -32,7 +33,7 @@ export function ArtistBioSection({ bioEditing, setBioEditing, bioText, setBioTex
           />
           <div className="flex gap-2">
             <button onClick={() => setBioEditing(false)} className={`font-mono text-[9px] tracking-[0.15em] uppercase cursor-pointer ${isDark ? "text-ink-cream/30" : "text-ink-black/30"}`}>Cancel</button>
-            <button onClick={() => setBioEditing(false)} className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-rust cursor-pointer">Save</button>
+            <button onClick={() => { onSave?.(); setBioEditing(false); }} className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-rust cursor-pointer">Save</button>
           </div>
         </div>
       ) : (

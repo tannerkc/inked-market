@@ -111,7 +111,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark min-h-screen flex items-center justify-center overflow-hidden pt-22">
+      <section id="hero-section" className="relative bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark min-h-screen flex items-center justify-center overflow-hidden pt-22">
         {/* Scattered Tattoo Decorations with Parallax */}
         {heroDecorations.map((d) => (
           <div
@@ -355,7 +355,7 @@ export default function Home() {
               {[...mockArtists.slice(2), ...mockStudios.slice(2)].slice(0, 4).map((item) => (
                 <Link
                   key={`${item.name}-${item.id}`}
-                  href={`/artists/${item.id}`}
+                  href={`/${"artistCount" in item ? "studios" : "artists"}/${item.id}`}
                   className="group relative aspect-square overflow-hidden"
                 >
                   <div

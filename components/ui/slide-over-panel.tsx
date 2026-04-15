@@ -24,14 +24,13 @@ const SlideOverPanel = React.forwardRef<HTMLDivElement, SlideOverPanelProps>(
       setMounted(true);
     }, []);
 
-    // Body scroll lock
+    // Body scroll lock — always clean up on unmount
+    const openRef = React.useRef(open);
+    openRef.current = open;
+
     React.useEffect(() => {
       if (typeof document === "undefined") return;
-      if (open) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
+      document.body.style.overflow = open ? "hidden" : "";
       return () => {
         document.body.style.overflow = "";
       };

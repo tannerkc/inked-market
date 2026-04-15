@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ interface AudiencePillsProps {
   className?: string;
 }
 
-function AudiencePills({ variant = "dark", className }: AudiencePillsProps) {
+function AudiencePillsInner({ variant = "dark", className }: AudiencePillsProps) {
   const isDark = variant === "dark";
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -54,6 +54,14 @@ function AudiencePills({ variant = "dark", className }: AudiencePillsProps) {
         );
       })}
     </div>
+  );
+}
+
+function AudiencePills(props: AudiencePillsProps) {
+  return (
+    <Suspense fallback={null}>
+      <AudiencePillsInner {...props} />
+    </Suspense>
   );
 }
 

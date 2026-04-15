@@ -63,6 +63,10 @@ export function InlineOverlayBuilder() {
     if (overlayEl) syncCssVarsToElement(overlayEl, resolvedVars);
   }, [overlayEl, resolvedVars]);
 
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeFlyout, setActiveFlyout] = useState<string | null>(null);
+  const [device, setDevice] = useState<DevicePreview>("desktop");
+
   // Constrain overlay to device frame width so bottom sheets stay within bounds
   useEffect(() => {
     if (!overlayEl) return;
@@ -76,10 +80,6 @@ export function InlineOverlayBuilder() {
       overlayEl.style.marginRight = "";
     };
   }, [overlayEl, device]);
-
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [activeFlyout, setActiveFlyout] = useState<string | null>(null);
-  const [device, setDevice] = useState<DevicePreview>("desktop");
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

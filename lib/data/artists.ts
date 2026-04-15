@@ -350,9 +350,9 @@ export const mockReviews: Record<string, Review[]> = {
 };
 
 export function getArtist(id: string) {
-  return mockArtists[id] ?? mockArtists["1"];
+  return mockArtists[id] ?? undefined;
 }
 
 export function getArtistReviews(id: string) {
-  return mockReviews[id] ?? mockReviews["1"];
+  return mockReviews[id] ?? [];
 }

@@ -5,7 +5,7 @@ export interface SignupTierFeature {
 
 export interface SignupTierData {
   name: string;
-  slug: string;
+  slug: "liner" | "shader" | "magnum";
   price: number;
   annualPrice?: number;
   description: string;

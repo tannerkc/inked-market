@@ -570,12 +570,11 @@ export function TemplateNavBar() {
     width: "100%",
   };
 
-  function NavContent() {
-    if (layout === "logo-center") return <LogoCenterContent menuOpen={menuOpen} onMenuToggle={toggleMenu} />;
-    if (layout === "centered")    return <CenteredContent menuOpen={menuOpen} onMenuToggle={toggleMenu} />;
-    if (layout === "minimal")     return <MinimalContent />;
-    return <StandardContent menuOpen={menuOpen} onMenuToggle={toggleMenu} />;
-  }
+  const navContent =
+    layout === "logo-center" ? <LogoCenterContent menuOpen={menuOpen} onMenuToggle={toggleMenu} /> :
+    layout === "centered"    ? <CenteredContent menuOpen={menuOpen} onMenuToggle={toggleMenu} /> :
+    layout === "minimal"     ? <MinimalContent /> :
+                               <StandardContent menuOpen={menuOpen} onMenuToggle={toggleMenu} />;
 
   // Mobile menu only shown for layouts that have nav links
   const showMobileMenu = menuOpen && !isMinimal;
@@ -600,7 +599,7 @@ export function TemplateNavBar() {
               transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s",
             }}
           >
-            <div style={navInnerStyle}><NavContent /></div>
+            <div style={navInnerStyle}>{navContent}</div>
           </nav>
           {showMobileMenu && heroPassed && (
             <div style={menuWrapperStyle}>
@@ -620,7 +619,7 @@ export function TemplateNavBar() {
         : { position: "relative" }}
     >
       <nav style={navOuterStyle}>
-        <div style={navInnerStyle}><NavContent /></div>
+        <div style={navInnerStyle}>{navContent}</div>
       </nav>
       {showMobileMenu && (
         <div style={menuWrapperStyle}>

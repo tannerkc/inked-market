@@ -8,8 +8,9 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, variant = "light", ...props }, ref) => {
+  ({ className, label, variant = "light", id, ...props }, ref) => {
     const isLight = variant === "light";
+    const inputId = id ?? React.useId();
 
     return (
       <div
@@ -23,6 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       >
         <label
+          htmlFor={inputId}
           className={cn(
             "block font-mono text-[9px] tracking-[0.15em] uppercase",
             isLight ? "text-ink-black/30" : "text-ink-cream/30"
@@ -32,6 +34,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </label>
         <input
           ref={ref}
+          id={inputId}
           className={cn(
             "w-full bg-transparent text-[15px] mt-1 outline-none placeholder:opacity-20",
             isLight

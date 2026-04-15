@@ -79,6 +79,7 @@ export function ArtistDashboard() {
               setBioEditing={dashboard.setBioEditing}
               bioText={dashboard.bioText}
               setBioText={dashboard.setBioText}
+              onSave={dashboard.handleSaveBio}
             />
             <ArtistPortfolioSection />
             <ArtistStudioSection

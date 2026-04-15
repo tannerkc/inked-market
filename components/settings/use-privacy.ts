@@ -38,7 +38,8 @@ export function usePrivacy() {
   );
 
   // Artist on free tier can't appear in search
-  const isFreeTier = user?.role === "artist" && (!user?.billing?.plan || user?.billing?.plan === "liner" || (!user?.billing && (!user?.plan || user?.plan === "Free" || user?.plan === "Liner" || user?.plan === "liner")));
+  const plan = user?.billing?.plan ?? user?.plan?.toLowerCase();
+  const isFreeTier = user?.role === "artist" && (!plan || plan === "liner" || plan === "free");
 
   return { prefs, toggle, setPortfolioVisibility, role: user?.role ?? "customer", isFreeTier };
 }

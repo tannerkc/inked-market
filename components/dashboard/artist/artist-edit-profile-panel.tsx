@@ -4,6 +4,7 @@ import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/components/providers/theme-provider";
+import { tattooStyleOptions } from "@/lib/data/signup-styles";
 
 interface ProfileForm {
   firstName: string;
@@ -24,7 +25,7 @@ interface ArtistEditProfilePanelProps {
   onSave: () => void;
 }
 
-const ARTIST_STYLE_OPTIONS = ["Traditional", "Realism", "Watercolor", "Tribal", "Geometric", "Blackwork", "Japanese", "Minimalist", "Portrait", "Fine Line", "Neo-Traditional", "Dotwork", "Sketch", "Abstract"];
+const ARTIST_STYLE_OPTIONS = tattooStyleOptions;
 
 export function ArtistEditProfilePanel({ open, onClose, profileForm, setProfileForm, onSave }: ArtistEditProfilePanelProps) {
   const { mode } = useTheme();

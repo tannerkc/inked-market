@@ -12,6 +12,8 @@ import { AboutSection } from "@/components/builder/preview/about-section";
 import { DetailsSection } from "@/components/builder/preview/details-section";
 import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
 import { TemplateFooter } from "@/components/builder/preview/template-footer";
+import { PoliciesSection } from "@/components/builder/preview/policies-section";
+import { PoliciesPagePreview } from "@/components/builder/preview/policies-page-preview";
 import type { ResolvedThemeVars } from "@/lib/types/builder";
 
 interface StudioPagePreviewProps {
@@ -31,7 +33,7 @@ export function StudioPagePreview({
   interactive = false,
   className,
 }: StudioPagePreviewProps) {
-  const { config, resolvedVars, replayKey } = useBuilder();
+  const { config, resolvedVars, replayKey, previewPage } = useBuilder();
   const rootRef = useRef<HTMLDivElement>(null);
 
   const cssVarStyle = cssVarsToStyle(resolvedVars);
@@ -119,29 +121,37 @@ export function StudioPagePreview({
         backgroundColor: "var(--bg-primary)",
       } as React.CSSProperties & Record<string, string>}
     >
-      <TemplateNavBar />
-
-      <div data-builder-section="hero">
-        {section("hero", <HeroSection />, false)}
-      </div>
-
-      {divider()}
-      {config.galleryBeforeAbout ? (
-        <>
-          {section("gallery", <GallerySection />)}
-          {divider()}
-          {section("about", <AboutSection />)}
-        </>
+      {previewPage === "policies" ? (
+        <PoliciesPagePreview />
       ) : (
-        section("about", <AboutSection />)
+        <>
+          <TemplateNavBar />
+
+          <div data-builder-section="hero">
+            {section("hero", <HeroSection />, false)}
+          </div>
+
+          {divider()}
+          {config.galleryBeforeAbout ? (
+            <>
+              {section("gallery", <GallerySection />)}
+              {divider()}
+              {section("about", <AboutSection />)}
+            </>
+          ) : (
+            section("about", <AboutSection />)
+          )}
+          {divider()}
+          {section("artist-strips", <ArtistStripsSection />)}
+          {divider()}
+          {section("details", <DetailsSection />)}
+          {divider()}
+          {section("footer-cta", <FooterCTASection />, false)}
+          {divider()}
+          {section("policies", <PoliciesSection />)}
+          {section("footer", <TemplateFooter />, false)}
+        </>
       )}
-      {divider()}
-      {section("artist-strips", <ArtistStripsSection />)}
-      {divider()}
-      {section("details", <DetailsSection />)}
-      {divider()}
-      {section("footer-cta", <FooterCTASection />, false)}
-      {section("footer", <TemplateFooter />, false)}
     </div>
   );
 }

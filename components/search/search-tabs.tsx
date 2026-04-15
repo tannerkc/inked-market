@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +15,7 @@ const tabs = [
   { label: "Studios", value: "studios" },
 ] as const;
 
-const SearchTabs = React.forwardRef<HTMLDivElement, SearchTabsProps>(
+const SearchTabsInner = React.forwardRef<HTMLDivElement, SearchTabsProps>(
   ({ variant = "dark", className, ...props }, ref) => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -62,6 +63,15 @@ const SearchTabs = React.forwardRef<HTMLDivElement, SearchTabsProps>(
       </div>
     );
   }
+);
+SearchTabsInner.displayName = "SearchTabsInner";
+
+const SearchTabs = React.forwardRef<HTMLDivElement, SearchTabsProps>(
+  (props, ref) => (
+    <Suspense fallback={null}>
+      <SearchTabsInner ref={ref} {...props} />
+    </Suspense>
+  )
 );
 
 SearchTabs.displayName = "SearchTabs";

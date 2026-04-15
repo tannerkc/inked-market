@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import type {
   StudioThemeConfig,
   ResolvedThemeVars,
@@ -55,10 +55,13 @@ export function useThemeEditor(
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  const historyIndexRef = useRef(historyIndex);
+  historyIndexRef.current = historyIndex;
+
   const pushHistory = useCallback(
     (newConfig: StudioThemeConfig) => {
       setHistory((prev) => {
-        const truncated = prev.slice(0, historyIndex + 1);
+        const truncated = prev.slice(0, historyIndexRef.current + 1);
         const next = [...truncated, newConfig];
         return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
       });
@@ -68,7 +71,7 @@ export function useThemeEditor(
       });
       setConfig(newConfig);
     },
-    [historyIndex],
+    [],
   );
 
   const applyChange = useCallback(
@@ -115,6 +118,11 @@ export function useThemeEditor(
         accentColor: undefined,
         backgroundColor: undefined,
         backgroundMode: presetDef.mode,
+        showPoliciesSection: config.showPoliciesSection,
+        policiesDisplayMode: config.policiesDisplayMode,
+        policiesCardStyle: config.policiesCardStyle,
+        policiesPageLayout: config.policiesPageLayout,
+        policies: config.policies,
       };
       pushHistory(newConfig);
     },

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +17,7 @@ const sortOptions = [
   { label: "Newest", value: "newest" },
 ] as const;
 
-const SortSelect = React.forwardRef<HTMLDivElement, SortSelectProps>(
+const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
   ({ variant = "dark", className, ...props }, ref) => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -138,6 +139,15 @@ const SortSelect = React.forwardRef<HTMLDivElement, SortSelectProps>(
   }
 );
 
+SortSelectInner.displayName = "SortSelectInner";
+
+const SortSelect = React.forwardRef<HTMLDivElement, SortSelectProps>(
+  (props, ref) => (
+    <Suspense fallback={null}>
+      <SortSelectInner ref={ref} {...props} />
+    </Suspense>
+  )
+);
 SortSelect.displayName = "SortSelect";
 
 export { SortSelect };

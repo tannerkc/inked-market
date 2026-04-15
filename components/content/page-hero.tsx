@@ -23,7 +23,7 @@ interface PageHeroProps {
 const accentColorMap: Record<AccentColor, string> = {
   sage: "bg-ink-sage shadow-[0_0_6px_rgba(107,124,94,0.4)]",
   rust: "bg-ink-rust shadow-[0_0_6px_rgba(193,68,14,0.4)]",
-  red: "bg-ink-red shadow-[0_0_6px_rgba(255,51,51,0.4)]",
+  red: "bg-ink-red shadow-[0_0_6px_color-mix(in_srgb,var(--ink-red)_40%,transparent)]",
 };
 
 const glowMap: Record<AccentColor, string> = {

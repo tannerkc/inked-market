@@ -1,5 +1,12 @@
 // Builder types for the Studio Template Customizer
 
+import type {
+  PolicyConfig,
+  PoliciesDisplayMode,
+  PoliciesCardStyle,
+  PoliciesPageLayout,
+} from "@/lib/types/policies";
+
 export type ThemePreset =
   | "midnight"
   | "parchment"
@@ -96,6 +103,11 @@ export interface StudioThemeConfig {
   customSocialPreview?: boolean;
   galleryBeforeAbout?: boolean;
   showGalleryHeading?: boolean;
+  showPoliciesSection?: boolean;
+  policiesDisplayMode?: PoliciesDisplayMode;
+  policiesCardStyle?: PoliciesCardStyle;
+  policiesPageLayout?: PoliciesPageLayout;
+  policies?: PolicyConfig[];
 }
 
 export interface ResolvedThemeVars {

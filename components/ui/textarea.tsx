@@ -8,8 +8,9 @@ export interface TextareaProps
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, variant = "light", rows = 5, ...props }, ref) => {
+  ({ className, label, variant = "light", rows = 5, id, ...props }, ref) => {
     const isLight = variant === "light";
+    const textareaId = id ?? React.useId();
 
     return (
       <div
@@ -23,6 +24,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
       >
         <label
+          htmlFor={textareaId}
           className={cn(
             "block font-mono text-[9px] tracking-[0.15em] uppercase",
             isLight ? "text-ink-black/30" : "text-ink-cream/30"
@@ -32,6 +34,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         </label>
         <textarea
           ref={ref}
+          id={textareaId}
           rows={rows}
           className={cn(
             "w-full bg-transparent text-[15px] mt-1 outline-none resize-y placeholder:opacity-20",

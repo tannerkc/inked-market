@@ -15,8 +15,9 @@ export interface SelectProps
 }
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, variant = "light", options, placeholder = "Select…", ...props }, ref) => {
+  ({ className, label, variant = "light", options, placeholder = "Select…", id, ...props }, ref) => {
     const isLight = variant === "light";
+    const selectId = id ?? React.useId();
 
     return (
       <div
@@ -30,6 +31,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         )}
       >
         <label
+          htmlFor={selectId}
           className={cn(
             "block font-mono text-[9px] tracking-[0.15em] uppercase",
             isLight ? "text-ink-black/30" : "text-ink-cream/30"
@@ -39,6 +41,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         </label>
         <select
           ref={ref}
+          id={selectId}
           className={cn(
             "w-full bg-transparent text-[15px] mt-1 outline-none appearance-none pr-6",
             isLight

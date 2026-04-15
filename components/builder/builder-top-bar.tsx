@@ -29,7 +29,7 @@ export function BuilderTopBar() {
         <span className="text-xs font-medium text-chrome-text-secondary">
           {studio?.name ?? "Your Studio"}
         </span>
-        <span className="rounded bg-[rgba(255,51,51,0.15)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-red">
+        <span className="rounded bg-ink-red/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-red">
           Editing
         </span>
         {isDirty && (

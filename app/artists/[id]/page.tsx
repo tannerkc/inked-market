@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const artist = getArtist(id);
+  if (!artist) return { title: "Artist Not Found | Inked Market" };
   return {
     title: `${artist.name} — Tattoo Artist | Inked Market`,
     description: artist.bio.slice(0, 160),
@@ -46,7 +48,9 @@ export async function generateMetadata({
 
 export default async function ArtistPage({ params }: PageProps) {
   const { id } = await params;
-  const artist = getArtist(id) as ReturnType<typeof getArtist> & {
+  const rawArtist = getArtist(id);
+  if (!rawArtist) notFound();
+  const artist = rawArtist as typeof rawArtist & {
     studioName?: string;
     location?: { city: string; state: string };
   };

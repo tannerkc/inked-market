@@ -153,7 +153,7 @@ export function DrawingCanvas() {
   useEffect(() => {
     if (!isDesktop) return;
 
-    const hero = document.querySelector("section");
+    const hero = document.getElementById("hero-section") ?? document.querySelector("section");
     if (!hero) return;
     heroRef.current = hero;
 

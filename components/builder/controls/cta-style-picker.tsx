@@ -22,7 +22,7 @@ export function CtaStylePicker() {
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-[11px] font-medium capitalize transition-colors",
               current === style
-                ? "border-ink-red bg-[rgba(255,51,51,0.1)] text-ink-red"
+                ? "border-ink-red bg-ink-red/10 text-ink-red"
                 : "border-chrome-border bg-chrome-surface text-chrome-text-secondary hover:border-chrome-border-hover",
             )}
           >

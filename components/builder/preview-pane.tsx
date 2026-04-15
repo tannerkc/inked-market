@@ -22,7 +22,7 @@ const deviceMaxWidth: Record<DevicePreview, string> = {
 export function PreviewPane() {
   const [device, setDevice] = useState<DevicePreview>("desktop");
   const [overlayEl, setOverlayEl] = useState<HTMLElement | null>(null);
-  const { studio, useMockData, resolvedVars } = useBuilder();
+  const { studio, useMockData, resolvedVars, previewPage } = useBuilder();
 
   useEffect(() => {
     if (!overlayEl) return;
@@ -52,10 +52,10 @@ export function PreviewPane() {
               <rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
               <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>
-            <span className="text-[11px] leading-none font-mono text-chrome-text-tertiary select-none">
+            <span className="block min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-none font-mono text-chrome-text-tertiary select-none">
               <span className="text-chrome-text-faint">https://</span>
               <span className="text-chrome-text-secondary">inkedmarket.com</span>
-              <span className="text-chrome-text-dim">/studios/{slug}</span>
+              <span className="text-chrome-text-dim">/studios/{slug}{previewPage === "policies" ? "/policies" : ""}</span>
             </span>
           </div>
         </div>

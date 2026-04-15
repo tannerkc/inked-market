@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/providers/theme-provider";
+import { PillToggle } from "@/components/ui/pill-toggle";
 import type { BillingCycle } from "@/lib/types";
 
 interface BillingCycleToggleProps {
@@ -11,6 +12,11 @@ interface BillingCycleToggleProps {
   className?: string;
 }
 
+const CYCLE_OPTIONS = [
+  { label: "Monthly", value: "monthly" },
+  { label: "Annual", value: "annual" },
+];
+
 const BillingCycleToggle = React.forwardRef<HTMLDivElement, BillingCycleToggleProps>(
   ({ cycle, onChange, className }, ref) => {
     const { mode } = useTheme();
@@ -18,45 +24,12 @@ const BillingCycleToggle = React.forwardRef<HTMLDivElement, BillingCycleTogglePr
 
     return (
       <div ref={ref} className={cn("flex items-center gap-3", className)}>
-        <div
-          className={cn(
-            "inline-flex rounded-full overflow-hidden border",
-            isDark ? "border-ink-cream/[0.08]" : "border-ink-black/[0.08]"
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => onChange("monthly")}
-            className={cn(
-              "px-4 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase transition-all cursor-pointer",
-              cycle === "monthly"
-                ? isDark
-                  ? "bg-ink-cream text-ink-black"
-                  : "bg-ink-black text-ink-cream"
-                : isDark
-                  ? "text-ink-cream/40 hover:text-ink-cream/60"
-                  : "text-ink-black/40 hover:text-ink-black/60"
-            )}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange("annual")}
-            className={cn(
-              "px-4 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase transition-all cursor-pointer",
-              cycle === "annual"
-                ? isDark
-                  ? "bg-ink-cream text-ink-black"
-                  : "bg-ink-black text-ink-cream"
-                : isDark
-                  ? "text-ink-cream/40 hover:text-ink-cream/60"
-                  : "text-ink-black/40 hover:text-ink-black/60"
-            )}
-          >
-            Annual
-          </button>
-        </div>
+        <PillToggle
+          options={CYCLE_OPTIONS}
+          value={cycle}
+          onChange={(v) => onChange(v as BillingCycle)}
+          isDark={isDark}
+        />
         {cycle === "annual" && (
           <span className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-sage">
             Save ~20%

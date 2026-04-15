@@ -111,7 +111,7 @@ export function Navigation() {
                     )}>
                       {initials}
                     </div>
-                    <div className="absolute -top-px -right-px w-[7px] h-[7px] rounded-full bg-ink-sage border-[1.5px] border-ink-black" style={{ borderColor: isDark ? '#0A0A0A' : '#F5F0EB' }} />
+                    <div className="absolute -top-px -right-px w-[7px] h-[7px] rounded-full bg-ink-sage border-[1.5px] border-ink-black" style={{ borderColor: isDark ? 'var(--ink-black)' : 'var(--ink-cream)' }} />
                   </div>
                   {/* Name */}
                   <span className={cn(

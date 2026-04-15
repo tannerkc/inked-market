@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { getArtistDashboardData, getDefaultAvailability, getStudioSearchResults } from "@/lib/data/dashboard";
 import type { WeeklyAvailability, Affiliation } from "@/lib/types";
@@ -39,6 +39,22 @@ export function useArtistDashboard() {
     website: user?.website || "",
     tiktok: user?.tiktok || "",
   });
+
+  // Sync profile form when user loads asynchronously
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        firstName: user.name?.split(" ")[0] || "",
+        lastName: user.name?.split(" ").slice(1).join(" ") || "",
+        location: user.location || "",
+        bio: user.bio || "",
+        styles: (user.styles || []) as string[],
+        instagram: user.instagram || "",
+        website: user.website || "",
+        tiktok: user.tiktok || "",
+      });
+    }
+  }, [user?.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Studio affiliation
   const [studioSearch, setStudioSearch] = useState("");
@@ -103,6 +119,10 @@ export function useArtistDashboard() {
     }));
   };
 
+  const handleSaveBio = () => {
+    updateUser({ bio: bioText });
+  };
+
   const handleSaveProfile = () => {
     updateUser({
       name: `${profileForm.firstName} ${profileForm.lastName}`.trim(),
@@ -124,6 +144,7 @@ export function useArtistDashboard() {
     setBioEditing,
     bioText,
     setBioText,
+    handleSaveBio,
     // Panels
     editProfileOpen,
     setEditProfileOpen,

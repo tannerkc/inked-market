@@ -12,7 +12,7 @@ const StatusDot = React.forwardRef<HTMLSpanElement, StatusDotProps>(
     <span
       ref={ref}
       className={cn(
-        "w-[7px] h-[7px] rounded-full bg-ink-red shadow-[0_0_8px_rgba(255,51,51,0.5)]",
+        "w-[7px] h-[7px] rounded-full bg-ink-red shadow-[0_0_8px_color-mix(in_srgb,var(--ink-red)_50%,transparent)]",
         className
       )}
     />
@@ -90,7 +90,7 @@ const variants = {
   "ink-ghost":
     "rounded-full text-ink-black/45 hover:text-ink-black/70 hover:bg-ink-black/[0.04] focus-visible:ring-ink-black",
   "ink-red":
-    "rounded-full bg-ink-red text-white hover:bg-ink-red/90 font-mono tracking-[0.15em] uppercase shadow-[0_4px_16px_rgba(var(--ink-red),0.2)] focus-visible:ring-ink-red",
+    "rounded-full bg-ink-red text-white hover:bg-ink-red/90 font-mono tracking-[0.15em] uppercase shadow-[0_4px_16px_color-mix(in_srgb,var(--ink-red)_20%,transparent)] focus-visible:ring-ink-red",
   "ink-light-outline":
     "rounded-full border border-ink-cream/15 text-ink-cream/60 hover:bg-ink-cream/[0.05] hover:border-ink-cream/25 hover:text-ink-cream/80 font-mono tracking-[0.15em] uppercase focus-visible:ring-ink-cream",
 } as const;

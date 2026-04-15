@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { getCustomerDashboardData } from "@/lib/data/dashboard";
 import {
@@ -72,6 +72,19 @@ export function useCustomerDashboard() {
     bio: user?.bio || "",
     styles: (user?.styles || []) as string[],
   });
+
+  // Sync profile form when user loads asynchronously
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        firstName: user.name?.split(" ")[0] || "",
+        lastName: user.name?.split(" ").slice(1).join(" ") || "",
+        location: user.location || "",
+        bio: user.bio || "",
+        styles: (user.styles || []) as string[],
+      });
+    }
+  }, [user?.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed values
   const unreadCount = useMemo(

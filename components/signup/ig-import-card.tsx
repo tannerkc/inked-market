@@ -28,7 +28,7 @@ export function IgImportCard({ onConnect, onSkip, className }: IgImportCardProps
         onClick={onConnect}
         className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-ink-black text-ink-cream font-mono text-[10px] uppercase tracking-[0.15em] cursor-pointer hover:bg-ink-black/90 transition-colors"
       >
-        <span className="w-[5px] h-[5px] rounded-full bg-ink-red shadow-[0_0_6px_rgba(255,51,51,0.4)]" />
+        <span className="w-[5px] h-[5px] rounded-full bg-ink-red shadow-[0_0_6px_color-mix(in_srgb,var(--ink-red)_40%,transparent)]" />
         Connect Instagram
       </button>
       {onSkip && (

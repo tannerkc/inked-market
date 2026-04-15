@@ -29,8 +29,8 @@ export function EditableSection({
       className={cn(
         "group/section relative cursor-pointer transition-[outline] duration-150",
         isActive
-          ? "outline outline-2 outline-[rgba(255,51,51,0.8)]"
-          : "outline outline-2 outline-transparent hover:outline-[rgba(255,51,51,0.4)]"
+          ? "outline outline-2 outline-ink-red/80"
+          : "outline outline-2 outline-transparent hover:outline-ink-red/40"
       )}
     >
       {/* Floating label */}

@@ -24,7 +24,7 @@ const FilterDropdown = React.forwardRef<HTMLDivElement, FilterDropdownProps>(
             ? "bg-ink-cream/[0.04] border border-ink-cream/[0.08]"
             : "bg-ink-black/[0.03] border border-ink-black/[0.06]",
           open
-            ? "max-h-[300px] opacity-100 py-5 px-5"
+            ? "max-h-[400px] overflow-y-auto opacity-100 py-5 px-5"
             : "max-h-0 opacity-0 overflow-hidden py-0 px-5 border-transparent",
           className
         )}

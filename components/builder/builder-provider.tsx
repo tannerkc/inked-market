@@ -9,12 +9,16 @@ import type { StudioThemeConfig } from "@/lib/types/builder";
 import { useStudio } from "@/lib/providers/studio-provider";
 import type { StudioData } from "@/lib/repositories";
 
+export type PreviewPage = "studio" | "policies";
+
 interface BuilderContextValue extends UseThemeEditorReturn {
   replayKey: number;
   triggerReplay: () => void;
   studio: StudioData | null;
   useMockData: boolean;
   toggleMockData: () => void;
+  previewPage: PreviewPage;
+  setPreviewPage: (page: PreviewPage) => void;
 }
 
 const BuilderContext = createContext<BuilderContextValue | null>(null);
@@ -37,6 +41,7 @@ export function BuilderProvider({ children, initial }: BuilderProviderProps) {
   const triggerReplay = useCallback(() => setReplayKey((k) => k + 1), []);
   const [useMockData, setUseMockData] = useState(false);
   const toggleMockData = useCallback(() => setUseMockData((v) => !v), []);
+  const [previewPage, setPreviewPage] = useState<PreviewPage>("studio");
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -60,7 +65,7 @@ export function BuilderProvider({ children, initial }: BuilderProviderProps) {
   }, [editor]);
 
   return (
-    <BuilderContext.Provider value={{ ...editor, replayKey, triggerReplay, studio, useMockData, toggleMockData }}>
+    <BuilderContext.Provider value={{ ...editor, replayKey, triggerReplay, studio, useMockData, toggleMockData, previewPage, setPreviewPage }}>
       {children}
     </BuilderContext.Provider>
   );

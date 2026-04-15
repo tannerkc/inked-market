@@ -81,7 +81,7 @@ export function FooterLayoutPicker() {
               className={cn(
                 "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
                 selected
-                  ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+                  ? "border-ink-red bg-ink-red/10"
                   : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
               )}
             >

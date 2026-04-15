@@ -34,7 +34,7 @@ function NavThumbnail({ style, selected }: { style: NavStyle; selected: boolean 
               className="h-[5px] w-full rounded-sm"
               style={{
                 backgroundColor: accent,
-                boxShadow: `0 1px 4px ${selected ? "rgba(255,51,51,0.3)" : "rgba(68,68,68,0.4)"}`,
+                boxShadow: `0 1px 4px ${selected ? "color-mix(in srgb, var(--ink-red) 30%, transparent)" : "rgba(68,68,68,0.4)"}`,
               }}
             />
           </div>

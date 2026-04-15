@@ -71,7 +71,7 @@ export function LogoUpload() {
           className={cn(
             "flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors",
             dragging
-              ? "border-ink-red bg-[rgba(255,51,51,0.05)]"
+              ? "border-ink-red bg-ink-red/5"
               : "border-chrome-border-hover bg-ink-black-raised hover:border-chrome-text-faint"
           )}
         >

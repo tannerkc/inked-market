@@ -11,7 +11,7 @@ interface PopularArticlesProps {
 }
 
 const dotColorMap: Record<string, string> = {
-  red: "bg-ink-red shadow-[0_0_5px_rgba(255,51,51,0.3)]",
+  red: "bg-ink-red shadow-[0_0_5px_color-mix(in_srgb,var(--ink-red)_30%,transparent)]",
   rust: "bg-ink-rust shadow-[0_0_5px_rgba(183,118,74,0.3)]",
   sage: "bg-ink-sage shadow-[0_0_5px_rgba(122,140,110,0.3)]",
 };

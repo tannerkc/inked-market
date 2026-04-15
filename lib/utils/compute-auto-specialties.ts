@@ -1,5 +1,5 @@
 import { tattooStyleLabels } from "@/lib/data/signup-styles";
-import type { Affiliation } from "@/lib/types";
+import type { Affiliation, TattooStyle } from "@/lib/types";
 
 /**
  * Compute studio specialties from the union of all active roster artists' styles.
@@ -17,6 +17,8 @@ export function computeAutoSpecialties(roster: Affiliation[]): string[] {
   }
 
   // Maintain consistent display order by following tattooStyleLabels
-  const labelOrder = Object.values(tattooStyleLabels);
-  return labelOrder.filter((label) => allStyles.has(label));
+  // Compare against TattooStyle keys (e.g., "fine-line"), not display labels
+  return (Object.entries(tattooStyleLabels) as [TattooStyle, string][])
+    .filter(([key]) => allStyles.has(key))
+    .map(([, label]) => label);
 }

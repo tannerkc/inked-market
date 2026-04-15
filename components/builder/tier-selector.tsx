@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface TierSelectorProps {
   onSelect: (tier: BuilderTier, mode: BuilderMode) => void;
+  isMobile?: boolean;
 }
 
 /* ─── Step 1: Editor Style ─────────────────────────────────────────────── */
@@ -25,7 +26,7 @@ function ModeStep({ onSelect }: { onSelect: (mode: BuilderMode) => void }) {
         <button
           type="button"
           onClick={() => onSelect("inline")}
-          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-[rgba(255,51,51,0.05)]"
+          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-ink-red/5"
         >
           {/* Icon: single panel with left sidebar */}
           <svg width="36" height="28" viewBox="0 0 36 28" fill="none" className="text-chrome-text-faint transition-colors group-hover:text-ink-red">
@@ -49,7 +50,7 @@ function ModeStep({ onSelect }: { onSelect: (mode: BuilderMode) => void }) {
         <button
           type="button"
           onClick={() => onSelect("split")}
-          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-[rgba(255,51,51,0.05)]"
+          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-ink-red/5"
         >
           {/* Icon: two-panel split */}
           <svg width="36" height="28" viewBox="0 0 36 28" fill="none" className="text-chrome-text-faint transition-colors group-hover:text-ink-red">
@@ -84,13 +85,13 @@ function TierStep({
   onBack,
 }: {
   onSelect: (tier: BuilderTier) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 px-4">
       <div className="text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[2px] text-ink-red/70">
-          Step 2 of 2
+          {onBack ? "Step 2 of 2" : "One more thing"}
         </p>
         <h2 className="mt-2 text-lg font-bold text-chrome-text-light">How much do you want to customize?</h2>
       </div>
@@ -100,7 +101,7 @@ function TierStep({
         <button
           type="button"
           onClick={() => onSelect("flash")}
-          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-[rgba(255,51,51,0.05)]"
+          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-ink-red/5"
         >
           {/* Icon: lightning bolt */}
           <svg width="24" height="32" viewBox="0 0 24 32" fill="none" className="text-chrome-text-faint transition-colors group-hover:text-ink-red">
@@ -120,7 +121,7 @@ function TierStep({
         <button
           type="button"
           onClick={() => onSelect("custom")}
-          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-[rgba(255,51,51,0.05)]"
+          className="group relative flex flex-1 flex-col items-center gap-3 rounded-xl border-2 border-chrome-border bg-chrome-surface px-5 py-8 text-center transition-all hover:border-ink-red hover:bg-ink-red/5"
         >
           {/* Icon: sliders */}
           <svg width="30" height="28" viewBox="0 0 30 28" fill="none" className="text-chrome-text-faint transition-colors group-hover:text-ink-red">
@@ -142,24 +143,26 @@ function TierStep({
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-[11px] text-chrome-text-faint transition-colors hover:text-chrome-text-secondary"
-      >
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 3L5 8l5 5" />
-        </svg>
-        Back
-      </button>
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-[11px] text-chrome-text-faint transition-colors hover:text-chrome-text-secondary"
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+          Back
+        </button>
+      )}
     </div>
   );
 }
 
 /* ─── Orchestrator ─────────────────────────────────────────────────────── */
 
-export function TierSelector({ onSelect }: TierSelectorProps) {
-  const [step, setStep] = useState<"mode" | "tier">("mode");
+export function TierSelector({ onSelect, isMobile }: TierSelectorProps) {
+  const [step, setStep] = useState<"mode" | "tier">(isMobile ? "tier" : "mode");
   const [selectedMode, setSelectedMode] = useState<BuilderMode>("inline");
 
   const handleModeSelect = (mode: BuilderMode) => {
@@ -167,14 +170,14 @@ export function TierSelector({ onSelect }: TierSelectorProps) {
     setStep("tier");
   };
 
-  if (step === "mode") {
+  if (step === "mode" && !isMobile) {
     return <ModeStep onSelect={handleModeSelect} />;
   }
 
   return (
     <TierStep
       onSelect={(tier) => onSelect(tier, selectedMode)}
-      onBack={() => setStep("mode")}
+      onBack={isMobile ? undefined : () => setStep("mode")}
     />
   );
 }

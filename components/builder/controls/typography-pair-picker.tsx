@@ -21,7 +21,7 @@ function PairingCard({
       className={cn(
         "w-full rounded-lg border p-3 text-left transition-colors",
         selected
-          ? "border-ink-red bg-[rgba(255,51,51,0.1)]"
+          ? "border-ink-red bg-ink-red/10"
           : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover"
       )}
     >

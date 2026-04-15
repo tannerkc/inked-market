@@ -28,9 +28,10 @@ import {
   LogoUpload,
   LogoPlacementPicker,
   ToggleRow,
+  PoliciesEditorCustom,
 } from "@/components/builder/controls";
 
-type CustomTab = "theme" | "type" | "sections" | "effects" | "brand";
+type CustomTab = "theme" | "type" | "sections" | "effects" | "brand" | "policies";
 
 const tabs: { label: string; value: CustomTab }[] = [
   { label: "Theme", value: "theme" },
@@ -38,6 +39,7 @@ const tabs: { label: string; value: CustomTab }[] = [
   { label: "Sections", value: "sections" },
   { label: "Effects", value: "effects" },
   { label: "Brand", value: "brand" },
+  { label: "Policies", value: "policies" },
 ];
 
 function SectionCard({
@@ -65,14 +67,14 @@ export function CustomEditor() {
 
   return (
     <>
-      <div className="flex border-b border-chrome-border">
+      <div className="flex overflow-x-auto border-b border-chrome-border scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.value}
             type="button"
             onClick={() => setActiveTab(tab.value)}
             className={cn(
-              "flex-1 py-3 text-[10px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2",
+              "shrink-0 px-3 py-3 text-[10px] font-semibold uppercase tracking-[1.5px] transition-colors border-b-2 whitespace-nowrap",
               activeTab === tab.value
                 ? "text-red-500 border-red-500"
                 : "text-chrome-text-dim border-transparent hover:text-chrome-text-secondary"
@@ -204,6 +206,9 @@ export function CustomEditor() {
             </div>
           </>
         )}
+
+        {/* ─── Policies Tab ────────────────────── */}
+        {activeTab === "policies" && <PoliciesEditorCustom />}
       </div>
     </>
   );

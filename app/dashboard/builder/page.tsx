@@ -12,7 +12,8 @@ import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
 import { OverlayContext } from "@/lib/contexts/overlay-context";
 
-/* ── Mobile viewport detection ── */
+/* ─── Mobile detection ────────────────────────────────────────────────── */
+
 const mobileQuery =
   typeof window !== "undefined"
     ? window.matchMedia("(max-width: 767px)")
@@ -22,12 +23,14 @@ function subscribeMobile(cb: () => void) {
   mobileQuery?.addEventListener("change", cb);
   return () => mobileQuery?.removeEventListener("change", cb);
 }
+
 function getIsMobile() {
   return mobileQuery?.matches ?? false;
 }
-function getIsMobileServer() {
-  return false;
-}
+
+const serverSnapshot = () => false;
+
+/* ─── Storage keys ────────────────────────────────────────────────────── */
 
 const BUILDER_MODE_KEY = "inked-builder-mode";
 const BUILDER_TIER_KEY = "inked-builder-tier";
@@ -64,7 +67,7 @@ function getExistingDraft(): StudioThemeConfig | null {
 }
 
 export default function BuilderPage() {
-  const isMobile = useSyncExternalStore(subscribeMobile, getIsMobile, getIsMobileServer);
+  const isMobile = useSyncExternalStore(subscribeMobile, getIsMobile, serverSnapshot);
   const [mode, setMode] = useState<BuilderMode>("inline");
   const [mounted, setMounted] = useState(false);
   const [overlayEl, setOverlayEl] = useState<HTMLElement | null>(null);
@@ -149,8 +152,8 @@ export default function BuilderPage() {
 
   if (!mounted) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0a0a0a]">
-        <div className="text-xs font-medium uppercase tracking-wider text-[#555]">
+      <div className="flex h-screen items-center justify-center bg-chrome-bg">
+        <div className="text-xs font-medium uppercase tracking-wider text-chrome-text-dim">
           Loading builder...
         </div>
       </div>
@@ -163,8 +166,8 @@ export default function BuilderPage() {
 
   if (!hasTier) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a]">
-        <TierSelector onSelect={handleSelectTier} />
+      <div className="fixed inset-0 z-50 flex flex-col bg-chrome-bg">
+        <TierSelector onSelect={handleSelectTier} isMobile={isMobile} />
       </div>
     );
   }
@@ -172,7 +175,7 @@ export default function BuilderPage() {
   if (isMobile) {
     return (
       <BuilderProvider initial={initialConfig}>
-        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#0a0a0a]">
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-chrome-bg">
           <OverlayContext.Provider value={overlayEl}>
             <MobileBuilder />
             <div
@@ -187,7 +190,7 @@ export default function BuilderPage() {
 
   return (
     <BuilderProvider initial={initialConfig}>
-      <div className="fixed inset-0 top-0 z-50 flex flex-col overflow-hidden bg-[#0a0a0a]">
+      <div className="fixed inset-0 top-0 z-50 flex flex-col overflow-hidden bg-chrome-bg">
         <BuilderTopBar />
         <div className="flex-1 overflow-hidden pt-12">
           {mode === "split" ? (

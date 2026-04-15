@@ -35,6 +35,7 @@ function TabBarInner<T extends string>(
   return (
     <div
       ref={ref}
+      role="tablist"
       className={cn(
         "flex items-center gap-0 border-b overflow-x-auto scrollbar-hide transition-colors duration-500",
         isLight ? "border-ink-black/[0.08]" : "border-ink-cream/[0.06]",
@@ -50,6 +51,8 @@ function TabBarInner<T extends string>(
           <button
             key={value}
             type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => onTabChange(value)}
             className={cn(
               "px-5 py-3.5 font-mono text-[10px] tracking-[0.15em] uppercase border-b-2 transition-colors duration-200 whitespace-nowrap cursor-pointer",

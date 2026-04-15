@@ -6,7 +6,7 @@ interface BioQuoteProps {
 }
 
 function BioQuote({ bio, sentenceCount = 2 }: BioQuoteProps) {
-  const excerpt = bio.split(". ").slice(0, sentenceCount).join(". ");
+  const excerpt = bio.split(". ").slice(0, sentenceCount).join(". ").replace(/[.!?]+$/, "");
 
   return (
     <blockquote className="text-[14px] md:text-[15px] text-ink-cream/60 leading-[1.8] italic border-l-2 border-ink-red/35 pl-5 max-w-[420px] relative z-10">

@@ -28,6 +28,7 @@ export function PillToggle({ options, value, onChange, isDark }: PillToggleProps
           <button
             key={opt.value}
             type="button"
+            aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={cn(
               "px-[var(--pill-btn-px)] py-[var(--pill-btn-py)] rounded-full font-mono text-[10px] tracking-[0.12em] uppercase transition-all duration-300 border-none cursor-pointer",

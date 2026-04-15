@@ -18,15 +18,11 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>("light");
-
-  // Hydrate from localStorage on mount
-  useEffect(() => {
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") return "light";
     const stored = localStorage.getItem("inked-theme");
-    if (stored === "light" || stored === "dark") {
-      setMode(stored);
-    }
-  }, []);
+    return stored === "dark" ? "dark" : "light";
+  });
 
   // Persist to localStorage and sync data-theme attribute
   useEffect(() => {
