@@ -61,4 +61,9 @@ export interface StudioData {
 
   // Integrations
   integrations?: StudioIntegrations;
+
+  // Source tracking (populated by Supabase, optional for backwards compat)
+  source?: "google" | "organic";
+  claimedBy?: string;
+  slug?: string;
 }
