@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import type { TemplateDefinition } from "@/lib/types/builder";
 
@@ -552,9 +550,11 @@ export function TemplatePreview({ template }: TemplatePreviewProps) {
   switch (template.slug) {
     case "bold-editorial":
       return <BoldEditorialPreview />;
-    case "clean-minimal":
+    case "studio-minimal":
+      // Absorbed clean-minimal in the 9→7 consolidation — inherits its preview.
       return <CleanMinimalPreview />;
-    case "immersive-dark":
+    case "dark-cinematic":
+      // Absorbed immersive-dark in the 9→7 consolidation — inherits its preview.
       return <ImmersiveDarkPreview />;
     case "warm-artisan":
       return <WarmArtisanPreview />;

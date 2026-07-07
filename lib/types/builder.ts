@@ -31,12 +31,10 @@ export type NavLayout = "standard" | "logo-center" | "centered" | "minimal";
 export type MobileMenuType = "dropdown" | "fullscreen" | "drawer";
 export type TemplateSlug =
   | "bold-editorial"
-  | "clean-minimal"
-  | "immersive-dark"
+  | "studio-minimal"
+  | "dark-cinematic"
   | "warm-artisan"
   | "gutter-punk"
-  | "dark-cinematic"
-  | "studio-minimal"
   | "fine-line"
   | "traditional-flash";
 

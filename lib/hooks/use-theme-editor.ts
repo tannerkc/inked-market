@@ -12,9 +12,39 @@ import { defaultThemeConfig, themePresets } from "@/lib/data/theme-presets";
 import { templates } from "@/lib/data/templates";
 import { vibeOptions } from "@/lib/data/builder-options";
 import { resolveTheme } from "@/lib/utils/resolve-theme";
+import { remapLegacyTemplate, LEGACY_TEMPLATE_MAP } from "@/lib/utils/legacy-template";
 
 const MAX_HISTORY = 50;
 const STORAGE_KEY = "inked-builder-draft";
+// Per-template draft cache: each template the owner edits keeps its own in-progress
+// config, so switching templates and back is seamless ("pick up where you left off").
+const DRAFTS_KEY = "inked-builder-drafts";
+
+function readTemplateDrafts(): Partial<Record<TemplateSlug, StudioThemeConfig>> {
+  try {
+    const raw = localStorage.getItem(DRAFTS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, StudioThemeConfig>;
+    const out: Partial<Record<TemplateSlug, StudioThemeConfig>> = {};
+    for (const [slug, cfg] of Object.entries(parsed)) {
+      const target = (LEGACY_TEMPLATE_MAP[slug] ?? slug) as TemplateSlug;
+      out[target] = remapLegacyTemplate(cfg);
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function writeTemplateDraft(slug: TemplateSlug, cfg: StudioThemeConfig) {
+  try {
+    const all = readTemplateDrafts();
+    all[slug] = cfg;
+    localStorage.setItem(DRAFTS_KEY, JSON.stringify(all));
+  } catch {
+    // localStorage may be unavailable
+  }
+}
 
 export interface UseThemeEditorReturn {
   config: StudioThemeConfig;
@@ -155,9 +185,14 @@ export function useThemeEditor(
 
   const applyTemplate = useCallback(
     (slug: TemplateSlug) => {
-      const tmpl = templates[slug];
+      // Preserve the outgoing template's in-progress edits before switching away.
+      if (config.template && config.template !== slug) {
+        writeTemplateDraft(config.template, config);
+      }
+      // Resume the target template's saved draft if one exists, else its defaults.
+      const base = readTemplateDrafts()[slug] ?? templates[slug].defaults;
       const newConfig: StudioThemeConfig = {
-        ...tmpl.defaults,
+        ...base,
         builderMode: config.builderMode,
         builderTier: config.builderTier,
       };
@@ -169,15 +204,19 @@ export function useThemeEditor(
   const undo = useCallback(() => {
     if (!canUndo) return;
     const newIndex = historyIndex - 1;
+    const target = history[newIndex];
+    if (!target) return;
     setHistoryIndex(newIndex);
-    setConfig(history[newIndex]);
+    setConfig(target);
   }, [canUndo, historyIndex, history]);
 
   const redo = useCallback(() => {
     if (!canRedo) return;
     const newIndex = historyIndex + 1;
+    const target = history[newIndex];
+    if (!target) return;
     setHistoryIndex(newIndex);
-    setConfig(history[newIndex]);
+    setConfig(target);
   }, [canRedo, historyIndex, history]);
 
   const reset = useCallback(() => {
@@ -204,6 +243,7 @@ export function useThemeEditor(
   const saveDraft = useCallback(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      writeTemplateDraft(config.template, config);
       setSavedConfig(config);
     } catch {
       // localStorage may be unavailable
@@ -214,7 +254,7 @@ export function useThemeEditor(
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return null;
-      const parsed = JSON.parse(stored) as StudioThemeConfig;
+      const parsed = remapLegacyTemplate(JSON.parse(stored) as StudioThemeConfig);
       setSavedConfig(parsed);
       return parsed;
     } catch {

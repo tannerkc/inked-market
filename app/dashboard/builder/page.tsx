@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import { BuilderProvider } from "@/components/builder/builder-provider";
+import { useStudio } from "@/lib/providers/studio-provider";
 import { BuilderTopBar } from "@/components/builder/builder-top-bar";
 import { SplitScreenBuilder } from "@/components/builder/split-screen-builder";
 import { InlineOverlayBuilder } from "@/components/builder/inline-overlay-builder";
@@ -11,6 +12,7 @@ import { TierSelector } from "@/components/builder/tier-selector";
 import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
 import { OverlayContext } from "@/lib/contexts/overlay-context";
+import { remapLegacyTemplate } from "@/lib/utils/legacy-template";
 
 /* ─── Mobile detection ────────────────────────────────────────────────── */
 
@@ -60,7 +62,7 @@ function getExistingDraft(): StudioThemeConfig | null {
   try {
     const stored = localStorage.getItem(DRAFT_KEY);
     if (!stored) return null;
-    return JSON.parse(stored) as StudioThemeConfig;
+    return remapLegacyTemplate(JSON.parse(stored) as StudioThemeConfig);
   } catch {
     return null;
   }
@@ -77,17 +79,26 @@ export default function BuilderPage() {
   const [initialConfig, setInitialConfig] = useState<
     StudioThemeConfig | undefined
   >(undefined);
+  const { studio, loading } = useStudio();
+  const hydratedRef = useRef(false);
 
+  // Hydrate once, after the studio has loaded. Prefer the DB-saved theme_config
+  // (source of truth across devices), then a local working draft, else the picker.
   useEffect(() => {
-    const draft = getExistingDraft();
+    if (hydratedRef.current || loading) return;
+    hydratedRef.current = true;
 
-    if (draft?.template) {
-      setInitialConfig(draft);
+    const dbConfig = studio?.themeConfig ? remapLegacyTemplate(studio.themeConfig) : undefined;
+    const draft = getExistingDraft();
+    const chosen = dbConfig?.template ? dbConfig : draft?.template ? draft : null;
+
+    if (chosen) {
+      setInitialConfig(chosen);
       setHasTemplate(true);
-      // Draft already carries mode + tier — skip setup entirely
-      setMode(draft.builderMode ?? getStoredMode());
+      // Config already carries mode + tier — skip setup entirely
+      setMode(chosen.builderMode ?? getStoredMode());
       setHasTier(true);
-      setSelectedTier(draft.builderTier ?? "flash");
+      setSelectedTier(chosen.builderTier ?? "flash");
     } else {
       setMode(getStoredMode());
       const storedTier = getStoredTier();
@@ -95,7 +106,7 @@ export default function BuilderPage() {
     }
 
     setMounted(true);
-  }, []);
+  }, [loading, studio]);
 
   useEffect(() => {
     if (!mounted) return;
