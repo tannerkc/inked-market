@@ -1,17 +1,19 @@
 "use client";
 
-import { useBuilder } from "@/components/builder/builder-provider";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { PromptChip } from "@/components/studio-site/empty-states";
+import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
 import type { FooterLayout } from "@/lib/types/builder";
+import type { StudioSiteData } from "@/components/studio-site/studio-site-data";
 import {
   standardPolicies,
   standardPolicyOrder,
 } from "@/lib/data/policy-templates";
-import type { PolicyConfig, StandardPolicyId } from "@/lib/types/policies";
+import type { StandardPolicyId } from "@/lib/types/policies";
 
 function useStudioName() {
-  const { studio } = useBuilder();
-  return studio?.name || MOCK_STUDIO_DATA.name;
+  const { data } = useStudioSite();
+  return data.name;
 }
 
 function useCurrentYear() {
@@ -19,7 +21,7 @@ function useCurrentYear() {
 }
 
 function usePolicyChips(): string[] {
-  const { config } = useBuilder();
+  const { config } = useStudioSite();
   if (config.policiesDisplayMode !== "footer") return [];
 
   const policies = config.policies ?? [];
@@ -48,62 +50,114 @@ function usePolicyChips(): string[] {
 }
 
 function useShowPoliciesLink(): boolean {
-  const { config } = useBuilder();
+  const { config } = useStudioSite();
   const policies = config.policies ?? [];
   return (config.showPoliciesSection ?? true) && policies.some((p) => p.enabled);
 }
 
 // ─── Scroll to section ──────────────────────────────────────────────────────
 
-const sectionMap: Record<string, string> = {
-  Portfolio: "gallery",
-  Artists: "artist-strips",
-  About: "about",
-  Visit: "footer-cta",
-  Booking: "footer-cta",
-  Consultations: "footer-cta",
+/** Footer label → data-section ids (first that exists wins). */
+const LABEL_SECTIONS: Record<string, string[]> = {
+  Portfolio: ["gallery", "artist-strips"],
+  Artists: ["artist-strips"],
+  About: ["about"],
+  Visit: ["footer-cta"],
+  Booking: ["details"],
+  Consultations: ["footer-cta"],
 };
 
 const policyLinks = new Set(["Aftercare", "Privacy", "Terms"]);
 
-function scrollToSection(label: string) {
-  const sectionName = sectionMap[label];
-  if (!sectionName) return;
-  const root = document.querySelector("[data-builder-root]");
-  if (!root) return;
-  const el = root.querySelector(`[data-section="${sectionName}"]`);
-  if (!el) return;
-  const scrollContainer = root.closest("[class*='overflow-y-auto']") ?? root.parentElement;
-  if (scrollContainer) {
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    scrollContainer.scrollBy({
-      top: elRect.top - containerRect.top,
-      behavior: "smooth",
-    });
-  }
+function scrollToLabel(label: string) {
+  const targets = LABEL_SECTIONS[label];
+  if (targets) scrollToBuilderSection(...targets);
 }
 
 // ─── Shared components ──────────────────────────────────────────────────────
 
+const SOCIAL_ICON_PATHS: Record<string, React.ReactNode> = {
+  instagram: (
+    <>
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  tiktok: (
+    <path d="M15 3c.4 2.3 1.9 3.8 4.2 4v3.2c-1.6 0-3-.5-4.2-1.4v6.5A5.7 5.7 0 1 1 9.3 9.6v3.3a2.5 2.5 0 1 0 2.5 2.5V3H15z" />
+  ),
+  facebook: (
+    <path d="M14 8h2.5V4.5H14c-2.5 0-4 1.6-4 4V11H7.5v3.5H10V21h3.5v-6.5H16l.5-3.5h-3v-2c0-.6.4-1 1-1z" />
+  ),
+  website: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z" />
+    </>
+  ),
+};
+
+interface SocialLink {
+  key: string;
+  href: string;
+  label: string;
+}
+
+function buildSocialLinks(d: StudioSiteData): SocialLink[] {
+  const links: SocialLink[] = [];
+  if (d.instagram) links.push({ key: "instagram", href: `https://instagram.com/${d.instagram.replace(/^@/, "")}`, label: "Instagram" });
+  if (d.tiktok) links.push({ key: "tiktok", href: `https://tiktok.com/@${d.tiktok.replace(/^@/, "")}`, label: "TikTok" });
+  if (d.facebook) links.push({ key: "facebook", href: d.facebook.startsWith("http") ? d.facebook : `https://facebook.com/${d.facebook}`, label: "Facebook" });
+  if (d.website) links.push({ key: "website", href: d.website.startsWith("http") ? d.website : `https://${d.website}`, label: "Website" });
+  return links;
+}
+
+/** Real social links only. Empty → builder shows an add-prompt; public shows nothing. */
 function SocialIcons({ className }: { className?: string }) {
+  const { data } = useStudioSite();
+  const links = buildSocialLinks(data);
+  if (links.length === 0) {
+    return (
+      <span className={className}>
+        <PromptChip group="socials" label="Add social links" />
+      </span>
+    );
+  }
   return (
-    <div className={className} style={{ display: "flex", gap: "16px" }}>
-      <span style={{ cursor: "pointer", transition: "color 0.2s" }}>&#9673;</span>
-      <span style={{ cursor: "pointer", transition: "color 0.2s" }}>&#10005;</span>
-      <span style={{ cursor: "pointer", transition: "color 0.2s" }}>&#9678;</span>
+    <div className={className} style={{ display: "flex", gap: "14px" }}>
+      {links.map((l) => (
+        <a
+          key={l.key}
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={l.label}
+          style={{ color: "var(--text-muted)", transition: "color 0.2s" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--accent)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {SOCIAL_ICON_PATHS[l.key]}
+          </svg>
+        </a>
+      ))}
     </div>
   );
 }
 
 function FooterLink({ label }: { label: string }) {
-  const { setPreviewPage } = useBuilder();
+  const { onNavigatePage } = useStudioSite();
 
   const handleClick = () => {
     if (policyLinks.has(label)) {
-      setPreviewPage("policies");
+      onNavigatePage("policies");
     } else {
-      scrollToSection(label);
+      scrollToLabel(label);
     }
   };
 
@@ -129,7 +183,7 @@ function FooterLink({ label }: { label: string }) {
 }
 
 function PolicyChipsRow() {
-  const { config } = useBuilder();
+  const { config } = useStudioSite();
   const chips = usePolicyChips();
   if (chips.length === 0) return null;
 
@@ -183,7 +237,7 @@ function PolicyChipsRow() {
 }
 
 function PoliciesBottomBarLink() {
-  const { setPreviewPage } = useBuilder();
+  const { onNavigatePage } = useStudioSite();
   const show = useShowPoliciesLink();
   if (!show) return null;
 
@@ -192,7 +246,7 @@ function PoliciesBottomBarLink() {
       <span>&middot;</span>
       <button
         type="button"
-        onClick={() => setPreviewPage("policies")}
+        onClick={() => onNavigatePage("policies")}
         style={{
           cursor: "pointer",
           color: "var(--accent)",
@@ -210,7 +264,18 @@ function PoliciesBottomBarLink() {
 
 // ─── Footer layouts ─────────────────────────────────────────────────────────
 
-const linkGroups = [
+/** Section links are static anchors; the Connect column holds only real destinations. */
+function useConnectLinks(): { label: string; href: string; external: boolean }[] {
+  const { data } = useStudioSite();
+  const connect: { label: string; href: string; external: boolean }[] = [];
+  if (data.instagram) connect.push({ label: "Instagram", href: `https://instagram.com/${data.instagram.replace(/^@/, "")}`, external: true });
+  if (data.facebook) connect.push({ label: "Facebook", href: data.facebook.startsWith("http") ? data.facebook : `https://facebook.com/${data.facebook}`, external: true });
+  if (data.email) connect.push({ label: "Email", href: `mailto:${data.email}`, external: false });
+  if (data.phone) connect.push({ label: "Phone", href: `tel:${data.phone.replace(/[^+\d]/g, "")}`, external: false });
+  return connect;
+}
+
+const SECTION_LINK_GROUPS = [
   {
     heading: "Studio",
     links: ["Portfolio", "Artists", "About", "Visit"],
@@ -219,10 +284,6 @@ const linkGroups = [
     heading: "Services",
     links: ["Booking", "Consultations", "Aftercare"],
   },
-  {
-    heading: "Connect",
-    links: ["Instagram", "Facebook", "Email", "Phone"],
-  },
 ];
 
 const navLinks = ["Portfolio", "Artists", "About"];
@@ -230,6 +291,8 @@ const navLinks = ["Portfolio", "Artists", "About"];
 function ColumnsFooter() {
   const studioName = useStudioName();
   const year = useCurrentYear();
+  const connectLinks = useConnectLinks();
+  const columnCount = SECTION_LINK_GROUPS.length + (connectLinks.length > 0 ? 1 : 0);
   return (
     <footer
       style={{
@@ -260,15 +323,15 @@ function ColumnsFooter() {
           <SocialIcons />
         </div>
 
-        {/* Link columns */}
+        {/* Link columns — Connect renders only when real destinations exist */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
             gap: "32px",
           }}
         >
-          {linkGroups.map((group) => (
+          {SECTION_LINK_GROUPS.map((group) => (
             <div key={group.heading}>
               <div
                 style={{
@@ -289,6 +352,45 @@ function ColumnsFooter() {
               </div>
             </div>
           ))}
+          {connectLinks.length > 0 ? (
+            <div>
+              <div
+                style={{
+                  fontSize: "11px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  marginBottom: "12px",
+                }}
+              >
+                Connect
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {connectLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    style={{
+                      fontSize: "13px",
+                      color: "var(--text-secondary)",
+                      textDecoration: "none",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--accent)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Policy chips */}
@@ -333,14 +435,7 @@ function MinimalBarFooter() {
     >
       <div className="mx-auto flex max-w-[1350px] flex-col items-center gap-3 px-6 py-4 @md:flex-row @md:justify-between @md:gap-0 @md:px-10 @md:py-5">
         {/* Social -- top on mobile, right on @md */}
-        <div
-          className="order-first @md:order-last"
-          style={{ display: "flex", gap: "16px", color: "var(--text-muted)" }}
-        >
-          <span style={{ cursor: "pointer" }}>&#9673;</span>
-          <span style={{ cursor: "pointer" }}>&#10005;</span>
-          <span style={{ cursor: "pointer" }}>&#9678;</span>
-        </div>
+        <SocialIcons className="order-first @md:order-last" />
 
         {/* Nav links -- centered on mobile, center on @md */}
         <div
@@ -349,17 +444,15 @@ function MinimalBarFooter() {
         >
           {navLinks.map((link, i) => (
             <span key={link} className="flex items-center">
-              {i > 0 && (
-                <span
+              {i > 0 ? <span
                   className="hidden @md:inline mr-4"
                   style={{ color: "var(--text-muted)" }}
                 >
                   &middot;
-                </span>
-              )}
+                </span> : null}
               <span
                 style={{ cursor: "pointer", transition: "color 0.2s" }}
-                onClick={() => scrollToSection(link)}
+                onClick={() => scrollToLabel(link)}
                 onMouseEnter={(e) => {
                   (e.target as HTMLElement).style.color = "var(--accent)";
                 }}
@@ -428,7 +521,7 @@ function CenteredFooter() {
             <span
               key={link}
               style={{ cursor: "pointer", transition: "color 0.2s" }}
-              onClick={() => scrollToSection(link)}
+              onClick={() => scrollToLabel(link)}
               onMouseEnter={(e) => {
                 (e.target as HTMLElement).style.color = "var(--accent)";
               }}
@@ -441,18 +534,8 @@ function CenteredFooter() {
           ))}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "16px",
-            color: "var(--text-muted)",
-            marginBottom: "24px",
-          }}
-        >
-          <span style={{ cursor: "pointer" }}>&#9673;</span>
-          <span style={{ cursor: "pointer" }}>&#10005;</span>
-          <span style={{ cursor: "pointer" }}>&#9678;</span>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+          <SocialIcons />
         </div>
 
         {/* Policy chips centered */}
@@ -473,7 +556,7 @@ const footerComponents: Record<Exclude<FooterLayout, "none">, React.FC> = {
 };
 
 export function TemplateFooter() {
-  const { config } = useBuilder();
+  const { config } = useStudioSite();
 
   if (!config.footerLayout || config.footerLayout === "none") return null;
 

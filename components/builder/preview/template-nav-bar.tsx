@@ -1,9 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useBuilder } from "@/components/builder/builder-provider";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
 import type { NavLayout, CtaStyle, MobileMenuType } from "@/lib/types/builder";
+
+/** Nav label → data-section ids (first match wins). */
+const NAV_LABEL_SECTIONS: Record<string, string[]> = {
+  Portfolio: ["gallery", "artist-strips"],
+  Artists: ["artist-strips"],
+  About: ["about"],
+  Contact: ["footer-cta"],
+};
+
+function scrollToNavLabel(label: string) {
+  const targets = NAV_LABEL_SECTIONS[label];
+  if (targets) scrollToBuilderSection(...targets);
+}
 
 /* ------------------------------------------------------------------ */
 /*  Hero-passed hook                                                    */
@@ -12,10 +25,7 @@ function useHeroPassed(navRef: React.RefObject<HTMLElement | null>, enabled: boo
   const [past, setPast] = useState(false);
 
   useEffect(() => {
-    if (!enabled) {
-      setPast(false);
-      return;
-    }
+    if (!enabled) return;
 
     const nav = navRef.current;
     if (!nav) return;
@@ -32,7 +42,9 @@ function useHeroPassed(navRef: React.RefObject<HTMLElement | null>, enabled: boo
     }
 
     const observer = new IntersectionObserver(
-      ([entry]) => setPast(!entry.isIntersecting),
+      ([entry]) => {
+        if (entry) setPast(!entry.isIntersecting);
+      },
       { root: scrollRoot, threshold: 0 },
     );
 
@@ -40,7 +52,8 @@ function useHeroPassed(navRef: React.RefObject<HTMLElement | null>, enabled: boo
     return () => observer.disconnect();
   }, [navRef, enabled]);
 
-  return past;
+  // Derive instead of resetting state in the effect (react-hooks/set-state-in-effect).
+  return enabled ? past : false;
 }
 
 /* ------------------------------------------------------------------ */
@@ -58,13 +71,12 @@ function navContainerStyle(layout: NavLayout): React.CSSProperties {
 /*  Shared atoms                                                        */
 /* ------------------------------------------------------------------ */
 function BrandMark() {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const showLogo = config.logoUrl && config.logoPlacement === "nav";
 
   if (showLogo) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- data-URL logo, next/image not applicable
       <img
         src={config.logoUrl}
         alt="Studio logo"
@@ -94,6 +106,7 @@ function NavLinks({ className }: { className?: string }) {
       {["Portfolio", "Artists", "About", "Contact"].map((link) => (
         <span
           key={link}
+          onClick={() => scrollToNavLabel(link)}
           style={{
             fontFamily: "var(--body-font)",
             fontSize: "13px",
@@ -117,21 +130,37 @@ const CTA_STYLE_VARS: Record<CtaStyle, React.CSSProperties> = {
 };
 
 function CtaButton({ className }: { className?: string }) {
-  const { config } = useBuilder();
+  const { config, data } = useStudioSite();
   const variant = CTA_STYLE_VARS[config.ctaStyle ?? "filled"];
+  const shared: React.CSSProperties = {
+    fontFamily: "var(--body-font)",
+    fontSize: "13px",
+    fontWeight: 600,
+    padding: "8px 20px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    ...variant,
+  };
+  // Real booking link when connected; otherwise jump to booking/contact — never dead.
+  if (data?.bookingLink) {
+    return (
+      <a
+        href={data.bookingLink.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        style={{ ...shared, display: "inline-block", textDecoration: "none" }}
+      >
+        Book Now
+      </a>
+    );
+  }
   return (
     <button
       type="button"
       className={className}
-      style={{
-        fontFamily: "var(--body-font)",
-        fontSize: "13px",
-        fontWeight: 600,
-        padding: "8px 20px",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-        ...variant,
-      }}
+      onClick={() => scrollToBuilderSection("details")}
+      style={shared}
     >
       Book Now
     </button>
@@ -249,8 +278,8 @@ function MinimalContent() {
 /* ------------------------------------------------------------------ */
 const MOBILE_LINKS = ["Portfolio", "Artists", "About", "Contact"];
 
-function DropdownMenu() {
-  const { config } = useBuilder();
+function DropdownMenu({ onClose }: { onClose: () => void }) {
+  const { config } = useStudioSite();
   const variant = CTA_STYLE_VARS[config.ctaStyle ?? "filled"];
 
   return (
@@ -266,6 +295,10 @@ function DropdownMenu() {
         {MOBILE_LINKS.map((link) => (
           <div
             key={link}
+            onClick={() => {
+              scrollToNavLabel(link);
+              onClose();
+            }}
             style={{
               padding: "12px 24px",
               fontFamily: "var(--body-font)",
@@ -300,8 +333,7 @@ function DropdownMenu() {
 }
 
 function FullscreenMenu({ onClose }: { onClose: () => void }) {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const variant = CTA_STYLE_VARS[config.ctaStyle ?? "filled"];
 
   return (
@@ -368,6 +400,10 @@ function FullscreenMenu({ onClose }: { onClose: () => void }) {
         {MOBILE_LINKS.map((link) => (
           <div
             key={link}
+            onClick={() => {
+              scrollToNavLabel(link);
+              onClose();
+            }}
             style={{
               fontFamily: "var(--heading-font)",
               fontSize: "28px",
@@ -403,8 +439,7 @@ function FullscreenMenu({ onClose }: { onClose: () => void }) {
 }
 
 function DrawerMenu({ onClose }: { onClose: () => void }) {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const variant = CTA_STYLE_VARS[config.ctaStyle ?? "filled"];
 
   return (
@@ -480,6 +515,10 @@ function DrawerMenu({ onClose }: { onClose: () => void }) {
           {MOBILE_LINKS.map((link) => (
             <div
               key={link}
+              onClick={() => {
+                scrollToNavLabel(link);
+                onClose();
+              }}
               style={{
                 padding: "13px 20px",
                 fontFamily: "var(--body-font)",
@@ -520,14 +559,14 @@ function DrawerMenu({ onClose }: { onClose: () => void }) {
 function MobileMenu({ type, onClose }: { type: MobileMenuType; onClose: () => void }) {
   if (type === "fullscreen") return <FullscreenMenu onClose={onClose} />;
   if (type === "drawer")     return <DrawerMenu onClose={onClose} />;
-  return <DropdownMenu />;
+  return <DropdownMenu onClose={onClose} />;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Exported nav bar                                                    */
 /* ------------------------------------------------------------------ */
 export function TemplateNavBar() {
-  const { config } = useBuilder();
+  const { config } = useStudioSite();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const layout: NavLayout = config.navLayout ?? "standard";
@@ -543,7 +582,7 @@ export function TemplateNavBar() {
     const el = wrapperRef.current;
     if (!el) return;
     const observer = new ResizeObserver(([entry]) => {
-      if (entry.contentRect.width >= 768) setMenuOpen(false);
+      if (entry && entry.contentRect.width >= 768) setMenuOpen(false);
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -601,11 +640,9 @@ export function TemplateNavBar() {
           >
             <div style={navInnerStyle}>{navContent}</div>
           </nav>
-          {showMobileMenu && heroPassed && (
-            <div style={menuWrapperStyle}>
+          {showMobileMenu && heroPassed ? <div style={menuWrapperStyle}>
               <MobileMenu type={mobileMenuType} onClose={() => setMenuOpen(false)} />
-            </div>
-          )}
+            </div> : null}
         </div>
       </div>
     );
@@ -621,11 +658,9 @@ export function TemplateNavBar() {
       <nav style={navOuterStyle}>
         <div style={navInnerStyle}>{navContent}</div>
       </nav>
-      {showMobileMenu && (
-        <div style={menuWrapperStyle}>
+      {showMobileMenu ? <div style={menuWrapperStyle}>
           <MobileMenu type={mobileMenuType} onClose={() => setMenuOpen(false)} />
-        </div>
-      )}
+        </div> : null}
     </div>
   );
 }
