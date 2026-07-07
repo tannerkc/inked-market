@@ -48,6 +48,8 @@ export interface StudioSiteData {
   coverImage?: string;
   /** Resolved booking destination (first connected booking-category integration). */
   bookingLink?: { url: string; platformName: string } | null;
+  /** True only when the builder's Sample Data toggle is on. Never set for live/public data. */
+  isSample?: boolean;
   /** Studio roster. Empty → artist-strips section hides itself. */
   artists: StudioSiteArtist[];
   /** Reviews. Empty → reviews widget collapses. */

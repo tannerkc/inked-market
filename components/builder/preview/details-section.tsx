@@ -2,25 +2,16 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useBuilder } from "@/components/builder/builder-provider";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { PromptChip } from "@/components/studio-site/empty-states";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
-import type { StudioData } from "@/lib/repositories";
-
-const MOCK_REVIEWS = [
-  { author: "Megan R.", stars: 5, text: "Jake did an incredible traditional rose sleeve on me. The line work is perfect and healed beautifully." },
-  { author: "Daniel S.", stars: 5, text: "Sarah's fine line work is unmatched. Got a botanical piece on my forearm — exactly what I envisioned." },
-  { author: "Priya K.", stars: 4, text: "Amazing work overall. Marcus did a gorgeous Japanese sleeve start and I'll definitely be back." },
-  { author: "Chris M.", stars: 5, text: "Lin's geometric sleeve is stunning. The precision is unreal. Worth every penny and the wait time." },
-  { author: "Alicia T.", stars: 5, text: "Second session with Marcus — the Japanese koi piece is coming along beautifully. Super professional studio." },
-  { author: "James L.", stars: 4, text: "Great experience. Parking can be tricky on weekends but the work speaks for itself." },
-  { author: "Taylor B.", stars: 5, text: "Sarah did a fine line botanical sleeve that turned out better than I imagined. Booked for the next one." },
-  { author: "Jordan M.", stars: 5, text: "Third time here — Jake's color work is on another level. The studio is always clean and welcoming." },
-];
+import type { StudioSiteData, StudioSiteReview } from "@/components/studio-site/studio-site-data";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 // ─── Booking widget data ─────────────────────────────────────────────────────
+// ponytail: booking demo only — themed placeholder calendar, not wired to real
+// availability. Swap for a real booking backend adapter when one exists.
 
 const BOOKING_ARTISTS = [
   { id: "any",    label: "Any",    initials: null,  availDays: [1,2,3,4,5,6] },
@@ -44,11 +35,48 @@ const CAL_DAYS      = 30;
 const CAL_TODAY     = 9;
 
 
-function ReviewsWidget() {
+function ReviewsWidget({
+  reviews,
+  ratingAverage,
+  reviewCount,
+}: {
+  reviews: StudioSiteReview[];
+  ratingAverage: string;
+  reviewCount: number;
+}) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const VISIBLE_COUNT = 3;
-  const visibleReviews = MOCK_REVIEWS.slice(0, VISIBLE_COUNT);
-  const totalCount = MOCK_REVIEWS.length;
+  const visibleReviews = reviews.slice(0, VISIBLE_COUNT);
+  const totalCount = reviewCount || reviews.length;
+
+  // Real-world empty state — shown identically on the live site (earned data
+  // can't be typed in; it arrives as verified clients leave reviews).
+  if (reviews.length === 0) {
+    return (
+      <div
+        className="flex h-full flex-col rounded-[var(--border-radius-lg)] overflow-hidden"
+        data-builder-card-lg
+        style={{ background: "var(--widget-1)" }}
+      >
+        <div className="px-4 pt-4 pb-2 shrink-0">
+          <div
+            className="text-[9px] font-bold tracking-[0.12em] uppercase"
+            style={{ color: "var(--widget-label)" }}
+          >
+            What clients say
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-4 pb-6 text-center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true" style={{ color: "var(--text-muted)" }}>
+            <path d="M11.48 3.5a.56.56 0 0 1 1.04 0l2.13 5.11 5.52.44a.56.56 0 0 1 .32.99l-4.2 3.6 1.28 5.39a.56.56 0 0 1-.84.61L12 16.73l-4.73 2.9a.56.56 0 0 1-.84-.6l1.29-5.4-4.21-3.6a.56.56 0 0 1 .32-.98l5.52-.44 2.13-5.12Z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            No reviews yet &mdash; verified client reviews appear here.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -70,7 +98,7 @@ function ReviewsWidget() {
             className="text-2xl font-black tracking-tight"
             style={{ color: "var(--text-primary)", fontFamily: "var(--heading-font)" }}
           >
-            4.9
+            {ratingAverage}
           </span>
           <div>
             <div className="text-xs text-amber-500">
@@ -133,11 +161,11 @@ function ReviewsWidget() {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title={`${totalCount} Verified Reviews · 4.9 avg`}
+        title={`${totalCount} Verified Reviews · ${ratingAverage} avg`}
         className="[--bg-raised:transparent] [--bg-sunken:rgba(255,255,255,0.1)] [--text-muted:#ffffff] [--text-secondary:#ffffff] [--border:rgba(255,255,255,0.1)]"
       >
         <div className="flex flex-col">
-          {MOCK_REVIEWS.map((review, i) => (
+          {reviews.map((review, i) => (
             <div
               key={i}
               className="py-4 first:pt-0"
@@ -169,7 +197,14 @@ function ReviewsWidget() {
   );
 }
 
-function HoursWidget({ hoursData }: { hoursData: StudioData['hours'] }) {
+function HoursWidget({
+  hoursData,
+  contact,
+}: {
+  hoursData: StudioSiteData["hours"];
+  contact: { phone?: string; email?: string };
+}) {
+  const hasHoursData = Object.keys(hoursData ?? {}).length > 0;
   return (
     <div
       data-builder-card-lg
@@ -191,35 +226,132 @@ function HoursWidget({ hoursData }: { hoursData: StudioData['hours'] }) {
       >
         VISIT US
       </h3>
-      <div className="flex flex-col gap-2">
-        {DAY_ORDER.map((day) => {
-          const h = hoursData[day];
-          if (!h) return null;
-          const timeLabel = h.closed ? "Closed" : `${h.open} \u2013 ${h.close}`;
-          return (
-            <div
-              key={day}
-              className="flex items-center justify-between text-xs"
-            >
-              <span style={{ color: "var(--text-secondary)" }}>
-                {day}
-              </span>
-              <span
-                style={{
-                  color: h.closed ? "var(--text-muted)" : "var(--text-primary)",
-                }}
+      {hasHoursData ? (
+        <div className="flex flex-col gap-2">
+          {DAY_ORDER.map((day) => {
+            const h = hoursData[day];
+            if (!h) return null;
+            const timeLabel = h.closed ? "Closed" : `${h.open} \u2013 ${h.close}`;
+            return (
+              <div
+                key={day}
+                className="flex items-center justify-between text-xs"
               >
-                {timeLabel}
-              </span>
+                <span style={{ color: "var(--text-secondary)" }}>
+                  {day}
+                </span>
+                <span
+                  style={{
+                    color: h.closed ? "var(--text-muted)" : "var(--text-primary)",
+                  }}
+                >
+                  {timeLabel}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col items-start gap-3">
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            By appointment &mdash; contact us.
+          </p>
+          {contact.phone || contact.email ? (
+            <div className="flex flex-col gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+              {contact.phone ? <span>{contact.phone}</span> : null}
+              {contact.email ? <span>{contact.email}</span> : null}
             </div>
-          );
-        })}
-      </div>
+          ) : null}
+          <PromptChip group="contact-hours" label="Set hours" />
+        </div>
+      )}
     </div>
   );
 }
 
-function BookingWidget() {
+/** Live-mode booking: a real link to the studio's booking platform, or an
+ * honest contact-to-book card assembled from real contact methods. */
+function BookingCard({ data }: { data: StudioSiteData }) {
+  const link = data.bookingLink;
+
+  return (
+    <div
+      data-builder-card-lg
+      className="flex h-full flex-col justify-between gap-5 rounded-xl border p-6"
+      style={{ backgroundColor: "var(--widget-3)", borderColor: "var(--widget-border)" }}
+    >
+      <div>
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+          style={{ color: "var(--widget-label)" }}
+        >
+          Booking
+        </p>
+        <h3
+          className="mt-3 text-lg font-bold uppercase tracking-tight"
+          style={{ fontFamily: "var(--heading-font)", color: "var(--text-primary)" }}
+        >
+          {link ? "Book a Session" : "Contact to Book"}
+        </h3>
+        <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          {link
+            ? `Appointments are scheduled through ${link.platformName}.`
+            : "Reach out and we\u2019ll set up your appointment."}
+        </p>
+      </div>
+
+      {link ? (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full rounded-lg py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] transition-opacity hover:opacity-90"
+          style={{ background: "var(--accent)", color: "var(--accent-text)" }}
+        >
+          Book on {link.platformName}
+        </a>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {data.phone ? (
+            <a
+              href={`tel:${data.phone.replace(/[^+\d]/g, "")}`}
+              className="text-sm hover:underline"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {data.phone}
+            </a>
+          ) : null}
+          {data.email ? (
+            <a
+              href={`mailto:${data.email}`}
+              className="text-sm hover:underline"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {data.email}
+            </a>
+          ) : null}
+          {data.instagram ? (
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {data.instagram.startsWith("@") ? data.instagram : `@${data.instagram}`}
+            </span>
+          ) : null}
+          {!data.phone && !data.email ? (
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Add contact details so clients can reach you.
+            </p>
+          ) : null}
+          <div className="mt-1">
+            <PromptChip group="booking" label="Add booking link" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Sample-mode-only demo: a themed placeholder calendar so studios can see how
+ * an embedded booking flow could look. Never rendered with live data. */
+function SampleBookingDemo() {
   const [artistId, setArtistId] = useState<string>("any");
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -390,8 +522,7 @@ function BookingWidget() {
       </div>
 
       {/* ── Time slots ─────────────────────────────────────── */}
-      {selectedDate && (
-        <div
+      {selectedDate ? <div
           className="px-5 py-4 border-t shrink-0"
           style={{ borderColor: "var(--widget-border)" }}
         >
@@ -417,14 +548,11 @@ function BookingWidget() {
                 </button>
               );
             })}
-            {availableSlots.length === 0 && (
-              <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            {availableSlots.length === 0 ? <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                 No openings this day
-              </p>
-            )}
+              </p> : null}
           </div>
-        </div>
-      )}
+        </div> : null}
 
       {/* ── CTA ────────────────────────────────────────────── */}
       <div
@@ -460,9 +588,9 @@ const LAYOUT_CLASSES = {
 } as const;
 
 export function DetailsSection({ className }: { className?: string }) {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const { detailsLayout } = config;
+  const reviews = data.reviews;
 
   return (
     <section
@@ -474,14 +602,22 @@ export function DetailsSection({ className }: { className?: string }) {
     >
       <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
         <div className={LAYOUT_CLASSES[detailsLayout]}>
-          <ReviewsWidget />
-          <HoursWidget hoursData={data?.hours ?? {}} />
-          {detailsLayout === "two-one" ? (
-            <div className="@md:col-span-2">
-              <BookingWidget />
-            </div>
+          <ReviewsWidget
+            reviews={reviews}
+            ratingAverage={data.ratingAverage ?? ""}
+            reviewCount={data.reviewCount ?? reviews.length}
+          />
+          <HoursWidget hoursData={data.hours} contact={{ phone: data.phone, email: data.email }} />
+          {data.isSample ? (
+            detailsLayout === "two-one" ? (
+              <div className="@md:col-span-2"><SampleBookingDemo /></div>
+            ) : (
+              <SampleBookingDemo />
+            )
+          ) : detailsLayout === "two-one" ? (
+            <div className="@md:col-span-2"><BookingCard data={data} /></div>
           ) : (
-            <BookingWidget />
+            <BookingCard data={data} />
           )}
         </div>
       </div>

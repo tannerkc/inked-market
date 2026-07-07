@@ -70,6 +70,7 @@ export function buildBuilderSiteData(
       }),
       ratingAverage: DEMO_SITE_RATING_AVERAGE,
       reviewCount: DEMO_SITE_REVIEWS.length,
+      isSample: true,
     };
   }
   return {

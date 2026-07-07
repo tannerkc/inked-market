@@ -139,4 +139,9 @@ check("Sample ON injects the full demo", () => {
   assert.equal(d.name, "Iron & Ink");
 });
 
+check("isSample flags only the Sample branch", () => {
+  assert.equal(buildBuilderSiteData(null, true).isSample, true);
+  assert.equal(buildBuilderSiteData(null, false).isSample ?? false, false);
+});
+
 console.log(`\n${passed} checks passed`);
