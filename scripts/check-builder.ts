@@ -69,4 +69,43 @@ check("mapStudioDataToDbStudio writes images, never id", () => {
   assert.ok(!("id" in mapped));
 });
 
+// ─── Content predicates + booking link ───────────────────────────────────
+import { getBookingLink, hasBio, hasHours, hasAnySocial, hasContact, hasPhotos } from "../lib/utils/studio-content";
+import { studioSiteDataFromStudioData, type StudioSiteData } from "../components/studio-site/studio-site-data";
+import type { StudioIntegrations } from "../lib/types/integrations";
+
+const EMPTY_SITE: StudioSiteData = studioSiteDataFromStudioData(null);
+
+check("empty site data fails every predicate", () => {
+  assert.equal(hasBio(EMPTY_SITE), false);
+  assert.equal(hasHours(EMPTY_SITE), false);
+  assert.equal(hasAnySocial(EMPTY_SITE), false);
+  assert.equal(hasContact(EMPTY_SITE), false);
+  assert.equal(hasPhotos(EMPTY_SITE), false);
+});
+
+check("getBookingLink picks first connected booking platform", () => {
+  const integrations: StudioIntegrations = {
+    google: { status: "connected", linkUrl: "https://g.co/maps/x" }, // reviews category — ignored
+    booksy: { status: "connected", linkUrl: "https://booksy.com/en-us/x" },
+  };
+  const link = getBookingLink(integrations);
+  assert.equal(link?.url, "https://booksy.com/en-us/x");
+  assert.equal(link?.platformName, "Booksy");
+  assert.equal(getBookingLink(undefined), null);
+  assert.equal(getBookingLink({ booksy: { status: "error", linkUrl: "https://x" } }), null);
+});
+
+check("studioSiteDataFromStudioData maps coverImage, images, bookingLink", () => {
+  const d = studioSiteDataFromStudioData({
+    name: "T", specialties: [], services: [], hours: {}, autoSpecialties: false,
+    coverImage: "https://x/c.webp", images: ["https://x/1.webp"],
+    integrations: { booksy: { status: "connected", linkUrl: "https://booksy.com/en-us/x" } },
+  });
+  assert.equal(d.coverImage, "https://x/c.webp");
+  assert.deepEqual(d.images, ["https://x/1.webp"]);
+  assert.equal(d.bookingLink?.platformName, "Booksy");
+  assert.equal(hasPhotos(d), true);
+});
+
 console.log(`\n${passed} checks passed`);
