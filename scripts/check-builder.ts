@@ -36,4 +36,37 @@ check("remapLegacyTemplate rewrites retired slug, passes through current", () =>
   assert.equal(remapLegacyTemplate(current), current); // no clone when unchanged
 });
 
+// ─── StudioData mappers ──────────────────────────────────────────────────
+import {
+  mapDbStudioToStudioData,
+  mapStudioDataToDbStudio,
+  type DbStudio,
+} from "../lib/supabase/types";
+
+const DB_ROW: DbStudio = {
+  id: "row-uuid-1", name: "Iron & Ink", slug: "iron-ink", source: "organic",
+  google_place_id: null, claimed_by: "owner-1", claimed_at: null,
+  address: "1 Main St", city: "Portland", state: "OR", zip_code: "97214",
+  latitude: null, longitude: null, phone: "555", email: "a@b.c", website: null,
+  bio: "story", description: null, instagram: null, tiktok: null, facebook: null,
+  hours: null, specialties: [], services: [], auto_specialties: false,
+  integrations: null, theme_config: null, rating: 4.5, review_count: 3,
+  profile_image: null, cover_image: "https://x/cover.webp",
+  images: ["https://x/1.webp", "https://x/2.webp"],
+  is_visible: true, created_at: "2026-01-01", updated_at: "2026-01-02",
+};
+
+check("mapDbStudioToStudioData carries id, images, coverImage", () => {
+  const d = mapDbStudioToStudioData(DB_ROW);
+  assert.equal(d.id, "row-uuid-1");
+  assert.deepEqual(d.images, ["https://x/1.webp", "https://x/2.webp"]);
+  assert.equal(d.coverImage, "https://x/cover.webp");
+});
+
+check("mapStudioDataToDbStudio writes images, never id", () => {
+  const mapped = mapStudioDataToDbStudio({ id: "should-not-write", images: ["u1"] });
+  assert.deepEqual(mapped.images, ["u1"]);
+  assert.ok(!("id" in mapped));
+});
+
 console.log(`\n${passed} checks passed`);
