@@ -1,157 +1,33 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
-import { cssVarsToStyle } from "@/lib/utils/builder";
-import { TemplateNavBar } from "@/components/builder/preview/template-nav-bar";
-import { HeroSection } from "@/components/builder/preview/hero-section";
-import { GallerySection } from "@/components/builder/preview/gallery-section";
-import { ArtistStripsSection } from "@/components/builder/preview/artist-strips-section";
-import { AboutSection } from "@/components/builder/preview/about-section";
-import { DetailsSection } from "@/components/builder/preview/details-section";
-import { FooterCTASection } from "@/components/builder/preview/footer-cta-section";
-import { TemplateFooter } from "@/components/builder/preview/template-footer";
-import { PoliciesSection } from "@/components/builder/preview/policies-section";
-import { PoliciesPagePreview } from "@/components/builder/preview/policies-page-preview";
-import type { ResolvedThemeVars } from "@/lib/types/builder";
+import { StudioSiteRenderer } from "@/components/studio-site/studio-site-renderer";
 
 interface StudioPagePreviewProps {
+  /** Accepted for caller compatibility; the shared renderer is always interactive. */
   interactive?: boolean;
   className?: string;
 }
 
-function SectionDivider({ style }: { style: string }) {
-  if (style === "none" || style === "solid" || style === "gradient" || style === "dotted" || style === "ornament") {
-    if (style === "none") return null;
-    return <div data-divider={style} />;
-  }
-  return null;
-}
-
-export function StudioPagePreview({
-  interactive = false,
-  className,
-}: StudioPagePreviewProps) {
-  const { config, resolvedVars, replayKey, previewPage } = useBuilder();
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  const cssVarStyle = cssVarsToStyle(resolvedVars);
-
-  const animationStyle = config.animationStyle ?? "none";
-  const dividerStyle = config.dividerStyle ?? "solid";
-  const surfaceTexture = config.surfaceTexture ?? "none";
-
-  // Scroll-triggered animation observer — also re-runs when replayKey increments
-  useEffect(() => {
-    if (animationStyle === "none") return;
-    const root = rootRef.current;
-    if (!root) return;
-
-    const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-animate]"));
-    if (!targets.length) return;
-
-    // Disable transitions and reset to invisible state
-    targets.forEach((el) => {
-      el.style.transition = "none";
-      el.classList.remove("animate-visible");
-    });
-
-    // Force a synchronous reflow so the browser commits the opacity:0 state
-    // before transitions are re-enabled. Without this, adding animate-visible
-    // back fires before the reset paint and the animation never plays.
-    void root.offsetHeight;
-
-    // Re-enable transitions now that the reset state is committed
-    targets.forEach((el) => {
-      el.style.transition = "";
-    });
-
-    const scrollRoot = root.closest<HTMLElement>("[class*='overflow-y-auto']");
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { root: scrollRoot, threshold: 0.1 },
-    );
-
-    const raf = requestAnimationFrame(() => {
-      targets.forEach((el) => observer.observe(el));
-    });
-
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [animationStyle, replayKey]);
-
-  const section = (
-    name: string,
-    children: React.ReactNode,
-    density = true,
-  ) => (
-    <div
-      data-section={name}
-      {...(density ? { "data-density-section": "" } : {})}
-      {...(animationStyle !== "none" ? { "data-animate": "" } : {})}
-    >
-      {children}
-    </div>
-  );
-
-  const divider = () => <SectionDivider style={dividerStyle} />;
+/**
+ * Thin adapter: feeds the builder's assembled site data (the provider's single
+ * truth source) into the shared StudioSiteRenderer. The public studio page uses
+ * the same renderer with real data, so preview and live site stay pixel-identical.
+ */
+export function StudioPagePreview({ className }: StudioPagePreviewProps) {
+  const { config, resolvedVars, replayKey, previewPage, siteData, setPreviewPage, openContentPanel } =
+    useBuilder();
 
   return (
-    <div
-      ref={rootRef}
-      data-builder-root
-      data-texture={surfaceTexture}
-      data-animation={animationStyle}
-      className={cn("@container w-full", className)}
-      style={{
-        ...cssVarStyle,
-        fontFamily: "var(--body-font)",
-        color: "var(--text-primary)",
-        backgroundColor: "var(--bg-primary)",
-      } as React.CSSProperties & Record<string, string>}
-    >
-      {previewPage === "policies" ? (
-        <PoliciesPagePreview />
-      ) : (
-        <>
-          <TemplateNavBar />
-
-          <div data-builder-section="hero">
-            {section("hero", <HeroSection />, false)}
-          </div>
-
-          {divider()}
-          {config.galleryBeforeAbout ? (
-            <>
-              {section("gallery", <GallerySection />)}
-              {divider()}
-              {section("about", <AboutSection />)}
-            </>
-          ) : (
-            section("about", <AboutSection />)
-          )}
-          {divider()}
-          {section("artist-strips", <ArtistStripsSection />)}
-          {divider()}
-          {section("details", <DetailsSection />)}
-          {divider()}
-          {section("footer-cta", <FooterCTASection />, false)}
-          {divider()}
-          {section("policies", <PoliciesSection />)}
-          {section("footer", <TemplateFooter />, false)}
-        </>
-      )}
-    </div>
+    <StudioSiteRenderer
+      config={config}
+      resolvedVars={resolvedVars}
+      data={siteData}
+      page={previewPage}
+      replayKey={replayKey}
+      onNavigatePage={setPreviewPage}
+      onEditContent={openContentPanel}
+      className={className}
+    />
   );
 }
