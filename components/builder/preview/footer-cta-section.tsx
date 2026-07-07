@@ -1,14 +1,58 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useBuilder } from "@/components/builder/builder-provider";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { SectionEmptyState } from "@/components/studio-site/empty-states";
+import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
 import type { CtaLayout, CtaStyle } from "@/lib/types/builder";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
-import type { StudioData } from "@/lib/repositories";
+import type { StudioSiteData } from "@/components/studio-site/studio-site-data";
+
+/** Primary CTA: real booking link when connected, otherwise scroll to hours/contact. */
+function PrimaryCta({
+  data,
+  ctaStyle,
+  label,
+  className,
+}: {
+  data: StudioSiteData;
+  ctaStyle: CtaStyle;
+  label: string;
+  className?: string;
+}) {
+  const { radiusClass, inlineStyle } = ctaButtonProps(ctaStyle);
+  const classes = cn(
+    "px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90",
+    radiusClass,
+    className,
+  );
+  if (data.bookingLink) {
+    return (
+      <a
+        href={data.bookingLink.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(classes, "inline-block text-center no-underline")}
+        style={inlineStyle}
+      >
+        {label}
+      </a>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => scrollToBuilderSection("details")}
+      className={classes}
+      style={inlineStyle}
+    >
+      {label}
+    </button>
+  );
+}
 
 interface VariantProps {
   glow: boolean;
-  data: StudioData | null;
+  data: StudioSiteData;
   ctaStyle: CtaStyle;
 }
 
@@ -69,8 +113,7 @@ function SimpleMinimal({ glow, data, ctaStyle }: VariantProps) {
       style={{ backgroundColor: "var(--bg-deep)" }}
     >
       {/* Glow: centered behind content */}
-      {glow && (
-        <div
+      {glow ? <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
           aria-hidden="true"
         >
@@ -78,8 +121,7 @@ function SimpleMinimal({ glow, data, ctaStyle }: VariantProps) {
             className="h-64 w-64 rounded-full opacity-40 blur-[100px]"
             style={{ backgroundColor: "var(--footer-glow)" }}
           />
-        </div>
-      )}
+        </div> : null}
 
       <div className="mx-auto max-w-[1350px] px-6 py-20 @lg:px-10">
         <div className="relative flex flex-col items-center gap-6 text-center">
@@ -92,17 +134,12 @@ function SimpleMinimal({ glow, data, ctaStyle }: VariantProps) {
           >
             {namePart}
           </h2>
-          {bodyText && (
+          {bodyText ? (
             <p className="max-w-lg text-sm" style={{ color: "var(--text-muted)" }}>
               {bodyText}
             </p>
-          )}
-          <button
-            className={cn("mt-2 px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
-            style={ctaButtonProps(ctaStyle).inlineStyle}
-          >
-            Book an Appointment
-          </button>
+          ) : null}
+          <PrimaryCta data={data} ctaStyle={ctaStyle} label="Book an Appointment" className="mt-2" />
         </div>
       </div>
     </section>
@@ -119,8 +156,7 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
       style={{ backgroundColor: "var(--bg-raised)" }}
     >
       {/* Glow: between the two columns, biased toward the form */}
-      {glow && (
-        <div
+      {glow ? <div
           className="pointer-events-none absolute inset-0 flex items-center justify-end pr-[20%]"
           aria-hidden="true"
         >
@@ -128,8 +164,7 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
             className="h-48 w-48 rounded-full opacity-25 blur-[100px]"
             style={{ backgroundColor: "var(--footer-glow)" }}
           />
-        </div>
-      )}
+        </div> : null}
 
       <div className="relative mx-auto grid max-w-5xl grid-cols-1 gap-8 px-8 py-16 @md:grid-cols-2 @lg:px-12">
         {/* Left column */}
@@ -144,31 +179,57 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
             Get in Touch
           </h2>
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Have a question about a custom piece? Send us a message and we&apos;ll
-            get back to you within 24 hours.
+            Questions about a custom piece? Reach us directly &mdash; we&rsquo;d love
+            to hear your idea.
           </p>
           <div className="mt-auto flex flex-col gap-2">
-            {data?.phone && (
+            {data?.phone ? (
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                 {data.phone}
               </span>
-            )}
-            {data?.email && (
+            ) : null}
+            {data?.email ? (
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                 {data.email}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* Right column — mock form */}
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Your Name"
+        {/* Right column — demo inquiry form in Sample mode; real contact actions live */}
+        {data.isSample ? (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Your Name"
+                readOnly
+                className="rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
+                style={{
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--bg-primary)",
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--body-font)",
+                }}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                readOnly
+                className="rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
+                style={{
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--bg-primary)",
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--body-font)",
+                }}
+              />
+            </div>
+            <textarea
+              placeholder="Message"
+              rows={3}
               readOnly
-              className="rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
+              className="resize-none rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
               style={{
                 border: "1px solid var(--border)",
                 backgroundColor: "var(--bg-primary)",
@@ -176,38 +237,54 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
                 fontFamily: "var(--body-font)",
               }}
             />
-            <input
-              type="email"
-              placeholder="Email"
-              readOnly
-              className="rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--bg-primary)",
-                color: "var(--text-primary)",
-                fontFamily: "var(--body-font)",
-              }}
-            />
+            <button
+              type="button"
+              className={cn("w-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+              style={ctaButtonProps(ctaStyle).inlineStyle}
+            >
+              Send Message
+            </button>
           </div>
-          <textarea
-            placeholder="Message"
-            rows={3}
-            readOnly
-            className="resize-none rounded-lg px-4 py-3 text-sm outline-none transition-colors focus:outline-none"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--bg-primary)",
-              color: "var(--text-primary)",
-              fontFamily: "var(--body-font)",
-            }}
-          />
-          <button
-            className={cn("w-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
-            style={ctaButtonProps(ctaStyle).inlineStyle}
-          >
-            Send Message
-          </button>
-        </div>
+        ) : (
+          <div className="flex flex-col justify-center gap-3">
+            {data?.phone ? (
+              <a
+                href={`tel:${data.phone.replace(/[^+\d]/g, "")}`}
+                className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
+                style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
+              >
+                Call {data.phone}
+              </a>
+            ) : null}
+            {data?.email ? (
+              <a
+                href={`mailto:${data.email}`}
+                className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
+                style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
+              >
+                Email {data.email}
+              </a>
+            ) : null}
+            {data?.instagram ? (
+              <a
+                href={`https://instagram.com/${data.instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
+                style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
+              >
+                DM {data.instagram.startsWith("@") ? data.instagram : `@${data.instagram}`}
+              </a>
+            ) : null}
+            {!data?.phone && !data?.email && !data?.instagram ? (
+              <SectionEmptyState
+                message="Add contact details so clients can reach you."
+                prompt={{ group: "contact-hours", label: "Add contact info" }}
+                className="items-start px-0 py-0 text-left"
+              />
+            ) : null}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -238,8 +315,7 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
         {/* Info panel */}
         <div className="relative p-8 @lg:p-10" style={{ backgroundColor: "var(--bg-raised)" }}>
           {/* Glow: peeks into right column from behind the map edge */}
-          {glow && (
-            <div
+          {glow ? <div
               className="pointer-events-none absolute inset-y-0 -left-24 flex w-48 items-center"
               aria-hidden="true"
             >
@@ -247,8 +323,7 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
                 className="h-48 w-48 rounded-full opacity-30 blur-[80px]"
                 style={{ backgroundColor: "var(--footer-glow)" }}
               />
-            </div>
-          )}
+            </div> : null}
           <h2
             className="text-xl font-bold uppercase tracking-tight"
             style={{
@@ -260,31 +335,23 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
           </h2>
 
           <div className="mt-5 flex flex-col gap-1">
-            {data?.address && (
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            {data?.address ? <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 {data.address}
-              </span>
-            )}
-            {cityStateZip && (
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              </span> : null}
+            {cityStateZip ? <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 {cityStateZip}
-              </span>
-            )}
+              </span> : null}
           </div>
 
           <div className="my-5 h-px" style={{ backgroundColor: "var(--border)" }} />
 
           <div className="flex flex-col gap-1">
-            {data?.phone && (
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            {data?.phone ? <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 {data.phone}
-              </span>
-            )}
-            {data?.email && (
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              </span> : null}
+            {data?.email ? <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 {data.email}
-              </span>
-            )}
+              </span> : null}
           </div>
 
           <div className="my-5 h-px" style={{ backgroundColor: "var(--border)" }} />
@@ -302,12 +369,25 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
             })}
           </div>
 
-          <button
-            className={cn("mt-6 px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
-            style={ctaButtonProps(ctaStyle).inlineStyle}
-          >
-            Get Directions
-          </button>
+          {data?.address || cityStateZip ? (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                [data?.address, cityStateZip].filter(Boolean).join(", "),
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("mt-6 inline-block px-6 py-3 text-center text-sm font-semibold no-underline transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
+              style={ctaButtonProps(ctaStyle).inlineStyle}
+            >
+              Get Directions
+            </a>
+          ) : (
+            <SectionEmptyState
+              message="Add your address so clients can find you."
+              prompt={{ group: "contact-hours", label: "Add address" }}
+              className="mt-6 items-start px-0 py-0 text-left"
+            />
+          )}
         </div>
       </div>
     </section>
@@ -317,23 +397,42 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
 /* ------------------------------------------------------------------ */
 /*  Layout: booking                                                   */
 /* ------------------------------------------------------------------ */
-function Booking({ glow, data: _data, ctaStyle }: VariantProps) {
+function Booking({ glow, data, ctaStyle }: VariantProps) {
+  // Real trust signals only — a stat renders solely when the data behind it exists.
+  const stats: { number: string; label: string; sub: string }[] = [];
+  if (data.ratingAverage && (data.reviewCount ?? 0) > 0) {
+    stats.push({
+      number: data.ratingAverage,
+      label: "Average Rating",
+      sub: `from ${data.reviewCount} review${data.reviewCount === 1 ? "" : "s"}`,
+    });
+  }
+  if (data.artists.length > 0) {
+    stats.push({
+      number: String(data.artists.length),
+      label: data.artists.length === 1 ? "Resident Artist" : "Resident Artists",
+      sub: "specialized styles",
+    });
+  }
+  if (data.services.includes("walk-ins")) {
+    stats.push({ number: "Yes", label: "Walk-ins", sub: "when chairs are open" });
+  }
+  const hasStats = stats.length > 0;
+
   return (
     <section className="relative w-full overflow-hidden">
       <div
-        className="grid grid-cols-1 @md:grid-cols-[1fr_1.1fr]"
+        className={cn("grid grid-cols-1", hasStats && "@md:grid-cols-[1fr_1.1fr]")}
         style={{ backgroundColor: "var(--bg-deep)" }}
       >
         {/* Left — headline + CTA */}
         <div className="relative flex flex-col justify-center px-8 py-16 @lg:px-12 @lg:py-20">
           {/* Glow: bleeds from left edge behind headline */}
-          {glow && (
-            <div
+          {glow ? <div
               className="pointer-events-none absolute -left-16 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full opacity-30 blur-[80px]"
               aria-hidden="true"
               style={{ backgroundColor: "var(--footer-glow)" }}
-            />
-          )}
+            /> : null}
 
           <div className="relative">
             <p
@@ -362,13 +461,10 @@ function Booking({ glow, data: _data, ctaStyle }: VariantProps) {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
+              <PrimaryCta data={data} ctaStyle={ctaStyle} label="Book a Consultation" className="px-8 py-3.5" />
               <button
-                className={cn("px-8 py-3.5 text-sm font-semibold transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}
-                style={ctaButtonProps(ctaStyle).inlineStyle}
-              >
-                Book a Consultation
-              </button>
-              <button
+                type="button"
+                onClick={() => scrollToBuilderSection("gallery", "artist-strips")}
                 className="rounded-lg px-6 py-3.5 text-sm font-semibold transition-colors"
                 style={{
                   border: "1px solid var(--border)",
@@ -382,77 +478,48 @@ function Booking({ glow, data: _data, ctaStyle }: VariantProps) {
           </div>
         </div>
 
-        {/* Right — trust signals panel */}
-        <div
-          className="flex flex-col justify-center border-t px-6 py-10 @md:border-t-0 @md:border-l @md:px-8 @md:py-16 @lg:px-12 @lg:py-20"
-          style={{
-            backgroundColor: "var(--bg-raised)",
-            borderColor: "var(--border)",
-          }}
-        >
-          <div className="grid grid-cols-2 gap-5">
-            {[
-              { number: "4.9", label: "Average Rating", sub: "from 80+ reviews" },
-              { number: "127+", label: "Happy Clients", sub: "and counting" },
-              { number: "3", label: "Expert Artists", sub: "specialized styles" },
-              { number: "~2 wk", label: "Avg Wait Time", sub: "for new bookings" },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="flex flex-col gap-1 rounded-xl p-4"
-                style={{
-                  backgroundColor: "var(--bg-primary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <span
-                  className="text-2xl font-bold"
+        {/* Right — trust signals panel: renders only stats that actually exist */}
+        {hasStats ? (
+          <div
+            className="flex flex-col justify-center border-t px-6 py-10 @md:border-t-0 @md:border-l @md:px-8 @md:py-16 @lg:px-12 @lg:py-20"
+            style={{
+              backgroundColor: "var(--bg-raised)",
+              borderColor: "var(--border)",
+            }}
+          >
+            <div className={cn("grid gap-5", stats.length === 1 ? "grid-cols-1" : "grid-cols-2")}>
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col gap-1 rounded-xl p-4"
                   style={{
-                    fontFamily: "var(--heading-font)",
-                    color: "var(--text-primary)",
+                    backgroundColor: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
                   }}
                 >
-                  {stat.number}
-                </span>
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {stat.label}
-                </span>
-                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  {stat.sub}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            className="mt-6 h-px w-full"
-            style={{ backgroundColor: "var(--border)" }}
-          />
-
-          <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <div className="flex shrink-0 -space-x-2">
-              {[
-                "https://randomuser.me/api/portraits/women/44.jpg",
-                "https://randomuser.me/api/portraits/men/32.jpg",
-                "https://randomuser.me/api/portraits/women/68.jpg",
-              ].map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="h-8 w-8 rounded-full object-cover"
-                  style={{ border: "2px solid var(--bg-raised)" }}
-                />
+                  <span
+                    className="text-2xl font-bold"
+                    style={{
+                      fontFamily: "var(--heading-font)",
+                      color: "var(--text-primary)",
+                    }}
+                  >
+                    {stat.number}
+                  </span>
+                  <span
+                    className="text-xs font-medium"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {stat.label}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    {stat.sub}
+                  </span>
+                </div>
               ))}
             </div>
-            <p className="min-w-0 text-xs" style={{ color: "var(--text-muted)" }}>
-              Join 127+ satisfied clients who trusted us with their ink
-            </p>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );
@@ -472,8 +539,7 @@ const VARIANTS: Record<CtaLayout, React.FC<VariantProps>> = {
 /*  Exported wrapper                                                  */
 /* ------------------------------------------------------------------ */
 export function FooterCTASection({ className }: { className?: string }) {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const layout: CtaLayout = config.ctaLayout ?? "simple-minimal";
   const Variant = VARIANTS[layout] ?? VARIANTS["simple-minimal"];
   const glow = config.glowIntensity !== undefined && config.glowIntensity !== "none";
