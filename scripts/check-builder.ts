@@ -108,4 +108,35 @@ check("studioSiteDataFromStudioData maps coverImage, images, bookingLink", () =>
   assert.equal(hasPhotos(d), true);
 });
 
+// ─── Demo gating (the core truth-model guarantee) ────────────────────────
+import { buildBuilderSiteData, DEMO_SITE_ARTISTS } from "../components/studio-site/demo-site-data";
+
+check("Sample OFF leaks zero demo content", () => {
+  const d = buildBuilderSiteData(null, false);
+  assert.deepEqual(d.artists, []);
+  assert.deepEqual(d.reviews, []);
+  assert.equal(d.ratingAverage, undefined);
+  assert.equal(d.reviewCount ?? 0, 0);
+});
+
+check("Sample OFF passes real live extras through", () => {
+  const d = buildBuilderSiteData(null, false, {
+    artists: [{ id: "a1", name: "Real Artist", initials: "RA", styles: [], photoCount: 0, photos: [] }],
+    reviews: [{ author: "Real", stars: 5, text: "Great" }],
+    ratingAverage: "5.0",
+    reviewCount: 1,
+  });
+  assert.equal(d.artists[0]?.name, "Real Artist");
+  assert.equal(d.reviews.length, 1);
+  assert.equal(d.ratingAverage, "5.0");
+});
+
+check("Sample ON injects the full demo", () => {
+  const d = buildBuilderSiteData(null, true);
+  assert.equal(d.artists.length, DEMO_SITE_ARTISTS.length);
+  assert.equal(d.reviews.length, 8);
+  assert.equal(d.ratingAverage, "4.9");
+  assert.equal(d.name, "Iron & Ink");
+});
+
 console.log(`\n${passed} checks passed`);
