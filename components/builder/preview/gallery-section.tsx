@@ -4,7 +4,8 @@ import { PLACEHOLDER_PATTERN, PLACEHOLDER_PATTERN_RAW } from "@/lib/utils/placeh
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useBuilder } from "@/components/builder/builder-provider";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { SectionEmptyState } from "@/components/studio-site/empty-states";
 import { PhotoLightbox } from "@/components/ui/photo-lightbox";
 
 
@@ -21,16 +22,18 @@ const GALLERY_ITEMS = [
   { id: 9, aspect: "aspect-[3/4]" },
 ];
 
-const LIGHTBOX_PHOTOS = GALLERY_ITEMS.map((item) => ({ id: item.id }));
+type GalleryTile = { id: number; aspect: string; src?: string };
 
 function GalleryItem({
   index,
   aspect,
+  src,
   className,
   onClick,
 }: {
   index: number;
   aspect: string;
+  src?: string;
   className?: string;
   onClick: (index: number) => void;
 }) {
@@ -47,13 +50,15 @@ function GalleryItem({
       )}
       style={{
         backgroundColor: "var(--bg-sunken)",
-        backgroundImage: PLACEHOLDER_PATTERN,
+        backgroundImage: src ? `url("${src}")` : PLACEHOLDER_PATTERN,
+        backgroundSize: src ? "cover" : undefined,
+        backgroundPosition: src ? "center" : undefined,
       }}
     />
   );
 }
 
-function FeaturedGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }) {
+function FeaturedGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
   return (
     <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
       {/* First item spans 2x2 */}
@@ -65,50 +70,52 @@ function FeaturedGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }
         className="col-span-2 row-span-2 overflow-hidden rounded-lg aspect-square cursor-zoom-in transition-opacity hover:opacity-90"
         style={{
           backgroundColor: "var(--bg-sunken)",
-          backgroundImage: PLACEHOLDER_PATTERN,
+          backgroundImage: items[0]?.src ? `url("${items[0].src}")` : PLACEHOLDER_PATTERN,
+          backgroundSize: items[0]?.src ? "cover" : undefined,
+          backgroundPosition: items[0]?.src ? "center" : undefined,
         }}
       />
-      {GALLERY_ITEMS.slice(1, 7).map((item, i) => (
-        <GalleryItem key={item.id} index={i + 1} aspect="aspect-square" onClick={onPhotoClick} />
+      {items.slice(1, 7).map((item, i) => (
+        <GalleryItem key={item.id} index={i + 1} aspect="aspect-square" src={item.src} onClick={onPhotoClick} />
       ))}
-      {GALLERY_ITEMS.slice(7, 9).map((item, i) => (
-        <GalleryItem key={item.id} index={i + 7} aspect="aspect-square" className="hidden @md:block" onClick={onPhotoClick} />
+      {items.slice(7, 9).map((item, i) => (
+        <GalleryItem key={item.id} index={i + 7} aspect="aspect-square" src={item.src} className="hidden @md:block" onClick={onPhotoClick} />
       ))}
     </div>
   );
 }
 
-function UniformGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }) {
+function UniformGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
   return (
     <div className="grid grid-cols-2 gap-3 @md:grid-cols-4">
-      {GALLERY_ITEMS.slice(0, 8).map((item, i) => (
-        <GalleryItem key={item.id} index={i} aspect="aspect-square" onClick={onPhotoClick} />
+      {items.slice(0, 8).map((item, i) => (
+        <GalleryItem key={item.id} index={i} aspect="aspect-square" src={item.src} onClick={onPhotoClick} />
       ))}
     </div>
   );
 }
 
-function MasonryGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }) {
+function MasonryGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
   return (
     <div className="columns-2 gap-3 @md:columns-4">
-      {GALLERY_ITEMS.map((item, i) => (
+      {items.map((item, i) => (
         <div key={item.id} className="mb-3 break-inside-avoid">
-          <GalleryItem index={i} aspect={item.aspect} onClick={onPhotoClick} />
+          <GalleryItem index={i} aspect={item.aspect} src={item.src} onClick={onPhotoClick} />
         </div>
       ))}
     </div>
   );
 }
 
-function CarouselGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }) {
+function CarouselGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
   return (
     <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-none">
-      {GALLERY_ITEMS.map((item, i) => (
+      {items.map((item, i) => (
         <div
           key={item.id}
           className="w-40 shrink-0 snap-start @sm:w-56 @md:w-64"
         >
-          <GalleryItem index={i} aspect="aspect-[3/4]" className="rounded-xl" onClick={onPhotoClick} />
+          <GalleryItem index={i} aspect="aspect-[3/4]" src={item.src} className="rounded-xl" onClick={onPhotoClick} />
         </div>
       ))}
     </div>
@@ -116,10 +123,25 @@ function CarouselGallery({ onPhotoClick }: { onPhotoClick: (i: number) => void }
 }
 
 export function GallerySection({ className }: { className?: string }) {
-  const { config } = useBuilder();
+  const { config, data } = useStudioSite();
   const { galleryLayout, showGalleryHeading } = config;
   const showHeading = showGalleryHeading !== false;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Real images → render those. Empty → designed empty state: a quiet tile
+  // silhouette (never mistakable for content) under a "coming soon" overlay.
+  const hasImages = data.images.length > 0;
+  const items: GalleryTile[] = hasImages
+    ? data.images.map((url, i) => ({
+        id: i,
+        aspect: GALLERY_ITEMS[i % GALLERY_ITEMS.length]!.aspect,
+        src: url,
+      }))
+    : GALLERY_ITEMS.slice(0, 6);
+
+  const lightboxPhotos = hasImages
+    ? items.map((item) => ({ id: item.id, src: item.src }))
+    : [];
 
   return (
     <section
@@ -130,23 +152,42 @@ export function GallerySection({ className }: { className?: string }) {
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
-        {showHeading && (
-          <p
+        {showHeading ? <p
             className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
             style={{ color: "var(--accent)" }}
           >
             Portfolio
-          </p>
-        )}
+          </p> : null}
 
-        {galleryLayout === "featured" && <FeaturedGallery onPhotoClick={setLightboxIndex} />}
-        {galleryLayout === "uniform" && <UniformGallery onPhotoClick={setLightboxIndex} />}
-        {galleryLayout === "masonry" && <MasonryGallery onPhotoClick={setLightboxIndex} />}
-        {galleryLayout === "carousel" && <CarouselGallery onPhotoClick={setLightboxIndex} />}
+        <div className="relative">
+          <div className={cn(!hasImages && "opacity-40")} aria-hidden={!hasImages}>
+            {galleryLayout === "featured" ? <FeaturedGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+            {galleryLayout === "uniform" ? <UniformGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+            {galleryLayout === "masonry" ? <MasonryGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+            {galleryLayout === "carousel" ? <CarouselGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+          </div>
+          {!hasImages ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="rounded-[var(--border-radius-lg)] px-4 py-2"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--bg-primary) 82%, transparent)",
+                  backdropFilter: "blur(2px)",
+                }}
+              >
+                <SectionEmptyState
+                  message="Portfolio coming soon."
+                  prompt={{ group: "photos", label: "Add photos" }}
+                  className="py-4"
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <PhotoLightbox
-        photos={LIGHTBOX_PHOTOS}
+        photos={lightboxPhotos}
         activeIndex={lightboxIndex}
         onClose={() => setLightboxIndex(null)}
         onNavigate={setLightboxIndex}
