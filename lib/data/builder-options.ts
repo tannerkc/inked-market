@@ -81,6 +81,16 @@ export const galleryOptions: SectionVariantOption<GalleryLayout>[] = [
     value: "carousel",
     description: "Horizontal scrolling strip",
   },
+  {
+    label: "Film Strip",
+    value: "film-strip",
+    description: "Sprocket-edged cinematic strip",
+  },
+  {
+    label: "Flash Sheet",
+    value: "flash-sheet",
+    description: "Bordered tiles, ornament corners",
+  },
 ];
 
 export const galleryPhotosOptions: SectionVariantOption<GalleryPhotosPerArtist>[] = [

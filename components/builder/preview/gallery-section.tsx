@@ -107,6 +107,51 @@ function MasonryGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhoto
   );
 }
 
+/** Dark Cinematic signature: horizontal strip framed by film sprocket holes. */
+function FilmStripGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
+  const sprockets: React.CSSProperties = {
+    backgroundImage: "repeating-linear-gradient(90deg, var(--border) 0 10px, transparent 10px 26px)",
+  };
+  return (
+    <div className="overflow-hidden rounded-[var(--border-radius-lg)]" style={{ backgroundColor: "var(--bg-deep)" }}>
+      <div className="h-4 w-full opacity-60" style={sprockets} aria-hidden="true" />
+      <div className="flex gap-2 overflow-x-auto px-2 py-2 snap-x snap-mandatory scrollbar-hide">
+        {items.map((item, i) => (
+          <div key={item.id} className="w-44 shrink-0 snap-start @sm:w-56 @md:w-64">
+            <GalleryItem index={i} aspect="aspect-[3/4]" src={item.src} className="rounded-sm" onClick={onPhotoClick} />
+          </div>
+        ))}
+      </div>
+      <div className="h-4 w-full opacity-60" style={sprockets} aria-hidden="true" />
+    </div>
+  );
+}
+
+/** Traditional Flash signature: flash-sheet grid — bordered tiles with corner ornaments. */
+function FlashSheetGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
+  const cornerBase = "pointer-events-none absolute h-2.5 w-2.5";
+  return (
+    <div className="grid grid-cols-2 gap-4 @md:grid-cols-3">
+      {items.slice(0, 9).map((item, i) => (
+        <div
+          key={item.id}
+          className="relative border-2 p-1.5"
+          style={{
+            borderColor: "color-mix(in srgb, var(--accent) 55%, var(--border))",
+            backgroundColor: "var(--bg-raised)",
+          }}
+        >
+          <span aria-hidden="true" className={cn(cornerBase, "left-0.5 top-0.5 border-l-2 border-t-2")} style={{ borderColor: "var(--accent)" }} />
+          <span aria-hidden="true" className={cn(cornerBase, "right-0.5 top-0.5 border-r-2 border-t-2")} style={{ borderColor: "var(--accent)" }} />
+          <span aria-hidden="true" className={cn(cornerBase, "bottom-0.5 left-0.5 border-b-2 border-l-2")} style={{ borderColor: "var(--accent)" }} />
+          <span aria-hidden="true" className={cn(cornerBase, "bottom-0.5 right-0.5 border-b-2 border-r-2")} style={{ borderColor: "var(--accent)" }} />
+          <GalleryItem index={i} aspect="aspect-square" src={item.src} className="rounded-none" onClick={onPhotoClick} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function CarouselGallery({ items, onPhotoClick }: { items: GalleryTile[]; onPhotoClick: (i: number) => void }) {
   return (
     <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-none">
@@ -165,6 +210,8 @@ export function GallerySection({ className }: { className?: string }) {
             {galleryLayout === "uniform" ? <UniformGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
             {galleryLayout === "masonry" ? <MasonryGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
             {galleryLayout === "carousel" ? <CarouselGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+            {galleryLayout === "film-strip" ? <FilmStripGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
+            {galleryLayout === "flash-sheet" ? <FlashSheetGallery items={items} onPhotoClick={hasImages ? setLightboxIndex : () => {}} /> : null}
           </div>
           {!hasImages ? (
             <div className="absolute inset-0 flex items-center justify-center">

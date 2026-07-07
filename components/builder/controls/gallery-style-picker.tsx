@@ -3,8 +3,7 @@
 import { useBuilder } from "@/components/builder/builder-provider";
 import { galleryOptions, galleryPhotosOptions } from "@/lib/data/builder-options";
 import type { GalleryLayout, GalleryPhotosPerArtist } from "@/lib/types/builder";
-import { cn } from "@/lib/utils";
-import { PickerCheckmark } from "./picker-checkmark";
+import { ThumbnailPicker } from "./thumbnail-picker";
 
 // ─── Gallery Layout (mixed gallery preview) ───────────────────────────────────
 
@@ -54,6 +53,26 @@ function GalleryThumbnail({ layout }: { layout: GalleryLayout }) {
           <div className="h-full w-[22%] shrink-0 rounded bg-chrome-subtle" />
         </div>
       );
+    case "film-strip":
+      return (
+        <div className="flex h-full w-full flex-col gap-0.5 rounded-md bg-chrome-raised p-2">
+          <div className="h-1 w-full rounded-sm [background-image:repeating-linear-gradient(90deg,var(--chrome-subtle)_0_4px,transparent_4px_9px)]" />
+          <div className="flex flex-1 gap-1 overflow-hidden">
+            <div className="h-full w-1/3 shrink-0 rounded-sm bg-chrome-muted" />
+            <div className="h-full w-1/3 shrink-0 rounded-sm bg-chrome-muted" />
+            <div className="h-full w-1/3 shrink-0 rounded-sm bg-chrome-border-hover" />
+          </div>
+          <div className="h-1 w-full rounded-sm [background-image:repeating-linear-gradient(90deg,var(--chrome-subtle)_0_4px,transparent_4px_9px)]" />
+        </div>
+      );
+    case "flash-sheet":
+      return (
+        <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1 rounded-md bg-chrome-raised p-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="rounded-none border border-chrome-subtle bg-chrome-muted p-0.5" />
+          ))}
+        </div>
+      );
   }
 }
 
@@ -61,50 +80,13 @@ export function GalleryStylePicker() {
   const { config, applyChange } = useBuilder();
 
   return (
-    <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        Gallery Layout
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {galleryOptions.map((opt) => {
-          const selected = config.galleryLayout === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ galleryLayout: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              <div className="aspect-[4/3] w-full p-1.5">
-                <GalleryThumbnail layout={opt.value} />
-              </div>
-
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <ThumbnailPicker<GalleryLayout>
+      title="Gallery Layout"
+      options={galleryOptions}
+      selectedValue={config.galleryLayout}
+      onSelect={(value) => applyChange({ galleryLayout: value })}
+      renderThumbnail={(value) => <GalleryThumbnail layout={value} />}
+    />
   );
 }
 
@@ -133,48 +115,14 @@ export function GalleryPhotosPicker() {
   const { config, applyChange } = useBuilder();
 
   return (
-    <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        Photos per Artist
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {galleryPhotosOptions.map((opt) => {
-          const selected = config.galleryPhotosPerArtist === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ galleryPhotosPerArtist: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              <div className="aspect-[4/3] w-full p-1.5">
-                <GalleryPhotosThumbnail count={opt.value} />
-              </div>
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <ThumbnailPicker<GalleryPhotosPerArtist>
+      title="Photos per Artist"
+      columns={3}
+      options={galleryPhotosOptions}
+      selectedValue={config.galleryPhotosPerArtist}
+      onSelect={(value) => applyChange({ galleryPhotosPerArtist: value })}
+      renderThumbnail={(value) => <GalleryPhotosThumbnail count={value} />}
+    />
   );
 }
 

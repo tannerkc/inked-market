@@ -199,4 +199,9 @@ check("signature hero defaults", () => {
   assert.equal(templates["gutter-punk"].defaults.heroLayout, "zine");
 });
 
+check("signature gallery defaults", () => {
+  assert.equal(templates["dark-cinematic"].defaults.galleryLayout, "film-strip");
+  assert.equal(templates["traditional-flash"].defaults.galleryLayout, "flash-sheet");
+});
+
 console.log(`\n${passed} checks passed`);

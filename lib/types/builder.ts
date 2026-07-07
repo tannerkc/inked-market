@@ -16,7 +16,7 @@ export type ThemePreset =
   | "mono";
 
 export type HeroLayout = "split" | "fullbleed" | "centered" | "masthead" | "grid-overlay" | "zine";
-export type GalleryLayout = "featured" | "uniform" | "masonry" | "carousel";
+export type GalleryLayout = "featured" | "uniform" | "masonry" | "carousel" | "film-strip" | "flash-sheet";
 export type GalleryPhotosPerArtist = 3 | 5 | 8;
 export type DetailsLayout = "three-col" | "two-one" | "stacked";
 export type CtaLayout = "simple-minimal" | "contact-form" | "map-info" | "booking";
