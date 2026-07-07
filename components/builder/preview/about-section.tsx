@@ -1,10 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useBuilder } from "@/components/builder/builder-provider";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { PromptChip, SectionEmptyState } from "@/components/studio-site/empty-states";
 import type { TagStyle } from "@/lib/types/builder";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
-import type { StudioData } from "@/lib/repositories";
+import type { StudioSiteData } from "@/components/studio-site/studio-site-data";
 
 const TAG_STYLES = {
   pill: "rounded-full",
@@ -63,7 +63,7 @@ function SpecialtiesBlock({
   );
 }
 
-function StudioDetailsBlock({ services }: { services: StudioData['services'] }) {
+function StudioDetailsBlock({ services }: { services: StudioSiteData['services'] }) {
   return (
     <div
       data-builder-card
@@ -83,14 +83,15 @@ function StudioDetailsBlock({ services }: { services: StudioData['services'] }) 
         className="space-y-1.5 text-sm"
         style={{ color: "var(--text-secondary)" }}
       >
-        {services.includes("walk-ins") && <li>Walk-ins welcome</li>}
-        {services.includes("piercing") && <li>Piercing available</li>}
+        {services.includes("walk-ins") ? <li>Walk-ins welcome</li> : null}
+        {services.includes("piercing") ? <li>Piercing available</li> : null}
       </ul>
     </div>
   );
 }
 
 function StoryBlock({ centered, bio }: { centered?: boolean; bio?: string }) {
+  const hasStory = Boolean(bio && bio.trim());
   return (
     <div className={cn(centered && "text-center")}>
       <h2
@@ -102,8 +103,9 @@ function StoryBlock({ centered, bio }: { centered?: boolean; bio?: string }) {
       >
         Our Story
       </h2>
-      {bio && (
+      {hasStory ? (
         <p
+          data-story-body
           className={cn(
             "text-sm leading-relaxed",
             centered && "mx-auto max-w-xl",
@@ -112,21 +114,47 @@ function StoryBlock({ centered, bio }: { centered?: boolean; bio?: string }) {
         >
           {bio}
         </p>
+      ) : (
+        <div className={cn("flex flex-col gap-3", centered ? "items-center" : "items-start")}>
+          <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>
+            Story coming soon.
+          </p>
+          <PromptChip group="story" label="Tell your story" />
+        </div>
       )}
     </div>
   );
 }
 
 export function AboutSection({ className }: { className?: string }) {
-  const { config, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
+  const { config, data } = useStudioSite();
   const { aboutLayout, showSpecialties, showStudioDetails, tagStyle } = config;
 
-  const hasSpecialties = showSpecialties !== false;
-  const hasDetails = showStudioDetails !== false;
   const specialties = data?.specialties ?? [];
   const services = data?.services ?? [];
   const bio = data?.bio;
+  // Reflow to what exists: blocks render only when toggled on AND real data exists.
+  const hasSpecialties = showSpecialties !== false && specialties.length > 0;
+  const hasDetails = showStudioDetails !== false && services.length > 0;
+
+  // Everything empty → one designed empty state instead of a hollow section.
+  const nothingToShow = !bio?.trim() && !hasSpecialties && !hasDetails;
+  if (aboutLayout !== "none" && nothingToShow) {
+    return (
+      <section
+        className={cn("w-full transition-all duration-500 ease-in-out", className)}
+        style={{ backgroundColor: "var(--bg-primary)" }}
+      >
+        <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
+          <SectionEmptyState
+            eyebrow="Our Story"
+            message="Story coming soon."
+            prompt={{ group: "story", label: "Tell your story" }}
+          />
+        </div>
+      </section>
+    );
+  }
 
   // About = none: render standalone content blocks if any are toggled on
   if (aboutLayout === "none") {
@@ -142,16 +170,12 @@ export function AboutSection({ className }: { className?: string }) {
       >
         <div className="mx-auto max-w-[1350px] px-6 py-8 @lg:px-10">
           <div className="flex flex-col gap-4 @sm:flex-row @sm:gap-6">
-            {hasSpecialties && (
-              <div className="flex-1">
+            {hasSpecialties ? <div className="flex-1">
                 <SpecialtiesBlock tagStyle={tagStyle} specialties={specialties} />
-              </div>
-            )}
-            {hasDetails && (
-              <div className="flex-1">
+              </div> : null}
+            {hasDetails ? <div className="flex-1">
                 <StudioDetailsBlock services={services} />
-              </div>
-            )}
+              </div> : null}
           </div>
         </div>
       </section>
@@ -167,26 +191,22 @@ export function AboutSection({ className }: { className?: string }) {
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       <div className="mx-auto max-w-[1350px] px-6 py-12 @lg:px-10">
-        {aboutLayout === "split" && (
-          <SplitAbout
+        {aboutLayout === "split" ? <SplitAbout
             tagStyle={tagStyle}
             showSpecialties={hasSpecialties}
             showDetails={hasDetails}
             specialties={specialties}
             services={services}
             bio={bio}
-          />
-        )}
-        {aboutLayout === "full-width" && (
-          <FullWidthAbout
+          /> : null}
+        {aboutLayout === "full-width" ? <FullWidthAbout
             tagStyle={tagStyle}
             showSpecialties={hasSpecialties}
             showDetails={hasDetails}
             specialties={specialties}
             services={services}
             bio={bio}
-          />
-        )}
+          /> : null}
       </div>
     </section>
   );
@@ -204,7 +224,7 @@ function SplitAbout({
   showSpecialties: boolean;
   showDetails: boolean;
   specialties: string[];
-  services: StudioData['services'];
+  services: StudioSiteData['services'];
   bio?: string;
 }) {
   const hasRightColumn = showSpecialties || showDetails;
@@ -218,20 +238,16 @@ function SplitAbout({
     >
       <div>
         <StoryBlock bio={bio} />
-        {hasRightColumn && (
-          <div
+        {hasRightColumn ? <div
             className="mt-8 h-px @md:hidden"
             style={{ backgroundColor: "var(--border)" }}
-          />
-        )}
+          /> : null}
       </div>
 
-      {hasRightColumn && (
-        <div className="space-y-5">
-          {showSpecialties && <SpecialtiesBlock tagStyle={tagStyle} specialties={specialties} />}
-          {showDetails && <StudioDetailsBlock services={services} />}
-        </div>
-      )}
+      {hasRightColumn ? <div className="space-y-5">
+          {showSpecialties ? <SpecialtiesBlock tagStyle={tagStyle} specialties={specialties} /> : null}
+          {showDetails ? <StudioDetailsBlock services={services} /> : null}
+        </div> : null}
     </div>
   );
 }
@@ -248,15 +264,14 @@ function FullWidthAbout({
   showSpecialties: boolean;
   showDetails: boolean;
   specialties: string[];
-  services: StudioData['services'];
+  services: StudioSiteData['services'];
   bio?: string;
 }) {
   return (
     <div className="mx-auto max-w-2xl text-center">
       <StoryBlock centered bio={bio} />
 
-      {showSpecialties && (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+      {showSpecialties ? <div className="mt-6 flex flex-wrap justify-center gap-2">
           {specialties.map((tag) => (
             <span
               key={tag}
@@ -276,36 +291,31 @@ function FullWidthAbout({
               {tag}
             </span>
           ))}
-        </div>
-      )}
+        </div> : null}
 
-      {showDetails && (
-        <div
-          className="mx-auto mt-8 grid max-w-lg grid-cols-3 gap-6 text-center"
-        >
-          <div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }}>
-              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{services.includes('walk-ins') ? 'Walk-ins Welcome' : 'By Appointment'}</p>
-          </div>
-          <div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }}>
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>Private Rooms</p>
-          </div>
-          <div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }}>
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18M9 21V9" />
-            </svg>
-            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>Free Parking</p>
-          </div>
+      {/* Real services only — never fabricated amenities */}
+      {showDetails && services.length > 0 ? (
+        <div className="mx-auto mt-8 flex max-w-lg flex-wrap justify-center gap-6 text-center">
+          {services.includes("walk-ins") ? (
+            <div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }} aria-hidden="true">
+                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>Walk-ins Welcome</p>
+            </div>
+          ) : null}
+          {services.includes("piercing") ? (
+            <div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2" style={{ color: "var(--accent)" }} aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <circle cx="12" cy="12" r="2.5" />
+              </svg>
+              <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>Piercing Available</p>
+            </div>
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
