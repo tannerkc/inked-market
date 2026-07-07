@@ -8,7 +8,7 @@ import { SetupProgressChip } from "@/components/builder/setup-progress-chip";
 
 export function BuilderTopBar() {
   const router = useRouter();
-  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, useMockData, toggleMockData } = useBuilder();
+  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, useMockData, toggleMockData, setIsPreviewing } = useBuilder();
 
   return (
     <div className="fixed top-0 right-0 left-0 z-[200] flex h-12 items-center justify-between border-b border-chrome-border bg-ink-black/92 px-5 backdrop-blur-xl">
@@ -75,6 +75,8 @@ export function BuilderTopBar() {
         <button
           type="button"
           onClick={toggleMockData}
+          aria-pressed={useMockData}
+          title="Preview with example content — never shown on your live site."
           className={cn(
             "rounded-lg border bg-transparent px-3.5 py-1.5 text-xs font-medium transition-colors",
             useMockData
@@ -82,7 +84,7 @@ export function BuilderTopBar() {
               : "border-chrome-border-hover text-chrome-text-tertiary",
           )}
         >
-          Mock Data
+          Sample Data
         </button>
         <button
           type="button"
@@ -93,6 +95,8 @@ export function BuilderTopBar() {
         </button>
         <button
           type="button"
+          onClick={() => setIsPreviewing(true)}
+          title="See your site exactly as visitors will"
           className="rounded-lg border border-chrome-border-hover bg-transparent px-3.5 py-1.5 text-xs font-medium text-chrome-text-secondary transition-colors hover:border-chrome-text-dim hover:text-white"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1.5 -mt-px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>Preview

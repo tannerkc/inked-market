@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
-import { BuilderProvider } from "@/components/builder/builder-provider";
+import { BuilderProvider, useBuilder } from "@/components/builder/builder-provider";
 import { BuilderContentPanel } from "@/components/builder/content-panel";
+import { StudioPagePreview } from "@/components/builder/studio-page-preview";
 import { useStudio } from "@/lib/providers/studio-provider";
 import { BuilderTopBar } from "@/components/builder/builder-top-bar";
 import { SplitScreenBuilder } from "@/components/builder/split-screen-builder";
@@ -32,6 +33,37 @@ function getIsMobile() {
 }
 
 const serverSnapshot = () => false;
+
+/**
+ * Full-screen chrome-free render of the current config with real data — this
+ * is exactly what publishing ships. Escape or the pill exits.
+ */
+function PreviewOverlay() {
+  const { isPreviewing, setIsPreviewing } = useBuilder();
+
+  useEffect(() => {
+    if (!isPreviewing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsPreviewing(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isPreviewing, setIsPreviewing]);
+
+  if (!isPreviewing) return null;
+  return (
+    <div className="fixed inset-0 z-[300] overflow-y-auto bg-chrome-bg">
+      <StudioPagePreview />
+      <button
+        type="button"
+        onClick={() => setIsPreviewing(false)}
+        className="fixed bottom-6 left-1/2 z-[310] -translate-x-1/2 rounded-full border border-chrome-border-hover bg-ink-black/90 px-5 py-2.5 text-xs font-semibold text-chrome-text-light shadow-2xl backdrop-blur-xl transition-colors hover:text-white"
+      >
+        Exit preview
+      </button>
+    </div>
+  );
+}
 
 /* ─── Storage keys ────────────────────────────────────────────────────── */
 
@@ -198,6 +230,7 @@ export default function BuilderPage() {
         </div>
         {/* Full-width drawer on phones — the mobile Content surface */}
         <BuilderContentPanel />
+        <PreviewOverlay />
       </BuilderProvider>
     );
   }
@@ -226,6 +259,7 @@ export default function BuilderPage() {
       </div>
       {/* Overlay drawer for inline mode; split mode docks Content in the editor panel */}
       {mode !== "split" ? <BuilderContentPanel /> : null}
+      <PreviewOverlay />
     </BuilderProvider>
   );
 }
