@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { SetupProgressChip } from "@/components/builder/setup-progress-chip";
 
 export function BuilderTopBar() {
   const router = useRouter();
@@ -32,14 +33,13 @@ export function BuilderTopBar() {
         <span className="rounded bg-ink-red/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-red">
           Editing
         </span>
-        {isDirty && (
-          <span className="rounded bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide text-chrome-text-dim">
+        {isDirty ? <span className="rounded bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide text-chrome-text-dim">
             Unsaved
-          </span>
-        )}
+          </span> : null}
       </div>
 
       <div className="flex items-center gap-2">
+        <SetupProgressChip />
         {/* Undo / Redo */}
         <div className="mr-2 flex items-center gap-1">
           <button

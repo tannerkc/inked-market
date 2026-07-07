@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
+import { SetupProgressChip } from "@/components/builder/setup-progress-chip";
 
 export function MobileTopBar() {
   const router = useRouter();
@@ -38,8 +39,9 @@ export function MobileTopBar() {
         </span>
       </div>
 
-      {/* Right: undo/redo + save + publish */}
+      {/* Right: setup + undo/redo + save + publish */}
       <div className="flex items-center gap-1.5">
+        <SetupProgressChip compact />
         <button
           type="button"
           onClick={undo}
@@ -75,9 +77,7 @@ export function MobileTopBar() {
           className="relative rounded-lg border border-chrome-border-hover px-2.5 py-1 text-[11px] font-medium text-chrome-text-secondary transition-colors active:bg-white/5"
         >
           Save
-          {isDirty && (
-            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-ink-red" />
-          )}
+          {isDirty ? <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-ink-red" /> : null}
         </button>
         <button
           type="button"

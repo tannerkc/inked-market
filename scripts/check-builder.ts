@@ -157,4 +157,39 @@ check("storagePathFromPublicUrl extracts bucket-relative path", () => {
   assert.equal(storagePathFromPublicUrl("https://example.com/not-storage.png"), null);
 });
 
+// ─── Setup progress ──────────────────────────────────────────────────────
+import { computeSetupItems } from "../lib/hooks/use-setup-progress";
+
+check("empty studio: no required item can be done", () => {
+  const items = computeSetupItems(EMPTY_SITE, defaultThemeConfig, 0);
+  const byId = new Map(items.map((i) => [i.id, i]));
+  assert.equal(byId.get("story")?.done, false);
+  assert.equal(byId.get("photos")?.done, false);
+  assert.equal(byId.get("contact-hours")?.done, false);
+  assert.equal(byId.get("socials")?.done, false);
+  assert.equal(byId.get("booking")?.done, false);
+  assert.equal(byId.get("artists")?.optional, true);
+});
+
+check("filled studio: everything done", () => {
+  const full: StudioSiteData = {
+    ...EMPTY_SITE,
+    bio: "story",
+    phone: "555",
+    email: "a@b.c",
+    hours: { Monday: { open: "10:00 AM", close: "6:00 PM", closed: false } },
+    instagram: "@x",
+    images: ["u"],
+    bookingLink: { url: "https://booksy.com/x", platformName: "Booksy" },
+  };
+  const cfgWithPolicy = {
+    ...defaultThemeConfig,
+    policies: [
+      { id: "aftercare", type: "standard" as const, title: "Aftercare", enabled: true, body: "", featured: false, order: 0 },
+    ],
+  };
+  const items = computeSetupItems(full, cfgWithPolicy, 2);
+  assert.ok(items.every((i) => i.done));
+});
+
 console.log(`\n${passed} checks passed`);
