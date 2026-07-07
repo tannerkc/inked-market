@@ -15,7 +15,7 @@ export type ThemePreset =
   | "gold"
   | "mono";
 
-export type HeroLayout = "split" | "fullbleed" | "centered";
+export type HeroLayout = "split" | "fullbleed" | "centered" | "masthead" | "grid-overlay" | "zine";
 export type GalleryLayout = "featured" | "uniform" | "masonry" | "carousel";
 export type GalleryPhotosPerArtist = 3 | 5 | 8;
 export type DetailsLayout = "three-col" | "two-one" | "stacked";

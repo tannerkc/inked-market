@@ -4,7 +4,7 @@ import { useBuilder } from "@/components/builder/builder-provider";
 import { heroOptions } from "@/lib/data/builder-options";
 import type { HeroLayout } from "@/lib/types/builder";
 import { cn } from "@/lib/utils";
-import { PickerCheckmark } from "./picker-checkmark";
+import { ThumbnailPicker } from "./thumbnail-picker";
 
 function HeroThumbnail({ layout, selected }: { layout: HeroLayout; selected: boolean }) {
   const accent = selected ? "#FF3333" : "#444";
@@ -38,6 +38,35 @@ function HeroThumbnail({ layout, selected }: { layout: HeroLayout; selected: boo
           <div className="h-2 w-2/5 rounded-sm" style={{ backgroundColor: accent }} />
         </div>
       );
+    case "masthead":
+      return (
+        <div className="flex h-full w-full flex-col gap-1 rounded-md bg-chrome-raised p-2">
+          <div className="h-0.5 w-full rounded-sm bg-chrome-text-primary" />
+          <div className="mx-auto h-3 w-2/3 rounded-sm bg-chrome-text-primary" />
+          <div className="h-px w-full bg-chrome-border-hover" />
+          <div className="mt-auto h-1/2 w-full rounded bg-chrome-muted" />
+        </div>
+      );
+    case "grid-overlay":
+      return (
+        <div className="relative grid h-full w-full grid-cols-3 gap-px rounded-md bg-chrome-raised p-2">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="rounded-sm bg-chrome-muted" />
+          ))}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-3 w-1/2 rounded-sm bg-chrome-text-primary" />
+          </div>
+        </div>
+      );
+    case "zine":
+      return (
+        <div className="relative flex h-full w-full items-center justify-center gap-1 overflow-hidden rounded-md bg-chrome-raised p-2">
+          <div className="h-3/4 w-1/4 -rotate-6 rounded-sm bg-chrome-muted" />
+          <div className="h-3/4 w-1/4 rotate-3 rounded-sm bg-chrome-muted" />
+          <div className="h-3/4 w-1/4 -rotate-2 rounded-sm bg-chrome-muted" />
+          <div className="absolute h-2.5 w-2/3 -rotate-2 rounded-sm" style={{ backgroundColor: accent }} />
+        </div>
+      );
   }
 }
 
@@ -46,51 +75,14 @@ export function HeroStylePicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        Hero Layout
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {heroOptions.map((opt) => {
-          const selected = config.heroLayout === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ heroLayout: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              {/* Thumbnail area */}
-              <div className="aspect-[4/3] w-full p-1.5">
-                <HeroThumbnail layout={opt.value} selected={selected} />
-              </div>
-
-              {/* Label */}
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-
-              {/* Selected check */}
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <ThumbnailPicker<HeroLayout>
+        title="Hero Layout"
+        columns={3}
+        options={heroOptions}
+        selectedValue={config.heroLayout}
+        onSelect={(value) => applyChange({ heroLayout: value })}
+        renderThumbnail={(value, selected) => <HeroThumbnail layout={value} selected={selected} />}
+      />
 
       {/* Hero Options */}
       <div className="mt-5 space-y-3">

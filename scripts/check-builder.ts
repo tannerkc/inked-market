@@ -192,4 +192,11 @@ check("filled studio: everything done", () => {
   assert.ok(items.every((i) => i.done));
 });
 
+// ─── Template signature defaults ─────────────────────────────────────────
+check("signature hero defaults", () => {
+  assert.equal(templates["bold-editorial"].defaults.heroLayout, "masthead");
+  assert.equal(templates["studio-minimal"].defaults.heroLayout, "grid-overlay");
+  assert.equal(templates["gutter-punk"].defaults.heroLayout, "zine");
+});
+
 console.log(`\n${passed} checks passed`);

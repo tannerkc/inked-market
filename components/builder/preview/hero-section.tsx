@@ -173,6 +173,169 @@ function CenteredHero() {
   );
 }
 
+/** Bold Editorial signature: magazine masthead — rule lines, huge name, meta row, wide image band. */
+function MastheadHero() {
+  const { config, data } = useStudioSite();
+  const metaParts = [
+    [data?.city, data?.state].filter(Boolean).join(", "),
+    (data?.specialties ?? []).slice(0, 3).join(" / "),
+  ].filter((p) => p.length > 0);
+
+  return (
+    <div
+      className="flex min-h-[520px] flex-col justify-between gap-6 px-6 pt-10 @lg:px-12"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+    >
+      <div>
+        <div className="h-[3px] w-full" style={{ backgroundColor: "var(--text-primary)" }} />
+        <h1
+          className="py-3 text-center text-6xl leading-[0.9] @lg:py-5 @lg:text-8xl"
+          style={{ fontFamily: "var(--heading-font)", color: "var(--text-primary)" }}
+        >
+          {data?.name ?? ""}
+        </h1>
+        <div className="h-px w-full" style={{ backgroundColor: "var(--border)" }} />
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 py-2 text-[10px] font-semibold uppercase tracking-[0.2em]"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {metaParts.map((part) => (
+            <span key={part}>{part}</span>
+          ))}
+          {config.showHeroSubtext !== false ? (
+            <span style={{ color: "var(--text-secondary)" }}>
+              {config.heroSubtext || "Tattoo crafted with intention."}
+            </span>
+          ) : null}
+        </div>
+        <div className="h-px w-full" style={{ backgroundColor: "var(--border)" }} />
+      </div>
+      <div
+        data-hero-image
+        className="relative min-h-[240px] flex-1"
+        style={heroImageStyle(data?.coverImage)}
+      >
+        {!data?.coverImage ? (
+          <div className="absolute bottom-4 left-4">
+            <PromptChip group="photos" label="Add cover photo" />
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Studio Minimal signature: the hero IS a photo grid; name floats on a quiet panel. */
+function GridOverlayHero() {
+  const { data } = useStudioSite();
+  const tiles = (data?.images ?? []).slice(0, 6);
+  const cells: (string | undefined)[] =
+    tiles.length > 0 ? tiles : Array.from({ length: 6 }, () => undefined);
+
+  return (
+    <div className="relative min-h-[520px]">
+      <div className="grid h-full min-h-[520px] grid-cols-2 gap-px @lg:grid-cols-3" aria-hidden={tiles.length === 0}>
+        {cells.map((src, i) => (
+          <div
+            key={i}
+            data-gallery-item
+            className={cn("min-h-[170px]", tiles.length === 0 && "opacity-50")}
+            style={
+              src
+                ? { backgroundImage: `url("${src}")`, backgroundSize: "cover", backgroundPosition: "center" }
+                : { backgroundColor: "var(--bg-sunken)", backgroundImage: PLACEHOLDER_PATTERN }
+            }
+          />
+        ))}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center p-6">
+        <div
+          className="flex flex-col items-center gap-4 px-10 py-8 text-center"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--bg-primary) 92%, transparent)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <HeroContent centered />
+          {tiles.length === 0 ? <PromptChip group="photos" label="Add photos" /> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Gutter Punk signature: zine collage — rotated tiles, tape corners, stamped name. */
+function ZineHero() {
+  const { config, data } = useStudioSite();
+  const photos = data?.images ?? [];
+  const tiles: (string | undefined)[] = [0, 1, 2].map((i) => photos[i]);
+
+  return (
+    <div
+      className="relative min-h-[520px] overflow-hidden px-6 py-12 @lg:px-12"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+    >
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-4 @lg:gap-8">
+        {tiles.map((src, i) => (
+          <div
+            key={i}
+            className={cn(
+              "relative h-[280px] w-[200px] shrink-0 @lg:h-[360px] @lg:w-[260px]",
+              i === 0 && "-rotate-[4deg] translate-y-6",
+              i === 1 && "rotate-[2deg] -translate-y-3",
+              i === 2 && "hidden -rotate-[1.5deg] translate-y-8 @md:block",
+              !src && "opacity-40",
+            )}
+            style={
+              src
+                ? {
+                    backgroundImage: `url("${src}")`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                  }
+                : {
+                    backgroundColor: "var(--bg-sunken)",
+                    backgroundImage: PLACEHOLDER_PATTERN,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                  }
+            }
+          >
+            {/* tape strip */}
+            <span
+              aria-hidden="true"
+              className="absolute -top-2 left-1/2 h-5 w-16 -translate-x-1/2 rotate-[-3deg]"
+              style={{ backgroundColor: "color-mix(in srgb, var(--text-primary) 18%, transparent)" }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="relative flex min-h-[420px] flex-col items-center justify-center gap-5 text-center">
+        <h1
+          className="inline-block -rotate-[2deg] px-5 py-2 text-5xl uppercase tracking-tight @lg:text-7xl"
+          style={{
+            fontFamily: "var(--heading-font)",
+            color: "var(--bg-primary)",
+            backgroundColor: "var(--text-primary)",
+            boxShadow: "4px 4px 0 var(--accent)",
+          }}
+        >
+          {data?.name ?? ""}
+        </h1>
+        {config.showHeroSubtext !== false ? (
+          <p
+            className="max-w-md text-sm font-semibold uppercase tracking-[0.15em]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {config.heroSubtext || "Tattoo crafted with intention."}
+          </p>
+        ) : null}
+        {photos.length === 0 ? <PromptChip group="photos" label="Add photos" /> : null}
+      </div>
+    </div>
+  );
+}
+
 export function HeroSection({ className }: { className?: string }) {
   const { config } = useStudioSite();
 
@@ -186,6 +349,9 @@ export function HeroSection({ className }: { className?: string }) {
       {config.heroLayout === "split" ? <SplitHero /> : null}
       {config.heroLayout === "fullbleed" ? <FullbleedHero /> : null}
       {config.heroLayout === "centered" ? <CenteredHero /> : null}
+      {config.heroLayout === "masthead" ? <MastheadHero /> : null}
+      {config.heroLayout === "grid-overlay" ? <GridOverlayHero /> : null}
+      {config.heroLayout === "zine" ? <ZineHero /> : null}
     </section>
   );
 }

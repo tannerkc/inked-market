@@ -43,6 +43,21 @@ export const heroOptions: SectionVariantOption<HeroLayout>[] = [
     value: "centered",
     description: "Centered text over image",
   },
+  {
+    label: "Masthead",
+    value: "masthead",
+    description: "Editorial masthead with rule lines",
+  },
+  {
+    label: "Grid Overlay",
+    value: "grid-overlay",
+    description: "Photo grid with name overlay",
+  },
+  {
+    label: "Zine",
+    value: "zine",
+    description: "Raw collage with stamped name",
+  },
 ];
 
 export const galleryOptions: SectionVariantOption<GalleryLayout>[] = [
