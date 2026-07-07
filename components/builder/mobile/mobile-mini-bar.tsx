@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { useMobileSheet } from "./mobile-sheet-orchestrator";
-import { FLASH_TABS, CUSTOM_TABS, type BuilderTabDef } from "@/lib/config/builder-toolbar-tabs";
+import { FLASH_TABS, CUSTOM_TABS } from "@/lib/config/builder-toolbar-tabs";
 
 const ThemeIcon = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -48,8 +48,14 @@ const TAB_ICONS: Record<string, React.ReactNode> = {
   brand: BrandIcon,
 };
 
+const ContentIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+);
+
 export function MobileMiniBar() {
-  const { config } = useBuilder();
+  const { config, openContentPanel, contentPanel } = useBuilder();
   const { state, openGlobal } = useMobileSheet();
   const tier = config.builderTier ?? "flash";
   const tabs = tier === "custom" ? CUSTOM_TABS : FLASH_TABS;
@@ -60,6 +66,17 @@ export function MobileMiniBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="flex h-14 items-center justify-around px-2">
+        <button
+          type="button"
+          onClick={() => openContentPanel()}
+          className={cn(
+            "flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 transition-colors active:bg-white/5",
+            contentPanel.open ? "text-ink-red" : "text-chrome-text-dim",
+          )}
+        >
+          <span className={cn(contentPanel.open && "text-ink-red")}>{ContentIcon}</span>
+          <span className="text-[9px] font-semibold">Content</span>
+        </button>
         {tabs.map((tab) => {
           const isActive =
             state.isOpen && state.type === "global" && state.globalTab === tab.id;

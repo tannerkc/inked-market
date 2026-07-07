@@ -36,3 +36,17 @@ export function getSectionTitle(id: string): string {
 export function getSectionIndex(id: string): number {
   return SECTION_IDS.indexOf(id);
 }
+
+import type { ContentGroup } from "@/components/studio-site/studio-site-context";
+
+/** Which Content-panel group edits each section's data. */
+export const SECTION_CONTENT_GROUP: Record<string, ContentGroup> = {
+  nav: "booking",
+  hero: "photos",
+  gallery: "photos",
+  about: "story",
+  "artist-strips": "artists",
+  details: "contact-hours",
+  "footer-cta": "booking",
+  footer: "socials",
+};

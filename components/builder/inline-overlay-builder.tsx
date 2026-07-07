@@ -18,7 +18,7 @@ import { FooterCTASection } from "@/components/builder/preview/footer-cta-sectio
 import { TemplateFooter } from "@/components/builder/preview/template-footer";
 import { GlobalTabContent } from "@/components/builder/builder-global-controls";
 import { SectionControls } from "@/components/builder/builder-section-controls";
-import { SECTION_DEFS } from "@/lib/config/builder-sections";
+import { SECTION_DEFS, SECTION_CONTENT_GROUP } from "@/lib/config/builder-sections";
 import { FLASH_TABS, CUSTOM_TABS } from "@/lib/config/builder-toolbar-tabs";
 import { cssVarsToStyle, syncCssVarsToElement } from "@/lib/utils/builder";
 import type { DevicePreview } from "@/lib/types/builder";
@@ -33,19 +33,19 @@ const TAB_ICONS: Record<string, string> = {
 
 const FLASH_BUTTONS: ToolbarButtonDef[] = FLASH_TABS.map((t) => ({
   id: t.id,
-  icon: TAB_ICONS[t.id],
+  icon: TAB_ICONS[t.id] ?? "",
   label: t.label,
 }));
 
 const CUSTOM_BUTTONS: ToolbarButtonDef[] = CUSTOM_TABS.map((t) => ({
   id: t.id,
-  icon: TAB_ICONS[t.id],
+  icon: TAB_ICONS[t.id] ?? "",
   label: t.label,
 }));
 
 export function InlineOverlayBuilder() {
   const editor = useBuilder();
-  const { config, resolvedVars, applyChange } = editor;
+  const { config, resolvedVars, applyChange, openContentPanel } = editor;
   const tier = config.builderTier ?? "flash";
 
   const handleTierChange = useCallback((newTier: typeof tier) => {
@@ -71,13 +71,13 @@ export function InlineOverlayBuilder() {
   useEffect(() => {
     if (!overlayEl) return;
     const mw = device === "desktop" ? "" : device === "tablet" ? "768px" : "390px";
-    overlayEl.style.maxWidth = mw;
-    overlayEl.style.marginLeft = mw ? "auto" : "";
-    overlayEl.style.marginRight = mw ? "auto" : "";
+    overlayEl.style.setProperty("max-width", mw);
+    overlayEl.style.setProperty("margin-left", mw ? "auto" : "");
+    overlayEl.style.setProperty("margin-right", mw ? "auto" : "");
     return () => {
-      overlayEl.style.maxWidth = "";
-      overlayEl.style.marginLeft = "";
-      overlayEl.style.marginRight = "";
+      overlayEl.style.removeProperty("max-width");
+      overlayEl.style.removeProperty("margin-left");
+      overlayEl.style.removeProperty("margin-right");
     };
   }, [overlayEl, device]);
 
@@ -182,6 +182,8 @@ export function InlineOverlayBuilder() {
                 title={section.title}
                 isOpen={activeSection === section.id}
                 onClose={() => setActiveSection(null)}
+                contentGroup={SECTION_CONTENT_GROUP[section.id]}
+                contentSummary="Edit the real studio data this section displays."
               >
                 <SectionControls sectionId={section.id} />
               </SectionPopover>
@@ -200,6 +202,7 @@ export function InlineOverlayBuilder() {
         onReset={editor.reset}
         tier={tier}
         onTierChange={handleTierChange}
+        onOpenContent={() => openContentPanel()}
       />
 
       {/* Flyouts — content from shared GlobalTabContent */}

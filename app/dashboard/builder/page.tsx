@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import { BuilderProvider } from "@/components/builder/builder-provider";
+import { BuilderContentPanel } from "@/components/builder/content-panel";
 import { useStudio } from "@/lib/providers/studio-provider";
 import { BuilderTopBar } from "@/components/builder/builder-top-bar";
 import { SplitScreenBuilder } from "@/components/builder/split-screen-builder";
@@ -195,6 +196,8 @@ export default function BuilderPage() {
             />
           </OverlayContext.Provider>
         </div>
+        {/* Full-width drawer on phones — the mobile Content surface */}
+        <BuilderContentPanel />
       </BuilderProvider>
     );
   }
@@ -221,6 +224,8 @@ export default function BuilderPage() {
           )}
         </div>
       </div>
+      {/* Overlay drawer for inline mode; split mode docks Content in the editor panel */}
+      {mode !== "split" ? <BuilderContentPanel /> : null}
     </BuilderProvider>
   );
 }
