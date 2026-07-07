@@ -157,6 +157,7 @@ export function InlineOverlayBuilder() {
       {/* Preview area with themed CSS variables */}
       <div
         data-builder-root
+        data-template={config.template}
         data-texture={surfaceTexture}
         data-animation={animationStyle}
         className="relative pb-[100px]"

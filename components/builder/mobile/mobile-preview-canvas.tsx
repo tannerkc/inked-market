@@ -83,6 +83,7 @@ export function MobilePreviewCanvas() {
     >
       <div
         data-builder-root
+        data-template={config.template}
         data-texture={surfaceTexture}
         data-animation={animationStyle}
         className="@container min-h-full pb-4"
@@ -100,11 +101,9 @@ export function MobilePreviewCanvas() {
             key={section.id}
             name={section.name}
             sectionId={section.id}
-            isActive={
-              state.isOpen &&
-              state.type === "section" &&
-              state.sectionId === section.id
-            }
+            isActive={Boolean(
+              state.isOpen && state.type === "section" && state.sectionId === section.id,
+            )}
             onClick={() => handleSectionClick(section.id)}
           >
             {sectionComponents[section.id]}

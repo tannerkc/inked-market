@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Wire Tailwind's `dark:` variant to the [data-theme="dark"] attribute set on
+   <html> by ThemeProvider (and the boot script in app/layout.tsx). This lets
+   components use `dark:` classes instead of branching in JS via useTheme(),
+   so they can stay as Server Components. */
+@custom-variant dark (&:where([data-theme="dark"] *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -331,4 +337,84 @@ body {
 [data-builder-root][data-animation="none"] [data-animate] {
   opacity: 1;
   transform: none;
+}
+
+/* ─── Template signatures (keyed by data-template) ─────────────────── */
+
+/* Dark Cinematic — letterboxed hero + slow Ken Burns on the cover */
+[data-template="dark-cinematic"] [data-section="hero"] {
+  position: relative;
+  overflow: hidden;
+}
+[data-template="dark-cinematic"] [data-section="hero"]::before,
+[data-template="dark-cinematic"] [data-section="hero"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background: #000;
+  z-index: 2;
+  pointer-events: none;
+}
+[data-template="dark-cinematic"] [data-section="hero"]::before { top: 0; }
+[data-template="dark-cinematic"] [data-section="hero"]::after { bottom: 0; }
+@keyframes builder-kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.07) translate(-1%, -1%); }
+}
+[data-template="dark-cinematic"] [data-hero-image] {
+  animation: builder-kenburns 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Warm Artisan — arched hero image + serif drop cap in the story */
+[data-template="warm-artisan"] [data-hero-image] {
+  border-radius: 45% 45% 0 0 / 22% 22% 0 0;
+}
+[data-template="warm-artisan"] [data-story-body]::first-letter {
+  font-family: var(--heading-font);
+  font-size: 3em;
+  line-height: 0.85;
+  float: left;
+  padding-right: 0.12em;
+  color: var(--accent);
+}
+
+/* Fine Line — hairline photo mats with breathing room */
+[data-template="fine-line"] [data-gallery-item] {
+  border: 1px solid var(--border);
+  padding: 6px;
+  background-color: var(--bg-primary);
+  background-clip: content-box;
+}
+
+/* Gutter Punk — stickered, off-kilter gallery tiles */
+[data-template="gutter-punk"] [data-gallery-item]:nth-child(3n + 1) { transform: rotate(-1.2deg); }
+[data-template="gutter-punk"] [data-gallery-item]:nth-child(3n + 2) { transform: rotate(0.9deg); }
+[data-template="gutter-punk"] [data-gallery-item]:nth-child(3n) { transform: rotate(-0.5deg); }
+
+/* Bold Editorial — numbered gallery plates */
+[data-builder-root][data-template="bold-editorial"] { counter-reset: plate; }
+[data-template="bold-editorial"] [data-gallery-item] {
+  position: relative;
+  counter-increment: plate;
+}
+[data-template="bold-editorial"] [data-gallery-item]::before {
+  content: "N\00B0 " counter(plate, decimal-leading-zero);
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  z-index: 1;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-primary);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+  [data-template="dark-cinematic"] [data-hero-image] { animation: none; }
+  [data-template="gutter-punk"] [data-gallery-item] { transform: none; }
 }

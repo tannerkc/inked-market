@@ -137,6 +137,7 @@ export function StudioSiteRenderer({
       <div
         ref={rootRef}
         data-builder-root
+        data-template={config.template}
         data-texture={surfaceTexture}
         data-animation={animationStyle}
         className={cn("@container w-full", className)}
