@@ -4,60 +4,33 @@ import { PLACEHOLDER_PATTERN, PLACEHOLDER_PATTERN_RAW } from "@/lib/utils/placeh
 import { PHOTO_TONES } from "@/lib/data/mock-studio";
 
 import { useState } from "react";
-import { useBuilder } from "@/components/builder/builder-provider";
+import Link from "next/link";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
+import { SectionEmptyState } from "@/components/studio-site/empty-states";
+import type { StudioSiteArtist } from "@/components/studio-site/studio-site-data";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { PhotoLightbox } from "@/components/ui/photo-lightbox";
 import { cn } from "@/lib/utils";
 
 
-type MockPhoto = {
-  id: number;
-};
-
-type MockArtist = {
-  id: number;
-  name: string;
-  initials: string;
-  styles: string[];
-  photoCount: number;
-  avatarClass: string;
-  photos: MockPhoto[];
-};
-
-const MOCK_ARTISTS: MockArtist[] = [
-  {
-    id: 1,
-    name: "Jake Morrison",
-    initials: "JM",
-    styles: ["Traditional", "Neo-Traditional"],
-    photoCount: 43,
-    avatarClass: "from-blue-700 to-blue-500",
-    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
-  },
-  {
-    id: 2,
-    name: "Sarah Chen",
-    initials: "SC",
-    styles: ["Fine Line", "Minimalist"],
-    photoCount: 28,
-    avatarClass: "from-orange-700 to-orange-500",
-    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
-  },
-  {
-    id: 3,
-    name: "Marcus Reyes",
-    initials: "MR",
-    styles: ["Japanese", "Blackwork"],
-    photoCount: 61,
-    avatarClass: "from-emerald-800 to-emerald-600",
-    photos: Array.from({ length: 12 }, (_, i) => ({ id: i + 1 })),
-  },
+// Avatar gradients cycled by roster index — reproduces the original mock's
+// per-artist avatar colors without carrying avatarClass in the data contract.
+const AVATAR_GRADIENTS = [
+  "from-blue-700 to-blue-500",
+  "from-orange-700 to-orange-500",
+  "from-emerald-800 to-emerald-600",
 ];
 
+function avatarClassFor(index: number) {
+  return AVATAR_GRADIENTS[index % AVATAR_GRADIENTS.length]!;
+}
+
 function PhotoBlock({
+  src,
   className,
   onClick,
 }: {
+  src?: string;
   className?: string;
   onClick?: () => void;
 }) {
@@ -72,7 +45,9 @@ function PhotoBlock({
       )}
       style={{
         background: "var(--bg-sunken)",
-        backgroundImage: PLACEHOLDER_PATTERN,
+        backgroundImage: src ? `url("${src}")` : PLACEHOLDER_PATTERN,
+        backgroundSize: src ? "cover" : undefined,
+        backgroundPosition: src ? "center" : undefined,
       }}
     />
   );
@@ -114,14 +89,16 @@ function OverflowPill({
 
 function ArtistStrip({
   artist,
+  avatarClass,
   photosToShow,
   onOverflowClick,
   onPhotoClick,
 }: {
-  artist: MockArtist;
+  artist: StudioSiteArtist;
+  avatarClass: string;
   photosToShow: number;
-  onOverflowClick: (artist: MockArtist) => void;
-  onPhotoClick: (artist: MockArtist, index: number) => void;
+  onOverflowClick: (artist: StudioSiteArtist) => void;
+  onPhotoClick: (artist: StudioSiteArtist, index: number) => void;
 }) {
   const strip = artist.photos.slice(0, photosToShow);
   const remaining = artist.photoCount - photosToShow;
@@ -137,7 +114,7 @@ function ArtistStrip({
           <div
             className={cn(
               "w-8 h-8 @sm:w-9 @sm:h-9 rounded-full bg-gradient-to-br flex items-center justify-center text-[10px] @sm:text-[11px] font-bold text-white shrink-0",
-              artist.avatarClass
+              avatarClass
             )}
           >
             {artist.initials}
@@ -153,33 +130,53 @@ function ArtistStrip({
               className="text-[10px] @sm:text-[11px] leading-tight mt-0.5 truncate"
               style={{ color: "var(--text-muted)" }}
             >
-              {artist.styles.join(" · ")} · {artist.photoCount} photos
+              {[artist.styles.join(" · "), artist.photoCount > 0 ? `${artist.photoCount} photos` : null]
+                .filter(Boolean)
+                .join(" · ")}
             </div>
           </div>
         </div>
-        <button
-          type="button"
-          className="text-[10px] @sm:text-[11px] font-medium shrink-0 ml-2"
-          style={{ color: "var(--accent)" }}
-        >
-          View profile ↗
-        </button>
+        {artist.profileHref ? (
+          <Link
+            href={artist.profileHref}
+            className="text-[10px] @sm:text-[11px] font-medium shrink-0 ml-2 hover:underline"
+            style={{ color: "var(--accent)" }}
+          >
+            View profile &#8599;
+          </Link>
+        ) : null}
       </div>
 
       {/* Photo strip — sizing handled by CSS in globals.css via data attributes */}
-      <div data-photo-strip>
-        <div data-photo-track>
-          {strip.map((photo, i) => (
-            <PhotoBlock key={photo.id} onClick={() => onPhotoClick(artist, i)} />
-          ))}
-          {remaining > 0 && (
-            <OverflowPill
-              remaining={remaining}
-              onClick={() => onOverflowClick(artist)}
-            />
-          )}
+      {artist.photos.length > 0 ? (
+        <div data-photo-strip>
+          <div data-photo-track>
+            {strip.map((photo, i) => (
+              <PhotoBlock key={photo.id} src={photo.url} onClick={() => onPhotoClick(artist, i)} />
+            ))}
+            {remaining > 0 ? (
+              <OverflowPill
+                remaining={remaining}
+                onClick={() => onOverflowClick(artist)}
+              />
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-16 w-12 shrink-0 rounded-md opacity-40"
+              style={{ background: "var(--bg-sunken)", backgroundImage: PLACEHOLDER_PATTERN }}
+              aria-hidden="true"
+            />
+          ))}
+          <span className="ml-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+            Portfolio coming soon
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -187,11 +184,13 @@ function ArtistStrip({
 
 function ArtistGallerySheet({
   artist,
+  avatarClass,
   open,
   onClose,
   onPhotoClick,
 }: {
-  artist: MockArtist;
+  artist: StudioSiteArtist;
+  avatarClass: string;
   open: boolean;
   onClose: () => void;
   onPhotoClick: (index: number) => void;
@@ -211,7 +210,7 @@ function ArtistGallerySheet({
         <div
           className={cn(
             "w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center text-[11px] font-bold text-white shrink-0",
-            artist.avatarClass
+            avatarClass
           )}
         >
           {artist.initials}
@@ -230,13 +229,15 @@ function ArtistGallerySheet({
             {artist.photoCount} photos
           </div>
         </div>
-        <button
-          type="button"
-          className="text-[11px] font-medium shrink-0 transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          View profile ↗
-        </button>
+        {artist.profileHref ? (
+          <Link
+            href={artist.profileHref}
+            className="text-[11px] font-medium shrink-0 transition-colors hover:underline"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            View profile &#8599;
+          </Link>
+        ) : null}
       </div>
 
       {/* 3-col portrait grid — each photo has a distinct muted tone */}
@@ -249,7 +250,9 @@ function ArtistGallerySheet({
             className="aspect-[3/4] rounded-md overflow-hidden cursor-zoom-in transition-opacity hover:opacity-75"
             style={{
               backgroundColor: PHOTO_TONES[i % PHOTO_TONES.length],
-              backgroundImage: PLACEHOLDER_PATTERN,
+              backgroundImage: photo.url ? `url("${photo.url}")` : PLACEHOLDER_PATTERN,
+              backgroundSize: photo.url ? "cover" : undefined,
+              backgroundPosition: photo.url ? "center" : undefined,
             }}
           />
         ))}
@@ -258,7 +261,7 @@ function ArtistGallerySheet({
       {/* Footer count */}
       <div className="mt-4 pt-3 text-center">
         <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-          Showing 12 of {artist.photoCount} photos
+          Showing {artist.photos.length} of {artist.photoCount} photos
         </span>
       </div>
     </BottomSheet>
@@ -266,16 +269,17 @@ function ArtistGallerySheet({
 }
 
 export function ArtistStripsSection() {
-  const { config } = useBuilder();
+  const { config, data } = useStudioSite();
   const { galleryPhotosPerArtist } = config;
+  const artists = data.artists;
 
-  const [sheetArtist, setSheetArtist] = useState<MockArtist | null>(null);
-  const [lightboxArtist, setLightboxArtist] = useState<MockArtist | null>(null);
+  const [sheetArtist, setSheetArtist] = useState<StudioSiteArtist | null>(null);
+  const [lightboxArtist, setLightboxArtist] = useState<StudioSiteArtist | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const photosToShow = galleryPhotosPerArtist ?? 5;
 
-  const openLightbox = (artist: MockArtist, index: number) => {
+  const openLightbox = (artist: StudioSiteArtist, index: number) => {
     setLightboxArtist(artist);
     setLightboxIndex(index);
   };
@@ -285,7 +289,38 @@ export function ArtistStripsSection() {
     setLightboxIndex(null);
   };
 
-  const lightboxPhotos = lightboxArtist?.photos ?? [];
+  const lightboxPhotos = (lightboxArtist?.photos ?? []).map((photo, i) => ({
+    id: i,
+    src: photo.url,
+  }));
+
+  // No roster → designed empty state (public parity), never a hidden section.
+  if (artists.length === 0) {
+    return (
+      <section data-builder-section="artist-strips" style={{ background: "var(--bg-primary)" }}>
+        <div className="mx-auto max-w-[1350px] px-6 @lg:px-10 pt-6 pb-4">
+          <p
+            className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Our Artists
+          </p>
+          <div
+            data-builder-card
+            className="rounded-lg border"
+            style={{ borderColor: "var(--border)", background: "var(--bg-raised)" }}
+          >
+            <SectionEmptyState
+              message="Artist lineup coming soon."
+              prompt={{ group: "artists", label: "Add artists" }}
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const sheetIndex = sheetArtist ? artists.findIndex((a) => a.id === sheetArtist.id) : -1;
 
   return (
     <section
@@ -301,10 +336,11 @@ export function ArtistStripsSection() {
           Our Artists
         </p>
 
-        {MOCK_ARTISTS.map((artist) => (
+        {artists.map((artist, i) => (
           <ArtistStrip
             key={artist.id}
             artist={artist}
+            avatarClass={avatarClassFor(i)}
             photosToShow={photosToShow}
             onOverflowClick={setSheetArtist}
             onPhotoClick={openLightbox}
@@ -313,7 +349,8 @@ export function ArtistStripsSection() {
       </div>
 
       <ArtistGallerySheet
-        artist={sheetArtist ?? MOCK_ARTISTS[0]}
+        artist={sheetArtist ?? artists[0]!}
+        avatarClass={avatarClassFor(sheetIndex >= 0 ? sheetIndex : 0)}
         open={!!sheetArtist}
         onClose={() => setSheetArtist(null)}
         onPhotoClick={(index) => {
