@@ -144,4 +144,17 @@ check("isSample flags only the Sample branch", () => {
   assert.equal(buildBuilderSiteData(null, false).isSample ?? false, false);
 });
 
+// ─── Upload path parsing ─────────────────────────────────────────────────
+import { storagePathFromPublicUrl } from "../lib/utils/image-upload";
+
+check("storagePathFromPublicUrl extracts bucket-relative path", () => {
+  assert.equal(
+    storagePathFromPublicUrl(
+      "https://cktvpfenygxhfaodihbz.supabase.co/storage/v1/object/public/studio-images/abc-123/photo.webp",
+    ),
+    "abc-123/photo.webp",
+  );
+  assert.equal(storagePathFromPublicUrl("https://example.com/not-storage.png"), null);
+});
+
 console.log(`\n${passed} checks passed`);
