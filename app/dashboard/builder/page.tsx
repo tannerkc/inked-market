@@ -15,6 +15,7 @@ import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
 import { OverlayContext } from "@/lib/contexts/overlay-context";
 import { remapLegacyTemplate } from "@/lib/utils/legacy-template";
+import { resolveEditorChrome } from "@/lib/utils/editor-chrome";
 
 /* ─── Mobile detection ────────────────────────────────────────────────── */
 
@@ -71,14 +72,14 @@ const BUILDER_MODE_KEY = "inked-builder-mode";
 const BUILDER_TIER_KEY = "inked-builder-tier";
 const DRAFT_KEY = "inked-builder-draft";
 
-function getStoredMode(): BuilderMode {
+function getStoredMode(): BuilderMode | null {
   try {
     const stored = localStorage.getItem(BUILDER_MODE_KEY);
     if (stored === "split" || stored === "inline") return stored;
   } catch {
     // localStorage may be unavailable
   }
-  return "inline";
+  return null;
 }
 
 function getStoredTier(): BuilderTier | null {
@@ -125,17 +126,25 @@ export default function BuilderPage() {
     const draft = getExistingDraft();
     const chosen = dbConfig?.template ? dbConfig : draft?.template ? draft : null;
 
+    // Mode/tier are EDITOR preferences: the freshest local choice (written by
+    // the dashboard toggle, settings page, and the builder itself) beats the
+    // value captured inside a saved config — that value only seeds new devices.
+    const chrome = resolveEditorChrome(
+      { mode: getStoredMode(), tier: getStoredTier() },
+      chosen,
+    );
+
     if (chosen) {
-      setInitialConfig(chosen);
+      // Align the working config with the resolved preferences so the next
+      // save doesn't write a stale mode/tier back to the DB.
+      setInitialConfig({ ...chosen, builderMode: chrome.mode, builderTier: chrome.tier });
       setHasTemplate(true);
-      // Config already carries mode + tier — skip setup entirely
-      setMode(chosen.builderMode ?? getStoredMode());
+      setMode(chrome.mode);
       setHasTier(true);
-      setSelectedTier(chosen.builderTier ?? "flash");
+      setSelectedTier(chrome.tier);
     } else {
-      setMode(getStoredMode());
-      const storedTier = getStoredTier();
-      if (storedTier) setSelectedTier(storedTier);
+      setMode(chrome.mode);
+      setSelectedTier(chrome.tier);
     }
 
     setMounted(true);

@@ -204,4 +204,26 @@ check("signature gallery defaults", () => {
   assert.equal(templates["traditional-flash"].defaults.galleryLayout, "flash-sheet");
 });
 
+// ─── Editor chrome preference precedence ─────────────────────────────────
+import { resolveEditorChrome } from "../lib/utils/editor-chrome";
+
+check("local editor preference beats the DB-captured mode/tier", () => {
+  // The reported bug: DB config saved in split kept overriding the toggles.
+  const dbCaptured = { builderMode: "split" as const, builderTier: "custom" as const };
+  assert.deepEqual(
+    resolveEditorChrome({ mode: "inline", tier: "flash" }, dbCaptured),
+    { mode: "inline", tier: "flash" },
+  );
+  // No local preference yet (new device) → DB seeds it.
+  assert.deepEqual(
+    resolveEditorChrome({ mode: null, tier: null }, dbCaptured),
+    { mode: "split", tier: "custom" },
+  );
+  // Nothing anywhere → defaults.
+  assert.deepEqual(
+    resolveEditorChrome({ mode: null, tier: null }, null),
+    { mode: "inline", tier: "flash" },
+  );
+});
+
 console.log(`\n${passed} checks passed`);
