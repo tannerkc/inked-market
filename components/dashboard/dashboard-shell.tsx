@@ -54,7 +54,7 @@ export function DashboardShell({
         <NotificationsBell />
       </div>
 
-      {!bannerDismissed && onboardingReady && (
+      {!bannerDismissed && onboardingReady ? (
         <OnboardingBanner
           title={onboardingTitle}
           subtitle={onboardingSubtitle}
@@ -64,7 +64,7 @@ export function DashboardShell({
           onDismiss={() => setBannerDismissed(true)}
           className="mb-7"
         />
-      )}
+      ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-7 items-start">
         <div className="space-y-5">{leftColumn}</div>
