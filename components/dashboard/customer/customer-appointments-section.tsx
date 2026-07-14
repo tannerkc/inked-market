@@ -103,7 +103,7 @@ const CustomerAppointmentsSection = React.forwardRef<
           />
         ) : (
           <div>
-            {upcoming.length > 0 && (
+            {upcoming.length > 0 ? (
               <div>
                 <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
                   Upcoming
@@ -112,9 +112,9 @@ const CustomerAppointmentsSection = React.forwardRef<
                   <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
                 ))}
               </div>
-            )}
+            ) : null}
 
-            {past.length > 0 && (
+            {past.length > 0 ? (
               <div className={upcoming.length > 0 ? "mt-4" : ""}>
                 <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
                   Past
@@ -123,7 +123,7 @@ const CustomerAppointmentsSection = React.forwardRef<
                   <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         )}
       </DashboardSection>
