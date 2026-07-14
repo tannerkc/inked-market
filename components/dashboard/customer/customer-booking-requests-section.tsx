@@ -9,6 +9,7 @@ import type { BookingRequest, BookingRequestStatus } from "@/lib/types";
 
 interface CustomerBookingRequestsSectionProps {
   requests: BookingRequest[];
+  onSelect?: (id: string) => void;
   className?: string;
 }
 
@@ -23,7 +24,7 @@ const requestStatusConfig: Record<BookingRequestStatus, { color: typeof BADGE_CO
 const CustomerBookingRequestsSection = React.forwardRef<
   HTMLDivElement,
   CustomerBookingRequestsSectionProps
->(({ requests, className, ...props }, ref) => (
+>(({ requests, onSelect, className, ...props }, ref) => (
   <div ref={ref} className={className} {...props}>
     <DashboardSection title="Booking Requests">
       {requests.length === 0 ? (
@@ -37,40 +38,42 @@ const CustomerBookingRequestsSection = React.forwardRef<
             const config = requestStatusConfig[request.status];
 
             return (
-              <div
+              <button
+                type="button"
                 key={request.id}
-                className="flex items-start gap-3 py-3 border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]"
+                onClick={() => onSelect?.(request.id)}
+                className="flex w-full items-start gap-3 py-3 text-left border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
                     {request.artistName}
                   </p>
-                  {request.studioName && (
+                  {request.studioName ? (
                     <p className="text-[11px] truncate text-ink-black/40 dark:text-ink-cream/40">
                       {request.studioName}
                     </p>
-                  )}
+                  ) : null}
 
                   <p className="text-[11px] mt-1 line-clamp-2 text-ink-black/35 dark:text-ink-cream/35">
                     {request.summary}
                   </p>
 
-                  {request.requestedDate && (
+                  {request.requestedDate ? (
                     <p className="font-mono text-[10px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
                       Requested: {formatDate(request.requestedDate)}
                     </p>
-                  )}
-                  {request.flexibleDates && !request.requestedDate && (
+                  ) : null}
+                  {request.flexibleDates && !request.requestedDate ? (
                     <p className="font-mono text-[10px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
                       Flexible dates
                     </p>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="flex-shrink-0 pt-0.5">
                   <StatusBadge label={config.label} color={config.color} />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

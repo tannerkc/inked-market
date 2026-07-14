@@ -1,7 +1,7 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { AuthGuard } from "@/components/providers/auth-guard";
-import { useTheme } from "@/components/providers/theme-provider";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
@@ -19,15 +19,18 @@ import { CustomerNotificationPrefsSection } from "./customer-notification-prefs-
 import { CustomerEditProfilePanel } from "./customer-edit-profile-panel";
 import { CustomerDesignBriefPanel } from "./customer-design-brief-panel";
 import { CustomerHealedPhotoPanel } from "./customer-healed-photo-panel";
+import { CustomerRequestPanel } from "@/components/booking";
 import { useCustomerDashboard } from "./use-customer-dashboard";
-import { cn } from "@/lib/utils";
 import type { QuickAction, CustomerDashboardTab } from "@/lib/types";
 import type { TabItem } from "@/components/ui/tab-bar";
 
 export function CustomerDashboard() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const dashboard = useCustomerDashboard();
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const selectedRequest = useMemo(
+    () => dashboard.requestRecords.find((r) => r.id === selectedRequestId) ?? null,
+    [dashboard.requestRecords, selectedRequestId]
+  );
 
   const tabs: TabItem<CustomerDashboardTab>[] = [
     {
@@ -61,7 +64,7 @@ export function CustomerDashboard() {
           strokeWidth={1.5}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={isDark ? "text-ink-red" : "text-ink-rust"}
+          className="text-ink-rust dark:text-ink-red"
         >
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -138,48 +141,21 @@ export function CustomerDashboard() {
               onEdit={() => dashboard.setEditProfileOpen(true)}
             />
             <StatsPanel stats={dashboard.data.stats} />
-            <div
-              className={cn(
-                "rounded-[20px] p-5 border",
-                isDark
-                  ? "bg-ink-cream/[0.02] border-ink-cream/[0.06]"
-                  : "bg-ink-black/[0.02] border-ink-black/[0.06]"
-              )}
-            >
-              <p
-                className={cn(
-                  "font-mono text-[9px] tracking-[0.2em] uppercase mb-3",
-                  isDark ? "text-ink-cream/35" : "text-ink-black/35"
-                )}
-              >
+            <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
+              <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">
                 Next Appointment
               </p>
               {dashboard.nextAppointment ? (
                 <div>
-                  <p
-                    className={cn(
-                      "text-[12px] font-medium",
-                      isDark ? "text-ink-cream/70" : "text-ink-black/70"
-                    )}
-                  >
+                  <p className="text-[12px] font-medium text-ink-black/70 dark:text-ink-cream/70">
                     {dashboard.nextAppointment.artistName}
                   </p>
                   {dashboard.nextAppointment.studioName && (
-                    <p
-                      className={cn(
-                        "text-[11px] mt-0.5",
-                        isDark ? "text-ink-cream/35" : "text-ink-black/35"
-                      )}
-                    >
+                    <p className="text-[11px] mt-0.5 text-ink-black/35 dark:text-ink-cream/35">
                       {dashboard.nextAppointment.studioName}
                     </p>
                   )}
-                  <p
-                    className={cn(
-                      "font-mono text-[10px] mt-2",
-                      isDark ? "text-ink-cream/40" : "text-ink-black/40"
-                    )}
-                  >
+                  <p className="font-mono text-[10px] mt-2 text-ink-black/40 dark:text-ink-cream/40">
                     {new Date(dashboard.nextAppointment.date).toLocaleDateString(
                       "en-US",
                       {
@@ -194,32 +170,17 @@ export function CustomerDashboard() {
                       : `${dashboard.nextAppointment.duration}min`}
                   </p>
                   {dashboard.nextAppointment.notes && (
-                    <p
-                      className={cn(
-                        "text-[11px] mt-2 line-clamp-2",
-                        isDark ? "text-ink-cream/25" : "text-ink-black/25"
-                      )}
-                    >
+                    <p className="text-[11px] mt-2 line-clamp-2 text-ink-black/25 dark:text-ink-cream/25">
                       {dashboard.nextAppointment.notes}
                     </p>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p
-                    className={cn(
-                      "text-[12px]",
-                      isDark ? "text-ink-cream/40" : "text-ink-black/40"
-                    )}
-                  >
+                  <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">
                     No upcoming appointments
                   </p>
-                  <p
-                    className={cn(
-                      "text-[11px] mt-1",
-                      isDark ? "text-ink-cream/20" : "text-ink-black/20"
-                    )}
-                  >
+                  <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
                     Browse artists to get started
                   </p>
                 </div>
@@ -233,7 +194,6 @@ export function CustomerDashboard() {
               tabs={tabs}
               activeTab={dashboard.activeTab}
               onTabChange={dashboard.setActiveTab}
-              variant={mode}
               className="mb-6"
             />
 
@@ -250,6 +210,7 @@ export function CustomerDashboard() {
                 />
                 <CustomerBookingRequestsSection
                   requests={dashboard.bookingRequests}
+                  onSelect={setSelectedRequestId}
                 />
                 <QuickActionsGrid actions={quickActions} />
               </>
@@ -310,6 +271,12 @@ export function CustomerDashboard() {
               open={dashboard.healedPhotoOpen}
               onClose={() => dashboard.setHealedPhotoOpen(false)}
               completedAppointments={dashboard.completedAppointments}
+            />
+            <CustomerRequestPanel
+              request={selectedRequest}
+              scheduled={selectedRequestId ? dashboard.scheduledRequestIds.has(selectedRequestId) : false}
+              onClose={() => setSelectedRequestId(null)}
+              onChanged={() => void dashboard.refreshBooking()}
             />
           </>
         }

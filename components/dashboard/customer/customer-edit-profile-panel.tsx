@@ -3,7 +3,6 @@
 import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useTheme } from "@/components/providers/theme-provider";
 import { tattooStyleOptions } from "@/lib/data/signup-styles";
 
 interface CustomerProfileForm {
@@ -31,9 +30,6 @@ export function CustomerEditProfilePanel({
   setProfileForm,
   onSave,
 }: CustomerEditProfilePanelProps) {
-  const { mode } = useTheme();
-  const variant = mode === "dark" ? "dark" : "light";
-
   return (
     <EditProfilePanel
       open={open}
@@ -52,7 +48,6 @@ export function CustomerEditProfilePanel({
       <div className="grid grid-cols-2 gap-3">
         <Input
           label="First Name"
-          variant={variant}
           value={profileForm.firstName}
           onChange={(e) =>
             setProfileForm({ ...profileForm, firstName: e.target.value })
@@ -61,7 +56,6 @@ export function CustomerEditProfilePanel({
         />
         <Input
           label="Last Name"
-          variant={variant}
           value={profileForm.lastName}
           onChange={(e) =>
             setProfileForm({ ...profileForm, lastName: e.target.value })
@@ -71,7 +65,6 @@ export function CustomerEditProfilePanel({
       </div>
       <Input
         label="Location"
-        variant={variant}
         value={profileForm.location}
         onChange={(e) =>
           setProfileForm({ ...profileForm, location: e.target.value })
@@ -80,7 +73,6 @@ export function CustomerEditProfilePanel({
       />
       <Textarea
         label="About You"
-        variant={variant}
         value={profileForm.bio}
         onChange={(e) =>
           setProfileForm({ ...profileForm, bio: e.target.value })

@@ -3,8 +3,6 @@
 import * as React from "react";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
 import type { StatusBadgeColor } from "@/components/ui/status-badge";
 import type { Appointment, AppointmentStatus } from "@/lib/types";
@@ -37,70 +35,32 @@ function formatDuration(minutes: number): string {
   return `${minutes}min`;
 }
 
-function AppointmentRow({
-  appointment,
-  isDark,
-}: {
-  appointment: Appointment;
-  isDark: boolean;
-}) {
+function AppointmentRow({ appointment }: { appointment: Appointment }) {
   const { month, day } = formatShortDate(appointment.date);
   const config = appointmentStatusConfig[appointment.status];
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-3 py-3 border-b transition-colors",
-        isDark
-          ? "border-ink-cream/[0.04] hover:bg-ink-cream/[0.04]"
-          : "border-ink-black/[0.04] hover:bg-ink-black/[0.04]"
-      )}
-    >
-      <div
-        className={cn(
-          "w-10 flex-shrink-0 text-center",
-          isDark ? "text-ink-cream/50" : "text-ink-black/50"
-        )}
-      >
+    <div className="flex items-center gap-3 py-3 border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]">
+      <div className="w-10 flex-shrink-0 text-center text-ink-black/50 dark:text-ink-cream/50">
         <p className="font-mono text-[9px] tracking-[0.1em] uppercase leading-none">
           {month}
         </p>
-        <p
-          className={cn(
-            "text-[16px] font-semibold leading-tight",
-            isDark ? "text-ink-cream/70" : "text-ink-black/70"
-          )}
-        >
+        <p className="text-[16px] font-semibold leading-tight text-ink-black/70 dark:text-ink-cream/70">
           {day}
         </p>
       </div>
 
       <div className="flex-1 min-w-0">
-        <p
-          className={cn(
-            "text-[12px] font-medium truncate",
-            isDark ? "text-ink-cream" : "text-ink-black"
-          )}
-        >
+        <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
           {appointment.artistName}
         </p>
         {appointment.studioName && (
-          <p
-            className={cn(
-              "text-[11px] truncate",
-              isDark ? "text-ink-cream/40" : "text-ink-black/40"
-            )}
-          >
+          <p className="text-[11px] truncate text-ink-black/40 dark:text-ink-cream/40">
             {appointment.studioName}
           </p>
         )}
         {appointment.notes && (
-          <p
-            className={cn(
-              "text-[11px] truncate",
-              isDark ? "text-ink-cream/30" : "text-ink-black/30"
-            )}
-          >
+          <p className="text-[11px] truncate text-ink-black/30 dark:text-ink-cream/30">
             {appointment.notes}
           </p>
         )}
@@ -108,12 +68,7 @@ function AppointmentRow({
 
       <div className="flex-shrink-0 text-right">
         <StatusBadge label={config.label} color={config.color} />
-        <p
-          className={cn(
-            "font-mono text-[10px] mt-1",
-            isDark ? "text-ink-cream/25" : "text-ink-black/25"
-          )}
-        >
+        <p className="font-mono text-[10px] mt-1 text-ink-black/25 dark:text-ink-cream/25">
           {formatDuration(appointment.duration)}
         </p>
       </div>
@@ -125,9 +80,6 @@ const CustomerAppointmentsSection = React.forwardRef<
   HTMLDivElement,
   CustomerAppointmentsSectionProps
 >(({ upcoming, past, className, ...props }, ref) => {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   const isEmpty = upcoming.length === 0 && past.length === 0;
 
   return (
@@ -142,40 +94,22 @@ const CustomerAppointmentsSection = React.forwardRef<
           <div>
             {upcoming.length > 0 && (
               <div>
-                <p
-                  className={cn(
-                    "font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1",
-                    isDark ? "text-ink-cream/25" : "text-ink-black/25"
-                  )}
-                >
+                <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
                   Upcoming
                 </p>
                 {upcoming.map((appt) => (
-                  <AppointmentRow
-                    key={appt.id}
-                    appointment={appt}
-                    isDark={isDark}
-                  />
+                  <AppointmentRow key={appt.id} appointment={appt} />
                 ))}
               </div>
             )}
 
             {past.length > 0 && (
               <div className={upcoming.length > 0 ? "mt-4" : ""}>
-                <p
-                  className={cn(
-                    "font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1",
-                    isDark ? "text-ink-cream/25" : "text-ink-black/25"
-                  )}
-                >
+                <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
                   Past
                 </p>
                 {past.map((appt) => (
-                  <AppointmentRow
-                    key={appt.id}
-                    appointment={appt}
-                    isDark={isDark}
-                  />
+                  <AppointmentRow key={appt.id} appointment={appt} />
                 ))}
               </div>
             )}

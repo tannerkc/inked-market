@@ -6,15 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { UploadDropzone } from "@/components/ui/upload-dropzone";
-import { useTheme } from "@/components/providers/theme-provider";
-import { cn } from "@/lib/utils";
 
-const selectClassName = (isDark: boolean) => cn(
-  "w-full rounded-xl px-4 py-3 text-[12px] border outline-none transition-colors appearance-none cursor-pointer",
-  isDark
-    ? "bg-ink-cream/[0.03] border-ink-cream/[0.08] text-ink-cream/70 focus:border-ink-cream/20"
-    : "bg-ink-black/[0.03] border-ink-black/[0.08] text-ink-black/70 focus:border-ink-black/20"
-);
+const SELECT_CLASS =
+  "w-full rounded-xl px-4 py-3 text-[12px] border outline-none transition-colors appearance-none cursor-pointer bg-ink-black/[0.03] border-ink-black/[0.08] text-ink-black/70 focus:border-ink-black/20 dark:bg-ink-cream/[0.03] dark:border-ink-cream/[0.08] dark:text-ink-cream/70 dark:focus:border-ink-cream/20";
 
 interface CustomerDesignBriefPanelProps {
   open: boolean;
@@ -52,10 +46,6 @@ export function CustomerDesignBriefPanel({
   open,
   onClose,
 }: CustomerDesignBriefPanelProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-  const variant = isDark ? "dark" : "light";
-
   const [placement, setPlacement] = React.useState("");
   const [size, setSize] = React.useState("");
   const [budgetMin, setBudgetMin] = React.useState("");
@@ -75,18 +65,13 @@ export function CustomerDesignBriefPanel({
     <SlideOverPanel open={open} onClose={onClose} title="New Design Brief">
       <div className="space-y-5">
         <div>
-          <p
-            className={cn(
-              "font-mono text-[9px] tracking-[0.15em] uppercase mb-2",
-              isDark ? "text-ink-cream/35" : "text-ink-black/35"
-            )}
-          >
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/35 dark:text-ink-cream/35">
             Placement
           </p>
           <select
             value={placement}
             onChange={(e) => setPlacement(e.target.value)}
-            className={selectClassName(isDark)}
+            className={SELECT_CLASS}
           >
             <option value="">Select placement...</option>
             {PLACEMENT_OPTIONS.map((opt) => (
@@ -98,18 +83,13 @@ export function CustomerDesignBriefPanel({
         </div>
 
         <div>
-          <p
-            className={cn(
-              "font-mono text-[9px] tracking-[0.15em] uppercase mb-2",
-              isDark ? "text-ink-cream/35" : "text-ink-black/35"
-            )}
-          >
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/35 dark:text-ink-cream/35">
             Size
           </p>
           <select
             value={size}
             onChange={(e) => setSize(e.target.value)}
-            className={selectClassName(isDark)}
+            className={SELECT_CLASS}
           >
             <option value="">Select size...</option>
             {SIZE_OPTIONS.map((opt) => (
@@ -121,18 +101,12 @@ export function CustomerDesignBriefPanel({
         </div>
 
         <div>
-          <p
-            className={cn(
-              "font-mono text-[9px] tracking-[0.15em] uppercase mb-2",
-              isDark ? "text-ink-cream/35" : "text-ink-black/35"
-            )}
-          >
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/35 dark:text-ink-cream/35">
             Budget Range (optional)
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Input
               label=""
-              variant={variant}
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
               placeholder="$ Min"
@@ -140,7 +114,6 @@ export function CustomerDesignBriefPanel({
             />
             <Input
               label=""
-              variant={variant}
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
               placeholder="$ Max"
@@ -151,7 +124,6 @@ export function CustomerDesignBriefPanel({
 
         <Textarea
           label="Describe Your Idea"
-          variant={variant}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe the tattoo you have in mind — style, subject matter, references, mood..."
@@ -159,12 +131,7 @@ export function CustomerDesignBriefPanel({
         />
 
         <div>
-          <p
-            className={cn(
-              "font-mono text-[9px] tracking-[0.15em] uppercase mb-2",
-              isDark ? "text-ink-cream/35" : "text-ink-black/35"
-            )}
-          >
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/35 dark:text-ink-cream/35">
             Reference Images
           </p>
           <UploadDropzone label="Drop images here or click to upload" hint="JPG, PNG up to 10MB each" />
@@ -172,7 +139,6 @@ export function CustomerDesignBriefPanel({
 
         <Textarea
           label="Additional Notes"
-          variant={variant}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Anything else the artist should know — skin sensitivities, time constraints, etc."
