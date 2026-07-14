@@ -9,6 +9,7 @@ import type {
   BookingRequestRecord,
   BookingSettings,
   BookingSettingsInput,
+  FlashItem,
 } from "@/lib/types/booking";
 import type { WeeklyAvailability } from "@/lib/types";
 import {
@@ -17,8 +18,10 @@ import {
   type DbAvailabilityRule,
   type DbBookingRequest,
   type DbBookingSettings,
+  type DbFlashItem,
   mapBookingSettingsToDb,
   mapDbAppointment,
+  mapDbFlashItem,
   mapDbAvailabilityOverride,
   mapDbAvailabilityRule,
   mapDbBookingRequest,
@@ -193,5 +196,91 @@ export async function fetchCustomerAppointments(
     .select(REQUEST_SELECT)
     .eq("customer_id", customerId)
     .order("start_at", { ascending: true });
+  return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
+}
+
+// ─── Phase 3: flash + direct booking ──────────────────────────────────────
+
+export async function fetchActiveFlashItems(
+  supabase: SupabaseClient,
+  artistId: string
+): Promise<FlashItem[]> {
+  const { data } = await supabase
+    .from("flash_items")
+    .select("*")
+    .eq("artist_id", artistId)
+    .eq("active", true)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as DbFlashItem[]).map(mapDbFlashItem);
+}
+
+export async function fetchOwnFlashItems(
+  supabase: SupabaseClient,
+  artistId: string
+): Promise<FlashItem[]> {
+  const { data } = await supabase
+    .from("flash_items")
+    .select("*")
+    .eq("artist_id", artistId)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as DbFlashItem[]).map(mapDbFlashItem);
+}
+
+export async function insertFlashItem(
+  supabase: SupabaseClient,
+  artistId: string,
+  input: {
+    title: string;
+    imageUrl: string;
+    priceCents: number;
+    depositCents: number;
+    durationMin: number;
+    oneOff: boolean;
+  }
+): Promise<FlashItem> {
+  const { data, error } = await supabase
+    .from("flash_items")
+    .insert({
+      artist_id: artistId,
+      title: input.title,
+      image_url: input.imageUrl,
+      price_cents: input.priceCents,
+      deposit_cents: input.depositCents,
+      duration_min: input.durationMin,
+      one_off: input.oneOff,
+    })
+    .select()
+    .single();
+  if (error) throw new Error(`Failed to add flash: ${error.message}`);
+  return mapDbFlashItem(data as DbFlashItem);
+}
+
+export async function setFlashItemActive(
+  supabase: SupabaseClient,
+  id: string,
+  active: boolean
+): Promise<void> {
+  const { error } = await supabase.from("flash_items").update({ active }).eq("id", id);
+  if (error) throw new Error(`Failed to update flash: ${error.message}`);
+}
+
+export async function deleteFlashItem(supabase: SupabaseClient, id: string): Promise<void> {
+  const { error } = await supabase.from("flash_items").delete().eq("id", id);
+  if (error) throw new Error(`Failed to delete flash: ${error.message}`);
+}
+
+export async function fetchArtistUpcomingAppointments(
+  supabase: SupabaseClient,
+  artistId: string,
+  limit = 5
+): Promise<AppointmentRecord[]> {
+  const { data } = await supabase
+    .from("appointments")
+    .select(REQUEST_SELECT)
+    .eq("artist_id", artistId)
+    .in("status", ["pending_deposit", "confirmed"])
+    .gte("end_at", new Date().toISOString())
+    .order("start_at", { ascending: true })
+    .limit(limit);
   return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
 }
