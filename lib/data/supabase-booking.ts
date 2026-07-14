@@ -10,6 +10,7 @@ import type {
   BookingSettings,
   BookingSettingsInput,
   FlashItem,
+  ProjectRecord,
 } from "@/lib/types/booking";
 import type { WeeklyAvailability } from "@/lib/types";
 import {
@@ -19,9 +20,11 @@ import {
   type DbBookingRequest,
   type DbBookingSettings,
   type DbFlashItem,
+  type DbProject,
   mapBookingSettingsToDb,
   mapDbAppointment,
   mapDbFlashItem,
+  mapDbProject,
   mapDbAvailabilityOverride,
   mapDbAvailabilityRule,
   mapDbBookingRequest,
@@ -283,4 +286,86 @@ export async function fetchArtistUpcomingAppointments(
     .order("start_at", { ascending: true })
     .limit(limit);
   return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
+}
+
+// ─── Phase 5: roster, grants, projects ────────────────────────────────────
+
+/** Active appointments across a studio's roster + its own walk-ins, next-up first. */
+export async function fetchRosterAppointments(
+  supabase: SupabaseClient,
+  studioId: string,
+  artistIds: string[]
+): Promise<AppointmentRecord[]> {
+  let query = supabase
+    .from("appointments")
+    .select(REQUEST_SELECT)
+    .in("status", ["pending_deposit", "confirmed"])
+    .gte("end_at", new Date().toISOString())
+    .order("start_at", { ascending: true })
+    .limit(30);
+  query =
+    artistIds.length > 0
+      ? query.or(`artist_id.in.(${artistIds.join(",")}),studio_id.eq.${studioId}`)
+      : query.eq("studio_id", studioId);
+  const { data } = await query;
+  return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
+}
+
+/** The artist's active affiliations with their front-desk grant state. */
+export async function fetchOwnGrantRows(
+  supabase: SupabaseClient,
+  artistId: string
+): Promise<{ id: string; manageBookings: boolean; studioName: string }[]> {
+  const { data } = await supabase
+    .from("affiliations")
+    .select("id, manage_bookings, studios(name)")
+    .eq("artist_id", artistId)
+    .eq("status", "active");
+  const rows = (data ?? []) as unknown as {
+    id: string;
+    manage_bookings: boolean;
+    studios: { name: string } | null;
+  }[];
+  return rows.map((r) => ({
+    id: r.id,
+    manageBookings: r.manage_bookings,
+    studioName: r.studios?.name ?? "Studio",
+  }));
+}
+
+export async function setManageBookings(
+  supabase: SupabaseClient,
+  affiliationId: string,
+  value: boolean
+): Promise<void> {
+  const { error } = await supabase
+    .from("affiliations")
+    .update({ manage_bookings: value })
+    .eq("id", affiliationId);
+  if (error) throw new Error(`Failed to update front-desk grant: ${error.message}`);
+}
+
+export async function fetchProjectByRequest(
+  supabase: SupabaseClient,
+  requestId: string
+): Promise<ProjectRecord | null> {
+  const { data } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("request_id", requestId)
+    .maybeSingle();
+  return data ? mapDbProject(data as DbProject) : null;
+}
+
+/** Non-cancelled sessions booked against a request (multi-session progress). */
+export async function countRequestSessions(
+  supabase: SupabaseClient,
+  requestId: string
+): Promise<number> {
+  const { count } = await supabase
+    .from("appointments")
+    .select("id", { count: "exact", head: true })
+    .eq("request_id", requestId)
+    .in("status", ["pending_deposit", "confirmed", "completed"]);
+  return count ?? 0;
 }
