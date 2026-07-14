@@ -45,7 +45,7 @@ Every bookable target is expressed as nullable `artist_id` / `studio_id` FK pair
 - Multi-session intent: `is_multi_session`, `estimated_sessions`
 - Status: `pending` | `accepted` | `declined` | `withdrawn` | `expired`; `expires_at` set on creation (default 14 days)
 - Artist response (set on accept): `response_message`, `quote_min_cents`, `quote_max_cents`, `deposit_cents`, `scheduling_mode` (`propose` | `open_calendar`), `proposed_times` jsonb `[{start,end}]`
-- `message_thread_id` — link to existing messaging thread
+- `conversation_id` — link to the existing `public.conversations` messaging table (wired in phase 2)
 
 **`appointments`** — anything with a concrete time:
 - `customer_id`, `artist_id`, `studio_id` (target CHECK), `request_id`, `project_id`, `flash_item_id` (all nullable back-links)
@@ -74,7 +74,9 @@ No overlap constraint on studio-only rows — studios run multiple chairs concur
 
 **`notifications`** — in-app bell: `user_id`, `kind`, `payload` jsonb, `read_at`. Doubles as the outbox for future email/SMS reminders.
 
-**Front desk grant** — new column on existing `studio_connections`: `manage_bookings boolean default false`, granted by the artist. Studio owners always get read-only roster visibility; write access requires the grant.
+**Front desk grant** — new column on existing `public.affiliations` (the artist-studio join from migration 006): `manage_bookings boolean default false`, granted by the artist. Studio owners always get read-only roster visibility (any active affiliation); write access requires the grant. (`studio_connections` is the sealed OAuth token table and is unrelated.)
+
+**Offline customers** — `appointments.customer_id` is nullable with a `customer_name` text fallback, so front-desk quick-add works for phone/walk-in customers who have no platform account.
 
 ### State Machines
 
