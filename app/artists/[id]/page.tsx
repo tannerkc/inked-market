@@ -22,6 +22,9 @@ import {
   MetaHighlight,
 } from "@/components/detail";
 import { getArtist, getArtistReviews } from "@/lib/data/artists";
+import { getArtistByIdFromDb } from "@/lib/data/supabase-artists";
+import { getReviewsForTarget } from "@/lib/data/supabase-reviews";
+import { SampleBadge } from "@/components/ui/sample-badge";
 import {
   permanentMarker,
   bebasNeue,
@@ -34,27 +37,49 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export const revalidate = 60; // ISR
+
+async function fetchArtist(id: string) {
+  // Try Supabase first, fall back to mock data
+  try {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const dbArtist = await getArtistByIdFromDb(supabase, id);
+      if (dbArtist) {
+        const reviews = await getReviewsForTarget(supabase, "artist", dbArtist.id);
+        return { artist: dbArtist, reviews, fromDb: true };
+      }
+    }
+  } catch {
+    // Fall through to mock
+  }
+
+  const artist = getArtist(id);
+  if (!artist) return null;
+  return { artist, reviews: getArtistReviews(id), fromDb: false };
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const artist = getArtist(id);
-  if (!artist) return { title: "Artist Not Found | Inked Market" };
+  const result = await fetchArtist(id);
+  if (!result) return { title: "Artist Not Found | Inked Market" };
   return {
-    title: `${artist.name} — Tattoo Artist | Inked Market`,
-    description: artist.bio.slice(0, 160),
+    title: `${result.artist.name} — Tattoo Artist | Inked Market`,
+    description: result.artist.bio.slice(0, 160),
   };
 }
 
 export default async function ArtistPage({ params }: PageProps) {
   const { id } = await params;
-  const rawArtist = getArtist(id);
-  if (!rawArtist) notFound();
-  const artist = rawArtist as typeof rawArtist & {
-    studioName?: string;
-    location?: { city: string; state: string };
-  };
-  const reviews = getArtistReviews(id);
+  const result = await fetchArtist(id);
+  if (!result) notFound();
+  const { artist, reviews, fromDb } = result;
+
+  const issueBase = Number.parseInt(artist.id, 10);
+  const issueNumber = Number.isNaN(issueBase) ? 47 : issueBase + 46;
 
   const calendarDays = Array.from({ length: 21 }, (_, i) => ({
     day: i + 1,
@@ -72,8 +97,13 @@ export default async function ArtistPage({ params }: PageProps) {
 
       {/* ── HERO ── */}
       <DetailHero coverImage={artist.coverImage} name={artist.name}>
+        {!fromDb && (
+          <div className="mb-3 relative z-10">
+            <SampleBadge label="Sample profile" />
+          </div>
+        )}
         <IssueLabel
-          issueNumber={parseInt(artist.id) + 46}
+          issueNumber={issueNumber}
           subtitle="Artist Spotlight"
           font={permanentMarker.className}
         />
@@ -122,7 +152,13 @@ export default async function ArtistPage({ params }: PageProps) {
 
         {/* CTA Row */}
         <div className="flex flex-wrap gap-2.5 mt-7 relative z-10">
-          <Button variant="ink-red" size="sm" statusDot="bg-ink-cream shadow-ink-cream-glow">
+          <Button
+            variant="ink-red"
+            size="sm"
+            statusDot="bg-ink-cream shadow-ink-cream-glow"
+            as={Link}
+            href={`/book/${id}`}
+          >
             Book Consultation
           </Button>
           <Button variant="ink-light-outline" size="sm">
@@ -200,6 +236,8 @@ export default async function ArtistPage({ params }: PageProps) {
               size="sm"
               statusDot="bg-ink-cream shadow-ink-cream-glow"
               className="w-full mt-4 justify-center"
+              as={Link}
+              href={`/book/${id}`}
             >
               Book a Date
             </Button>
