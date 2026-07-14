@@ -1,5 +1,6 @@
 export { ArtistRequestsSection } from "./artist-requests-section";
 export { BookingFlow } from "./booking-flow";
+export { BookingModePrompt } from "./booking-mode-prompt";
 export { BlockedDatesEditor } from "./blocked-dates-editor";
 export { CustomerAppointmentPanel } from "./customer-appointment-panel";
 export { CustomerRequestPanel } from "./customer-request-panel";

@@ -8,7 +8,12 @@ import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, InviteArtistIcon, LinkShareIcon, BookingSettingsIcon, CalendarIcon } from "@/components/dashboard/dashboard-icons";
-import { BookingSettingsPanel, FrontDeskPanel, RosterScheduleCard } from "@/components/booking";
+import {
+  BookingModePrompt,
+  BookingSettingsPanel,
+  FrontDeskPanel,
+  RosterScheduleCard,
+} from "@/components/booking";
 import { StudioPageCard } from "./studio-page-card";
 import { StudioArtistsSection } from "./studio-artists-section";
 import { StudioBusinessHours } from "./studio-business-hours";
@@ -129,6 +134,7 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
         }
         rightColumn={
           <>
+            <BookingModePrompt onOpenSettings={() => setBookingSettingsOpen(true)} />
             <StudioPageCard />
             <StudioArtistsSection
               roster={dashboard.roster}

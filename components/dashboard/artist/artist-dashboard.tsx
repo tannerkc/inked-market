@@ -9,6 +9,7 @@ import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, CalendarIcon, LinkShareIcon, BookingSettingsIcon } from "@/components/dashboard/dashboard-icons";
 import {
   ArtistRequestsSection,
+  BookingModePrompt,
   BookingSettingsPanel,
   FlashManagerPanel,
   RequestDetailPanel,
@@ -92,6 +93,7 @@ export function ArtistDashboard() {
         }
         rightColumn={
           <>
+            <BookingModePrompt onOpenSettings={() => setBookingSettingsOpen(true)} />
             <ArtistRequestsSection
               pending={artistRequests.pending}
               others={artistRequests.others}

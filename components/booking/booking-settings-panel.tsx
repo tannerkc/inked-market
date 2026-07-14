@@ -92,6 +92,38 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
         </p>
       ) : (
         <div className="flex flex-col gap-5 p-4">
+          <SelectRow
+            label="Bookings"
+            value={settings.bookingMode ?? ""}
+            options={[
+              ...(settings.bookingMode === null ? [{ value: "", label: "Choose..." }] : []),
+              { value: "inbuilt", label: "Inked booking" },
+              { value: "external", label: "External link" },
+              { value: "off", label: "Off" },
+            ]}
+            onChange={(v) =>
+              update("bookingMode", v === "" ? null : (v as "inbuilt" | "external" | "off"))
+            }
+          />
+
+          {settings.bookingMode === "external" ? (
+            <div className="flex flex-col gap-2">
+              <FieldLabel>Your booking link</FieldLabel>
+              <input
+                type="url"
+                value={settings.externalBookingUrl ?? ""}
+                onChange={(e) => update("externalBookingUrl", e.target.value || null)}
+                placeholder="https://calendly.com/your-page"
+                className="min-h-[44px] rounded-lg border border-ink-black/[0.08] bg-transparent px-3 font-mono text-[12px] dark:border-ink-cream/[0.08]"
+              />
+              <p className="text-[10px] text-ink-black/30 dark:text-ink-cream/30">
+                Your public page will show a Book button that opens this link.
+              </p>
+            </div>
+          ) : null}
+
+          {settings.bookingMode === "inbuilt" ? (
+            <>
           <ToggleRow
             label="Accepting bookings"
             hint="Master switch for every booking flow"
@@ -268,6 +300,8 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
             placeholder="Deposits are non-refundable within 48 hours of the appointment..."
             rows={3}
           />
+            </>
+          ) : null}
 
           {error ? <p className="text-[12px] text-red-600 dark:text-red-400">{error}</p> : null}
 
@@ -276,7 +310,12 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
               await save();
               onClose();
             }}
-            disabled={saving || !entity}
+            disabled={
+              saving ||
+              !entity ||
+              (settings.bookingMode === "external" &&
+                !settings.externalBookingUrl?.startsWith("https://"))
+            }
             className="min-h-[44px]"
           >
             {saving ? "Saving..." : "Save Settings"}
