@@ -36,12 +36,15 @@ interface BookingRequestFlowProps {
   artistId: string;
   artistName: string;
   acceptingRequests: boolean;
+  /** True when rendered inside the /book chooser, which owns the heading. */
+  embedded?: boolean;
 }
 
 export function BookingRequestFlow({
   artistId,
   artistName,
   acceptingRequests,
+  embedded = false,
 }: BookingRequestFlowProps) {
   const { user } = useAuth();
   const [description, setDescription] = useState("");
@@ -81,7 +84,13 @@ export function BookingRequestFlow({
   if (done) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-medium">Request sent</h1>
+        {embedded ? (
+          <p className="font-mono text-[12px] font-medium text-ink-black/70 dark:text-ink-cream/70">
+            Request sent
+          </p>
+        ) : (
+          <h1 className="text-xl font-medium">Request sent</h1>
+        )}
         <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
           {artistName} will review your idea and reply with a quote and times. Track it from your
           dashboard.
@@ -128,7 +137,9 @@ export function BookingRequestFlow({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-medium">Request a booking with {artistName}</h1>
+      {embedded ? null : (
+        <h1 className="text-xl font-medium">Request a booking with {artistName}</h1>
+      )}
 
       <Textarea
         label="Describe your idea"

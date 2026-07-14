@@ -1,4 +1,5 @@
 export { ArtistRequestsSection } from "./artist-requests-section";
+export { BookingFlow } from "./booking-flow";
 export { BlockedDatesEditor } from "./blocked-dates-editor";
 export { CustomerRequestPanel } from "./customer-request-panel";
 export { RequestDetailPanel } from "./request-detail-panel";
