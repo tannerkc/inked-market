@@ -311,4 +311,41 @@ check("SlotsQuerySchema bounds the range", () => {
   assert.ok(!SlotsQuerySchema.safeParse({ ...q, from: "2026-08-02", to: "2026-08-01" }).success);
 });
 
+// ─── scheduling.ts ───────────────────────────────────────────────────────
+import { validateChosenTime } from "../lib/booking/scheduling";
+
+const CHOSEN = { startAt: "2026-08-01T17:00:00.000Z", endAt: "2026-08-01T20:00:00.000Z" };
+const SCHED_NOW = new Date("2026-07-14T00:00:00Z");
+
+check("validateChosenTime: propose mode accepts exact match only", () => {
+  const proposed = [CHOSEN, { startAt: "2026-08-02T17:00:00.000Z", endAt: "2026-08-02T20:00:00.000Z" }];
+  assert.ok(
+    validateChosenTime({ mode: "propose", proposedTimes: proposed, openSlots: [], chosen: CHOSEN, now: SCHED_NOW }).ok
+  );
+  const shifted = { startAt: "2026-08-01T17:30:00.000Z", endAt: "2026-08-01T20:30:00.000Z" };
+  assert.ok(
+    !validateChosenTime({ mode: "propose", proposedTimes: proposed, openSlots: [], chosen: shifted, now: SCHED_NOW }).ok
+  );
+});
+
+check("validateChosenTime: rejects past and inverted times", () => {
+  const past = { startAt: "2026-07-01T17:00:00.000Z", endAt: "2026-07-01T20:00:00.000Z" };
+  assert.ok(
+    !validateChosenTime({ mode: "propose", proposedTimes: [past], openSlots: [], chosen: past, now: SCHED_NOW }).ok
+  );
+  const inverted = { startAt: "2026-08-01T20:00:00.000Z", endAt: "2026-08-01T17:00:00.000Z" };
+  assert.ok(
+    !validateChosenTime({ mode: "propose", proposedTimes: [inverted], openSlots: [], chosen: inverted, now: SCHED_NOW }).ok
+  );
+});
+
+check("validateChosenTime: open calendar requires slot membership", () => {
+  assert.ok(
+    validateChosenTime({ mode: "open_calendar", proposedTimes: [], openSlots: [CHOSEN], chosen: CHOSEN, now: SCHED_NOW }).ok
+  );
+  assert.ok(
+    !validateChosenTime({ mode: "open_calendar", proposedTimes: [], openSlots: [], chosen: CHOSEN, now: SCHED_NOW }).ok
+  );
+});
+
 console.log(`\n${passed} checks passed`);
