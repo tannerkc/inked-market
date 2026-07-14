@@ -8,16 +8,10 @@ import {
   SubmitBookingRequestSchema,
 } from "@/lib/validation/schemas";
 import { validateChosenTime } from "@/lib/booking/scheduling";
-import { computeOpenSlots } from "@/lib/booking/availability";
-import { zonedParts } from "@/lib/booking/tz";
+import { computeArtistSlotsRange, localDateOf } from "@/lib/booking/server-slots";
 import {
-  type DbAvailabilityOverride,
-  type DbAvailabilityRule,
   type DbBookingSettings,
   effectiveRequestStatus,
-  mapDbAvailabilityOverride,
-  mapDbAvailabilityRule,
-  mapDbBookingSettings,
 } from "@/lib/supabase/booking-types";
 import { fetchRequestById } from "@/lib/data/supabase-booking";
 
@@ -192,46 +186,16 @@ export async function scheduleFromRequest(
     if (!settingsRow) {
       return { success: false, error: "This artist has no availability set up." };
     }
-    const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
     // Recompute slots for the chosen local day only, server-side.
-    const p = zonedParts(new Date(chosen.startAt), settings.timezone);
-    const localDate = `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}`;
-    const [rulesRes, overridesRes, busyRes] = await Promise.all([
-      admin.from("availability_rules").select("*").eq("artist_id", request.artistId),
-      admin
-        .from("availability_overrides")
-        .select("*")
-        .eq("artist_id", request.artistId)
-        .eq("date", localDate),
-      admin
-        .from("appointments")
-        .select("start_at, end_at")
-        .eq("artist_id", request.artistId)
-        .in("status", ["pending_deposit", "confirmed"])
-        .gte("end_at", `${localDate}T00:00:00Z`)
-        .lte("start_at", `${localDate}T23:59:59Z`),
-    ]);
-    openSlots = computeOpenSlots({
-      rules: ((rulesRes.data ?? []) as DbAvailabilityRule[]).map(mapDbAvailabilityRule),
-      overrides: ((overridesRes.data ?? []) as DbAvailabilityOverride[]).map(
-        mapDbAvailabilityOverride
-      ),
-      busy: ((busyRes.data ?? []) as { start_at: string; end_at: string }[]).map((b) => ({
-        startAt: b.start_at,
-        endAt: b.end_at,
-      })),
-      settings: {
-        timezone: settings.timezone,
-        slotGranularityMin: settings.slotGranularityMin,
-        bufferMin: settings.bufferMin,
-        minNoticeHours: settings.minNoticeHours,
-        maxHorizonDays: settings.maxHorizonDays,
-      },
+    const localDate = localDateOf(chosen.startAt, timezone);
+    const range = await computeArtistSlotsRange(admin, {
+      artistId: request.artistId,
       durationMin: request.sessionDurationMin ?? 180,
       fromDate: localDate,
       toDate: localDate,
       now,
     });
+    openSlots = range?.slots ?? [];
   }
 
   const verdict = validateChosenTime({
