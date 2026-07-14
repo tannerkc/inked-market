@@ -10,6 +10,7 @@ import type { Appointment, AppointmentStatus } from "@/lib/types";
 interface CustomerAppointmentsSectionProps {
   upcoming: Appointment[];
   past: Appointment[];
+  onSelect?: (id: string) => void;
   className?: string;
 }
 
@@ -35,12 +36,22 @@ function formatDuration(minutes: number): string {
   return `${minutes}min`;
 }
 
-function AppointmentRow({ appointment }: { appointment: Appointment }) {
+function AppointmentRow({
+  appointment,
+  onSelect,
+}: {
+  appointment: Appointment;
+  onSelect?: (id: string) => void;
+}) {
   const { month, day } = formatShortDate(appointment.date);
   const config = appointmentStatusConfig[appointment.status];
 
   return (
-    <div className="flex items-center gap-3 py-3 border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]">
+    <button
+      type="button"
+      onClick={() => onSelect?.(appointment.id)}
+      className="flex w-full items-center gap-3 py-3 text-left border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]"
+    >
       <div className="w-10 flex-shrink-0 text-center text-ink-black/50 dark:text-ink-cream/50">
         <p className="font-mono text-[9px] tracking-[0.1em] uppercase leading-none">
           {month}
@@ -54,16 +65,16 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
         <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
           {appointment.artistName}
         </p>
-        {appointment.studioName && (
+        {appointment.studioName ? (
           <p className="text-[11px] truncate text-ink-black/40 dark:text-ink-cream/40">
             {appointment.studioName}
           </p>
-        )}
-        {appointment.notes && (
+        ) : null}
+        {appointment.notes ? (
           <p className="text-[11px] truncate text-ink-black/30 dark:text-ink-cream/30">
             {appointment.notes}
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex-shrink-0 text-right">
@@ -72,14 +83,14 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
           {formatDuration(appointment.duration)}
         </p>
       </div>
-    </div>
+    </button>
   );
 }
 
 const CustomerAppointmentsSection = React.forwardRef<
   HTMLDivElement,
   CustomerAppointmentsSectionProps
->(({ upcoming, past, className, ...props }, ref) => {
+>(({ upcoming, past, onSelect, className, ...props }, ref) => {
   const isEmpty = upcoming.length === 0 && past.length === 0;
 
   return (
@@ -98,7 +109,7 @@ const CustomerAppointmentsSection = React.forwardRef<
                   Upcoming
                 </p>
                 {upcoming.map((appt) => (
-                  <AppointmentRow key={appt.id} appointment={appt} />
+                  <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
                 ))}
               </div>
             )}
@@ -109,7 +120,7 @@ const CustomerAppointmentsSection = React.forwardRef<
                   Past
                 </p>
                 {past.map((appt) => (
-                  <AppointmentRow key={appt.id} appointment={appt} />
+                  <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
                 ))}
               </div>
             )}

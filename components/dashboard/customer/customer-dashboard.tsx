@@ -19,7 +19,11 @@ import { CustomerNotificationPrefsSection } from "./customer-notification-prefs-
 import { CustomerEditProfilePanel } from "./customer-edit-profile-panel";
 import { CustomerDesignBriefPanel } from "./customer-design-brief-panel";
 import { CustomerHealedPhotoPanel } from "./customer-healed-photo-panel";
-import { CustomerRequestPanel, PendingDepositBanner } from "@/components/booking";
+import {
+  CustomerAppointmentPanel,
+  CustomerRequestPanel,
+  PendingDepositBanner,
+} from "@/components/booking";
 import { useCustomerDashboard } from "./use-customer-dashboard";
 import type { QuickAction, CustomerDashboardTab } from "@/lib/types";
 import type { TabItem } from "@/components/ui/tab-bar";
@@ -30,6 +34,11 @@ export function CustomerDashboard() {
   const selectedRequest = useMemo(
     () => dashboard.requestRecords.find((r) => r.id === selectedRequestId) ?? null,
     [dashboard.requestRecords, selectedRequestId]
+  );
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const selectedAppointment = useMemo(
+    () => dashboard.appointmentRecords.find((a) => a.id === selectedAppointmentId) ?? null,
+    [dashboard.appointmentRecords, selectedAppointmentId]
   );
 
   const tabs: TabItem<CustomerDashboardTab>[] = [
@@ -208,6 +217,7 @@ export function CustomerDashboard() {
                 <CustomerAppointmentsSection
                   upcoming={dashboard.upcomingAppointments}
                   past={dashboard.pastAppointments}
+                  onSelect={setSelectedAppointmentId}
                 />
                 <CustomerBookingRequestsSection
                   requests={dashboard.bookingRequests}
@@ -285,6 +295,11 @@ export function CustomerDashboard() {
                 ).length
               }
               onClose={() => setSelectedRequestId(null)}
+              onChanged={() => void dashboard.refreshBooking()}
+            />
+            <CustomerAppointmentPanel
+              appointment={selectedAppointment}
+              onClose={() => setSelectedAppointmentId(null)}
               onChanged={() => void dashboard.refreshBooking()}
             />
           </>
