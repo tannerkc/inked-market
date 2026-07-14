@@ -133,6 +133,18 @@ export interface BookingRequestRecord {
   createdAt: string;
 }
 
+export interface FlashItem {
+  id: string;
+  artistId: string;
+  title: string;
+  imageUrl: string;
+  priceCents: number;
+  depositCents: number;
+  durationMin: number;
+  active: boolean;
+  oneOff: boolean;
+}
+
 export interface AppointmentRecord {
   id: string;
   customerId: string | null;

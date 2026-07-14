@@ -11,6 +11,7 @@ import type {
   BookingSettingsInput,
   ConsultLocation,
   DepositStatus,
+  FlashItem,
   PaymentProvider,
   ProposedTime,
   RequestStatus,
@@ -313,6 +314,34 @@ export function mapDbAppointment(row: DbAppointment): AppointmentRecord {
     depositStatus: row.deposit_status,
     notes: row.notes,
     customerNotes: row.customer_notes,
+  };
+}
+
+export interface DbFlashItem {
+  id: string;
+  artist_id: string;
+  title: string;
+  image_url: string;
+  price_cents: number;
+  deposit_cents: number;
+  duration_min: number;
+  active: boolean;
+  one_off: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export function mapDbFlashItem(row: DbFlashItem): FlashItem {
+  return {
+    id: row.id,
+    artistId: row.artist_id,
+    title: row.title,
+    imageUrl: row.image_url,
+    priceCents: row.price_cents,
+    depositCents: row.deposit_cents,
+    durationMin: row.duration_min,
+    active: row.active,
+    oneOff: row.one_off,
   };
 }
 

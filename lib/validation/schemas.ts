@@ -114,6 +114,20 @@ export const ScheduleFromRequestSchema = z.object({
 });
 export type ScheduleFromRequestInput = z.infer<typeof ScheduleFromRequestSchema>;
 
+export const BookConsultationSchema = z.object({
+  artistId: z.string().uuid(),
+  startAt: isoDatetime,
+  endAt: isoDatetime,
+});
+export type BookConsultationInput = z.infer<typeof BookConsultationSchema>;
+
+export const BookFlashSchema = z.object({
+  flashItemId: z.string().uuid(),
+  startAt: isoDatetime,
+  endAt: isoDatetime,
+});
+export type BookFlashInput = z.infer<typeof BookFlashSchema>;
+
 export const SlotsQuerySchema = z
   .object({
     artistId: z.string().uuid(),

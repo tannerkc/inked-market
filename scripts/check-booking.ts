@@ -419,4 +419,48 @@ check("appointment maps to legacy view model with duration minutes", () => {
   assert.ok(vm.date instanceof Date);
 });
 
+// ─── phase 3: flash + flows ──────────────────────────────────────────────
+import { BookConsultationSchema, BookFlashSchema } from "../lib/validation/schemas";
+import { enabledBookingFlows } from "../lib/booking/flows";
+import { mapDbFlashItem, type DbFlashItem } from "../lib/supabase/booking-types";
+
+check("direct-booking schemas validate ids and datetimes", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00c04fc964ff";
+  const times = { startAt: "2026-08-01T17:00:00Z", endAt: "2026-08-01T17:30:00Z" };
+  assert.ok(BookConsultationSchema.safeParse({ artistId: uuid, ...times }).success);
+  assert.ok(!BookConsultationSchema.safeParse({ artistId: "nope", ...times }).success);
+  assert.ok(BookFlashSchema.safeParse({ flashItemId: uuid, ...times }).success);
+  assert.ok(
+    !BookFlashSchema.safeParse({ flashItemId: uuid, startAt: "tomorrow", endAt: times.endAt }).success
+  );
+});
+
+check("enabledBookingFlows respects master switch and per-flow toggles", () => {
+  const base = {
+    acceptingBookings: true,
+    customRequestsEnabled: true,
+    consultationsEnabled: false,
+    flashEnabled: true,
+  };
+  assert.deepEqual(enabledBookingFlows(base), ["custom", "flash"]);
+  assert.deepEqual(enabledBookingFlows({ ...base, acceptingBookings: false }), []);
+  assert.deepEqual(
+    enabledBookingFlows({ ...base, consultationsEnabled: true, customRequestsEnabled: false }),
+    ["consultation", "flash"]
+  );
+});
+
+const DB_FLASH: DbFlashItem = {
+  id: "f1", artist_id: "a1", title: "Snake and dagger", image_url: "https://x/f.webp",
+  price_cents: 25000, deposit_cents: 5000, duration_min: 120,
+  active: true, one_off: true, created_at: "2026-07-14", updated_at: "2026-07-14",
+};
+
+check("flash item maps db->domain", () => {
+  const f = mapDbFlashItem(DB_FLASH);
+  assert.equal(f.artistId, "a1");
+  assert.equal(f.priceCents, 25000);
+  assert.equal(f.oneOff, true);
+});
+
 console.log(`\n${passed} checks passed`);
