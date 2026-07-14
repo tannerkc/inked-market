@@ -198,4 +198,60 @@ check("eachDate is inclusive on both ends", () => {
   assert.deepEqual(eachDate("2026-01-30", "2026-02-01"), ["2026-01-30", "2026-01-31", "2026-02-01"]);
 });
 
+// ─── booking-types.ts mappers ────────────────────────────────────────────
+import {
+  mapDbBookingSettings,
+  mapBookingSettingsToDb,
+  rulesToWeekly,
+  weeklyToRules,
+  DAY_NAMES,
+  type DbBookingSettings,
+} from "../lib/supabase/booking-types";
+import { getDefaultAvailability } from "../lib/data/dashboard";
+
+const DB_SETTINGS: DbBookingSettings = {
+  id: "s1", artist_id: "a1", studio_id: null,
+  accepting_bookings: true, custom_requests_enabled: true,
+  consultations_enabled: false, flash_enabled: false, walk_ins_enabled: false,
+  consult_duration_min: 30, consult_price_cents: 0, consult_location: "in_person",
+  default_deposit_cents: 5000, payment_provider: null,
+  slot_granularity_min: 30, buffer_min: 15, min_notice_hours: 24, max_horizon_days: 60,
+  timezone: "America/New_York", cancellation_policy_text: null, cancellation_window_hours: 48,
+  created_at: "2026-07-14", updated_at: "2026-07-14",
+};
+
+check("settings map db->domain->db", () => {
+  const s = mapDbBookingSettings(DB_SETTINGS);
+  assert.equal(s.artistId, "a1");
+  assert.equal(s.studioId, undefined);
+  assert.equal(s.defaultDepositCents, 5000);
+  assert.equal(s.bufferMin, 15);
+  const back = mapBookingSettingsToDb({ bufferMin: 20, acceptingBookings: false });
+  assert.deepEqual(back, { buffer_min: 20, accepting_bookings: false });
+});
+
+check("weeklyToRules emits 24h windows only for enabled days", () => {
+  const weekly = getDefaultAvailability();
+  const monday = DAY_NAMES[1];
+  for (const day of DAY_NAMES) {
+    if (weekly[day]) weekly[day] = { ...weekly[day], enabled: day === monday };
+  }
+  weekly[monday] = { enabled: true, slots: [{ start: "10:00 AM", end: "6:00 PM" }] };
+  const rules = weeklyToRules(weekly);
+  assert.deepEqual(rules, [{ weekday: 1, startHm: "10:00", endHm: "18:00" }]);
+});
+
+check("rulesToWeekly enables days with rows, disables the rest", () => {
+  const base = getDefaultAvailability();
+  const weekly = rulesToWeekly(
+    [{ id: "r1", weekday: 2, startHm: "09:00", endHm: "17:00" }],
+    base
+  );
+  const tuesday = DAY_NAMES[2];
+  assert.equal(weekly[tuesday].enabled, true);
+  assert.deepEqual(weekly[tuesday].slots, [{ start: "9:00 AM", end: "5:00 PM" }]);
+  const monday = DAY_NAMES[1];
+  assert.equal(weekly[monday].enabled, false);
+});
+
 console.log(`\n${passed} checks passed`);
