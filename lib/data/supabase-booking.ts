@@ -2,20 +2,26 @@
 // following the lib/data/supabase-artists.ts pattern.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
+  AppointmentRecord,
   AvailabilityOverride,
   AvailabilityRule,
   BookingEntityRef,
+  BookingRequestRecord,
   BookingSettings,
   BookingSettingsInput,
 } from "@/lib/types/booking";
 import type { WeeklyAvailability } from "@/lib/types";
 import {
+  type DbAppointment,
   type DbAvailabilityOverride,
   type DbAvailabilityRule,
+  type DbBookingRequest,
   type DbBookingSettings,
   mapBookingSettingsToDb,
+  mapDbAppointment,
   mapDbAvailabilityOverride,
   mapDbAvailabilityRule,
+  mapDbBookingRequest,
   mapDbBookingSettings,
   weeklyToRules,
 } from "@/lib/supabase/booking-types";
@@ -136,4 +142,56 @@ export async function addBlockedDate(
 export async function removeOverride(supabase: SupabaseClient, id: string): Promise<void> {
   const { error } = await supabase.from("availability_overrides").delete().eq("id", id);
   if (error) throw new Error(`Failed to remove override: ${error.message}`);
+}
+
+// ─── Phase 2: requests + appointments ─────────────────────────────────────
+
+export const REQUEST_SELECT = "*, artists(name), studios(name)";
+
+export async function fetchCustomerRequests(
+  supabase: SupabaseClient,
+  customerId: string
+): Promise<BookingRequestRecord[]> {
+  const { data } = await supabase
+    .from("booking_requests")
+    .select(REQUEST_SELECT)
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as DbBookingRequest[]).map(mapDbBookingRequest);
+}
+
+export async function fetchArtistRequests(
+  supabase: SupabaseClient,
+  artistId: string
+): Promise<BookingRequestRecord[]> {
+  const { data } = await supabase
+    .from("booking_requests")
+    .select(REQUEST_SELECT)
+    .eq("artist_id", artistId)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as DbBookingRequest[]).map(mapDbBookingRequest);
+}
+
+export async function fetchRequestById(
+  supabase: SupabaseClient,
+  id: string
+): Promise<BookingRequestRecord | null> {
+  const { data } = await supabase
+    .from("booking_requests")
+    .select(REQUEST_SELECT)
+    .eq("id", id)
+    .maybeSingle();
+  return data ? mapDbBookingRequest(data as DbBookingRequest) : null;
+}
+
+export async function fetchCustomerAppointments(
+  supabase: SupabaseClient,
+  customerId: string
+): Promise<AppointmentRecord[]> {
+  const { data } = await supabase
+    .from("appointments")
+    .select(REQUEST_SELECT)
+    .eq("customer_id", customerId)
+    .order("start_at", { ascending: true });
+  return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
 }
