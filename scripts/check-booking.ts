@@ -105,8 +105,8 @@ function baseInput(): ComputeSlotsInput {
 check("full open day yields hourly slots 9-5", () => {
   const slots = computeOpenSlots(baseInput());
   assert.equal(slots.length, 8);
-  assert.equal(slots[0].startAt, "2026-07-14T13:00:00.000Z"); // 9am EDT
-  assert.equal(slots[7].startAt, "2026-07-14T20:00:00.000Z"); // 4pm EDT
+  assert.equal(slots[0]!.startAt, "2026-07-14T13:00:00.000Z"); // 9am EDT
+  assert.equal(slots[7]!.startAt, "2026-07-14T20:00:00.000Z"); // 4pm EDT
 });
 
 check("busy block with buffer removes overlapping and adjacent slots", () => {
@@ -158,7 +158,7 @@ check("duration must fit inside the free interval", () => {
   input.durationMin = 180;
   const slots = computeOpenSlots(input);
   // 9-5 = 8h; 3h piece on 60-min grid: last start 2pm
-  assert.equal(slots[slots.length - 1].startAt, "2026-07-14T18:00:00.000Z");
+  assert.equal(slots[slots.length - 1]!.startAt, "2026-07-14T18:00:00.000Z");
 });
 
 check("DST spring-forward day computes real UTC window", () => {
@@ -168,7 +168,7 @@ check("DST spring-forward day computes real UTC window", () => {
   input.toDate = "2026-03-08";
   input.now = new Date("2026-03-01T00:00:00Z"); // baseInput's July now is after March 8
   const slots = computeOpenSlots(input);
-  assert.equal(slots[0].startAt, "2026-03-08T13:00:00.000Z"); // 9am EDT (post spring-forward)
+  assert.equal(slots[0]!.startAt, "2026-03-08T13:00:00.000Z"); // 9am EDT (post spring-forward)
   assert.equal(slots.length, 3);
 });
 
@@ -232,9 +232,10 @@ check("settings map db->domain->db", () => {
 
 check("weeklyToRules emits 24h windows only for enabled days", () => {
   const weekly = getDefaultAvailability();
-  const monday = DAY_NAMES[1];
+  const monday = DAY_NAMES[1]!;
   for (const day of DAY_NAMES) {
-    if (weekly[day]) weekly[day] = { ...weekly[day], enabled: day === monday };
+    const d = weekly[day];
+    if (d) weekly[day] = { ...d, enabled: day === monday };
   }
   weekly[monday] = { enabled: true, slots: [{ start: "10:00 AM", end: "6:00 PM" }] };
   const rules = weeklyToRules(weekly);
@@ -247,11 +248,11 @@ check("rulesToWeekly enables days with rows, disables the rest", () => {
     [{ id: "r1", weekday: 2, startHm: "09:00", endHm: "17:00" }],
     base
   );
-  const tuesday = DAY_NAMES[2];
-  assert.equal(weekly[tuesday].enabled, true);
-  assert.deepEqual(weekly[tuesday].slots, [{ start: "9:00 AM", end: "5:00 PM" }]);
-  const monday = DAY_NAMES[1];
-  assert.equal(weekly[monday].enabled, false);
+  const tuesday = DAY_NAMES[2]!;
+  assert.equal(weekly[tuesday]!.enabled, true);
+  assert.deepEqual(weekly[tuesday]!.slots, [{ start: "9:00 AM", end: "5:00 PM" }]);
+  const monday = DAY_NAMES[1]!;
+  assert.equal(weekly[monday]!.enabled, false);
 });
 
 console.log(`\n${passed} checks passed`);

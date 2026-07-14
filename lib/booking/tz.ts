@@ -50,8 +50,8 @@ function offsetAt(date: Date, timeZone: string): number {
  * times on spring-forward days resolve to the adjacent valid instant.
  */
 export function zonedTimeToUtc(dateIso: string, hm: string, timeZone: string): Date {
-  const [y, mo, d] = dateIso.split("-").map(Number);
-  const [h, mi] = hm.split(":").map(Number);
+  const [y = 0, mo = 1, d = 1] = dateIso.split("-").map(Number);
+  const [h = 0, mi = 0] = hm.split(":").map(Number);
   const guess = Date.UTC(y, mo - 1, d, h, mi);
   const first = offsetAt(new Date(guess), timeZone);
   const second = offsetAt(new Date(guess - first), timeZone);
