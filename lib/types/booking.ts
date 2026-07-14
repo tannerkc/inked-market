@@ -133,6 +133,19 @@ export interface BookingRequestRecord {
   createdAt: string;
 }
 
+export type ProjectStatus = "active" | "completed" | "cancelled" | "paused";
+
+export interface ProjectRecord {
+  id: string;
+  requestId: string | null;
+  customerId: string | null;
+  artistId?: string;
+  title: string;
+  status: ProjectStatus;
+  estimatedSessions: number | null;
+  notes: string | null;
+}
+
 export interface FlashItem {
   id: string;
   artistId: string;

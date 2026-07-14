@@ -505,4 +505,51 @@ check("appointment mapper carries deposit checkout url", () => {
   assert.equal(vm.depositCheckoutUrl, "https://pay.example/x");
 });
 
+// ─── phase 5: projects + lifecycle ───────────────────────────────────────
+import { refundDecision } from "../lib/booking/lifecycle";
+import { FrontDeskSchema } from "../lib/validation/schemas";
+import { mapDbProject, type DbProject } from "../lib/supabase/booking-types";
+
+check("refundDecision honors payer, policy window, and deposit state", () => {
+  const base = {
+    depositStatus: "paid" as const,
+    startAt: "2026-08-01T17:00:00Z",
+    cancellationWindowHours: 48,
+  };
+  const early = new Date("2026-07-28T17:00:00Z");
+  const late = new Date("2026-07-31T12:00:00Z"); // inside 48h window
+  assert.equal(refundDecision({ ...base, cancelledBy: "customer", now: early }), "refund_due");
+  assert.equal(refundDecision({ ...base, cancelledBy: "customer", now: late }), "forfeit");
+  assert.equal(refundDecision({ ...base, cancelledBy: "artist", now: late }), "refund_due");
+  assert.equal(refundDecision({ ...base, cancelledBy: "studio", now: late }), "refund_due");
+  assert.equal(
+    refundDecision({ ...base, depositStatus: "pending", cancelledBy: "customer", now: early }),
+    "none"
+  );
+});
+
+check("FrontDeskSchema enforces target XOR and walk-in typing", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00c04fc964ff";
+  const base = { customerName: "Sam", startAt: "2026-08-01T17:00:00Z", durationMin: 60 };
+  assert.ok(FrontDeskSchema.safeParse({ ...base, artistId: uuid, walkIn: false, type: "session" }).success);
+  assert.ok(FrontDeskSchema.safeParse({ ...base, walkIn: true, type: "walk_in" }).success);
+  assert.ok(!FrontDeskSchema.safeParse({ ...base, walkIn: false, type: "session" }).success);
+  assert.ok(!FrontDeskSchema.safeParse({ ...base, artistId: uuid, walkIn: true, type: "walk_in" }).success);
+  assert.ok(!FrontDeskSchema.safeParse({ ...base, artistId: uuid, walkIn: false, type: "walk_in" }).success);
+  assert.ok(!FrontDeskSchema.safeParse({ ...base, walkIn: true, type: "session" }).success);
+});
+
+const DB_PROJECT: DbProject = {
+  id: "p1", request_id: "r1", customer_id: "u1", artist_id: "a1", studio_id: null,
+  title: "Dragon half sleeve", status: "active", estimated_sessions: 4, notes: null,
+  created_at: "2026-07-14", updated_at: "2026-07-14",
+};
+
+check("project maps db->domain", () => {
+  const p = mapDbProject(DB_PROJECT);
+  assert.equal(p.artistId, "a1");
+  assert.equal(p.estimatedSessions, 4);
+  assert.equal(p.status, "active");
+});
+
 console.log(`\n${passed} checks passed`);

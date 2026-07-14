@@ -128,6 +128,35 @@ export const BookFlashSchema = z.object({
 });
 export type BookFlashInput = z.infer<typeof BookFlashSchema>;
 
+export const FrontDeskSchema = z
+  .object({
+    artistId: z.string().uuid().optional(),
+    walkIn: z.boolean().default(false),
+    customerName: z.string().trim().min(1).max(80),
+    type: z.enum(["walk_in", "session", "consultation"]),
+    startAt: isoDatetime,
+    durationMin: z.number().int().min(15).max(720),
+    notes: z.string().trim().max(500).optional(),
+  })
+  .superRefine((d, ctx) => {
+    const hasArtist = d.artistId !== undefined;
+    if (hasArtist === d.walkIn) {
+      ctx.addIssue({ code: "custom", message: "Pick an artist or a walk-in, not both" });
+    }
+    if (d.walkIn && d.type !== "walk_in") {
+      ctx.addIssue({ code: "custom", message: "Studio-level bookings are walk-ins" });
+    }
+    if (hasArtist && d.type === "walk_in") {
+      ctx.addIssue({ code: "custom", message: "Walk-ins are not tied to an artist" });
+    }
+  });
+export type FrontDeskInput = z.infer<typeof FrontDeskSchema>;
+
+export const CancelAppointmentSchema = z.object({
+  appointmentId: z.string().uuid(),
+  reason: z.string().trim().max(300).optional(),
+});
+
 export const SlotsQuerySchema = z
   .object({
     artistId: z.string().uuid(),

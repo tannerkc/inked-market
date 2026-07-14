@@ -13,6 +13,8 @@ import type {
   DepositStatus,
   FlashItem,
   PaymentProvider,
+  ProjectRecord,
+  ProjectStatus,
   ProposedTime,
   RequestStatus,
   SchedulingMode,
@@ -344,6 +346,33 @@ export function mapDbFlashItem(row: DbFlashItem): FlashItem {
     durationMin: row.duration_min,
     active: row.active,
     oneOff: row.one_off,
+  };
+}
+
+export interface DbProject {
+  id: string;
+  request_id: string | null;
+  customer_id: string | null;
+  artist_id: string | null;
+  studio_id: string | null;
+  title: string;
+  status: ProjectStatus;
+  estimated_sessions: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export function mapDbProject(row: DbProject): ProjectRecord {
+  return {
+    id: row.id,
+    requestId: row.request_id,
+    customerId: row.customer_id,
+    artistId: row.artist_id ?? undefined,
+    title: row.title,
+    status: row.status,
+    estimatedSessions: row.estimated_sessions,
+    notes: row.notes,
   };
 }
 
