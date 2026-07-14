@@ -3,6 +3,7 @@ export { BookingFlow } from "./booking-flow";
 export { BlockedDatesEditor } from "./blocked-dates-editor";
 export { CustomerAppointmentPanel } from "./customer-appointment-panel";
 export { CustomerRequestPanel } from "./customer-request-panel";
+export { NotificationsBell } from "./notifications-bell";
 export { PendingDepositBanner } from "./pending-deposit-banner";
 export { RequestDetailPanel } from "./request-detail-panel";
 export { SlotPicker } from "./slot-picker";
