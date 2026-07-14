@@ -73,4 +73,129 @@ check("zonedParts round-trips", () => {
   );
 });
 
+// ─── availability.ts ─────────────────────────────────────────────────────
+import {
+  computeOpenSlots,
+  subtractIntervals,
+  eachDate,
+  type ComputeSlotsInput,
+} from "../lib/booking/availability";
+
+const NY = "America/New_York";
+/** Tue 2026-07-14, 9:00-17:00 NY, 60-min slots, zero friction. */
+function baseInput(): ComputeSlotsInput {
+  return {
+    rules: [{ weekday: 2, startHm: "09:00", endHm: "17:00" }],
+    overrides: [],
+    busy: [],
+    settings: {
+      timezone: NY,
+      slotGranularityMin: 60,
+      bufferMin: 0,
+      minNoticeHours: 0,
+      maxHorizonDays: 365,
+    },
+    durationMin: 60,
+    fromDate: "2026-07-14",
+    toDate: "2026-07-14",
+    now: new Date("2026-07-01T00:00:00Z"),
+  };
+}
+
+check("full open day yields hourly slots 9-5", () => {
+  const slots = computeOpenSlots(baseInput());
+  assert.equal(slots.length, 8);
+  assert.equal(slots[0].startAt, "2026-07-14T13:00:00.000Z"); // 9am EDT
+  assert.equal(slots[7].startAt, "2026-07-14T20:00:00.000Z"); // 4pm EDT
+});
+
+check("busy block with buffer removes overlapping and adjacent slots", () => {
+  const input = baseInput();
+  input.settings.bufferMin = 30;
+  // 12:00-13:00 EDT busy; +-30min buffer blocks 11:00 and 13:00 starts too
+  input.busy = [{ startAt: "2026-07-14T16:00:00.000Z", endAt: "2026-07-14T17:00:00.000Z" }];
+  const starts = computeOpenSlots(input).map((s) => s.startAt);
+  assert.ok(!starts.includes("2026-07-14T15:00:00.000Z")); // 11am: ends 12pm, hits front buffer
+  assert.ok(!starts.includes("2026-07-14T16:00:00.000Z")); // noon: busy
+  assert.ok(!starts.includes("2026-07-14T17:00:00.000Z")); // 1pm: rear buffer
+  assert.ok(starts.includes("2026-07-14T18:00:00.000Z")); // 2pm: clear
+});
+
+check("slots align to window start, not to busy-block edges", () => {
+  const input = baseInput();
+  // busy 9:00-9:47 EDT; next slot must be 10:00, not 9:47
+  input.busy = [{ startAt: "2026-07-14T13:00:00.000Z", endAt: "2026-07-14T13:47:00.000Z" }];
+  const starts = computeOpenSlots(input).map((s) => s.startAt);
+  assert.equal(starts[0], "2026-07-14T14:00:00.000Z");
+});
+
+check("closed override kills the day; hours override replaces template", () => {
+  const closed = baseInput();
+  closed.overrides = [{ date: "2026-07-14", closed: true }];
+  assert.equal(computeOpenSlots(closed).length, 0);
+
+  const custom = baseInput();
+  custom.overrides = [{ date: "2026-07-14", closed: false, startHm: "12:00", endHm: "14:00" }];
+  const starts = computeOpenSlots(custom).map((s) => s.startAt);
+  assert.deepEqual(starts, ["2026-07-14T16:00:00.000Z", "2026-07-14T17:00:00.000Z"]);
+});
+
+check("min notice trims near slots; horizon trims far slots", () => {
+  const input = baseInput();
+  input.now = new Date("2026-07-14T14:30:00.000Z"); // 10:30am EDT same day
+  input.settings.minNoticeHours = 2;
+  const starts = computeOpenSlots(input).map((s) => s.startAt);
+  assert.equal(starts[0], "2026-07-14T17:00:00.000Z"); // first >= 12:30pm EDT aligned = 1pm
+
+  const far = baseInput();
+  far.now = new Date("2026-07-10T00:00:00Z");
+  far.settings.maxHorizonDays = 2; // horizon ends 2026-07-12, before the Tuesday
+  assert.equal(computeOpenSlots(far).length, 0);
+});
+
+check("duration must fit inside the free interval", () => {
+  const input = baseInput();
+  input.durationMin = 180;
+  const slots = computeOpenSlots(input);
+  // 9-5 = 8h; 3h piece on 60-min grid: last start 2pm
+  assert.equal(slots[slots.length - 1].startAt, "2026-07-14T18:00:00.000Z");
+});
+
+check("DST spring-forward day computes real UTC window", () => {
+  const input = baseInput();
+  input.rules = [{ weekday: 0, startHm: "09:00", endHm: "12:00" }]; // Sunday
+  input.fromDate = "2026-03-08";
+  input.toDate = "2026-03-08";
+  input.now = new Date("2026-03-01T00:00:00Z"); // baseInput's July now is after March 8
+  const slots = computeOpenSlots(input);
+  assert.equal(slots[0].startAt, "2026-03-08T13:00:00.000Z"); // 9am EDT (post spring-forward)
+  assert.equal(slots.length, 3);
+});
+
+check("split shifts produce two distinct blocks", () => {
+  const input = baseInput();
+  input.rules = [
+    { weekday: 2, startHm: "09:00", endHm: "12:00" },
+    { weekday: 2, startHm: "14:00", endHm: "17:00" },
+  ];
+  const starts = computeOpenSlots(input).map((s) => s.startAt);
+  assert.equal(starts.length, 6);
+  assert.ok(!starts.includes("2026-07-14T16:00:00.000Z")); // noon EDT
+  assert.ok(!starts.includes("2026-07-14T17:00:00.000Z")); // 1pm EDT
+});
+
+check("subtractIntervals handles containment, overlap, and no-op", () => {
+  const win = [{ startMs: 100, endMs: 200 }];
+  assert.deepEqual(subtractIntervals(win, [{ startMs: 0, endMs: 300 }]), []);
+  assert.deepEqual(subtractIntervals(win, [{ startMs: 150, endMs: 160 }]), [
+    { startMs: 100, endMs: 150 },
+    { startMs: 160, endMs: 200 },
+  ]);
+  assert.deepEqual(subtractIntervals(win, [{ startMs: 300, endMs: 400 }]), win);
+});
+
+check("eachDate is inclusive on both ends", () => {
+  assert.deepEqual(eachDate("2026-01-30", "2026-02-01"), ["2026-01-30", "2026-01-31", "2026-02-01"]);
+});
+
 console.log(`\n${passed} checks passed`);
