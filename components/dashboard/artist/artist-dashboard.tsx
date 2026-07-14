@@ -10,6 +10,7 @@ import { PhotoUploadIcon, CalendarIcon, LinkShareIcon, BookingSettingsIcon } fro
 import {
   ArtistRequestsSection,
   BookingSettingsPanel,
+  FlashManagerPanel,
   RequestDetailPanel,
   useArtistRequests,
 } from "@/components/booking";
@@ -26,6 +27,7 @@ export function ArtistDashboard() {
   const dashboard = useArtistDashboard();
   const artistRequests = useArtistRequests();
   const [bookingSettingsOpen, setBookingSettingsOpen] = useState(false);
+  const [flashOpen, setFlashOpen] = useState(false);
 
   const quickActions: QuickAction[] = [
     {
@@ -48,6 +50,14 @@ export function ArtistDashboard() {
       onClick: () => setBookingSettingsOpen(true),
       iconBgClass: "bg-ink-rust/[0.06]",
       iconBorderClass: "border-ink-rust/[0.1]",
+    },
+    {
+      icon: <PhotoUploadIcon className="text-ink-sage" />,
+      label: "Manage Flash",
+      description: "Ready-to-book designs with set prices",
+      onClick: () => setFlashOpen(true),
+      iconBgClass: "bg-ink-sage/[0.08]",
+      iconBorderClass: "border-ink-sage/[0.12]",
     },
     {
       icon: <LinkShareIcon className="text-ink-sage" />,
@@ -145,6 +155,7 @@ export function ArtistDashboard() {
               responding={artistRequests.responding}
               error={artistRequests.error}
             />
+            <FlashManagerPanel open={flashOpen} onClose={() => setFlashOpen(false)} />
             <ArtistFindStudioPanel
               open={dashboard.findStudioOpen}
               onClose={() => dashboard.setFindStudioOpen(false)}
