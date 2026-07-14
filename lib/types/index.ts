@@ -1,5 +1,8 @@
 // Core entity types for the Inked Market platform
 
+import type { StudioThemeConfig } from "@/lib/types/builder";
+import type { StudioIntegrations } from "@/lib/types/integrations";
+
 export interface BaseEntity {
   id: string;
   createdAt: Date;
@@ -21,8 +24,31 @@ export interface Location {
 export interface SocialLinks {
   instagram?: string;
   facebook?: string;
+  tiktok?: string;
   twitter?: string;
   website?: string;
+}
+
+export type StudioSource = "google" | "organic";
+
+// ─── Cover photo framing ──────────────────────────────────────────────────────
+
+/**
+ * Crop rect normalized (0-1) against the ORIGINAL cover upload.
+ * `ratio` is the aspect-preset id it was made with (restores the editor).
+ */
+export interface CoverCrop {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  ratio: string;
+}
+
+/** Focal point normalized (0-1) within the DISPLAYED cover — drives background-position. */
+export interface CoverFocal {
+  x: number;
+  y: number;
 }
 
 export interface Studio extends BaseEntity {
@@ -34,6 +60,10 @@ export interface Studio extends BaseEntity {
   email: string;
   socialLinks: SocialLinks;
   coverImage: string;
+  /** Cover framing focal point — public renderers apply it via background-position. */
+  coverFocal?: CoverFocal;
+  /** Dedicated cover photos for multi-photo heroes (heroCoverMode "multi"). */
+  coverImages?: string[];
   profileImage: string;
   images: string[];
   specialties: string[];
@@ -44,11 +74,21 @@ export interface Studio extends BaseEntity {
   openHours?: {
     [key: string]: { open: string; close: string; closed?: boolean } | { closed: true };
   };
-  integrations?: {
-    googleBusiness?: { profileUrl: string; rating: number; reviewCount: number };
-    yelp?: { profileUrl: string; rating: number; reviewCount: number };
-    booking?: { platform: string; bookingUrl: string; label?: string };
-  };
+  /** Per-platform connection records — same shape the builder and dashboard persist. */
+  integrations?: StudioIntegrations;
+  // Seeding & claim fields (populated by Supabase, optional for backwards compat)
+  slug?: string;
+  source?: StudioSource;
+  googlePlaceId?: string;
+  claimedBy?: string;
+  claimedAt?: Date;
+  latitude?: number;
+  longitude?: number;
+  // Builder — saved studio website theme (persisted as theme_config jsonb)
+  themeConfig?: StudioThemeConfig;
+  /** Live site theme — set by Publish. Absent = no custom site is public yet. */
+  publishedThemeConfig?: StudioThemeConfig;
+  publishedAt?: Date;
 }
 
 export interface Artist extends BaseEntity {
@@ -221,12 +261,17 @@ export interface WeeklyAvailability {
 export type AffiliationStatus = "pending-invite" | "pending-request" | "active";
 
 export interface Affiliation {
+  /** Affiliation row id when backed by an affiliations row; artist id for linked entries. */
   id: string;
   name: string;
   avatarUrl?: string;
   status: AffiliationStatus;
   role: "artist" | "studio";
   styles?: string[];
+  /** artists.id of the counterpart (set on live roster entries). */
+  artistId?: string;
+  /** Linked via artists.studio_id (artist-managed) — no affiliation row, studio can't remove. */
+  linked?: boolean;
 }
 
 // Studio service flags (operational capabilities, not tattoo styles)
@@ -324,7 +369,7 @@ export interface Appointment extends BaseEntity {
   notes?: string;
 }
 
-export type BookingRequestStatus = "pending" | "accepted" | "declined" | "expired";
+export type BookingRequestStatus = "pending" | "accepted" | "declined" | "expired" | "withdrawn";
 
 export interface BookingRequest extends BaseEntity {
   customerId: string;

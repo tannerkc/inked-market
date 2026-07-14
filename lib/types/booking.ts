@@ -78,3 +78,78 @@ export interface AvailabilityOverride {
   endHm: string | null;
   source: string; // 'manual' now; 'gcal' etc. later
 }
+
+// ─── Phase 2: requests + appointments ─────────────────────────────────────
+
+export type RequestStatus = "pending" | "accepted" | "declined" | "withdrawn" | "expired";
+export type SchedulingMode = "propose" | "open_calendar";
+export type AppointmentType = "consultation" | "flash" | "session" | "walk_in";
+export type AppointmentLifecycleStatus =
+  | "pending_deposit"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "no_show";
+export type DepositStatus =
+  | "not_required"
+  | "pending"
+  | "paid"
+  | "waived"
+  | "refund_due"
+  | "refunded";
+
+export interface ProposedTime {
+  startAt: string; // ISO UTC
+  endAt: string;
+}
+
+export interface BookingRequestRecord {
+  id: string;
+  customerId: string;
+  customerName: string | null;
+  artistId?: string;
+  studioId?: string;
+  artistName?: string;
+  studioName?: string;
+  description: string;
+  placement: string | null;
+  sizeCategory: string | null;
+  budgetRange: string | null;
+  isColor: boolean | null;
+  referenceImageUrls: string[];
+  preferredTiming: string | null;
+  flexibleDates: boolean;
+  isMultiSession: boolean;
+  estimatedSessions: number | null;
+  status: RequestStatus;
+  expiresAt: string;
+  responseMessage: string | null;
+  quoteMinCents: number | null;
+  quoteMaxCents: number | null;
+  depositCents: number | null;
+  schedulingMode: SchedulingMode | null;
+  sessionDurationMin: number | null;
+  proposedTimes: ProposedTime[];
+  createdAt: string;
+}
+
+export interface AppointmentRecord {
+  id: string;
+  customerId: string | null;
+  customerName: string | null;
+  artistId?: string;
+  studioId?: string;
+  artistName?: string;
+  studioName?: string;
+  requestId: string | null;
+  type: AppointmentType;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  status: AppointmentLifecycleStatus;
+  priceCents: number | null;
+  depositCents: number;
+  depositStatus: DepositStatus;
+  notes: string | null;
+  customerNotes: string | null;
+}

@@ -255,4 +255,60 @@ check("rulesToWeekly enables days with rows, disables the rest", () => {
   assert.equal(weekly[monday]!.enabled, false);
 });
 
+// ─── validation schemas ──────────────────────────────────────────────────
+import {
+  SubmitBookingRequestSchema,
+  RespondToRequestSchema,
+  SlotsQuerySchema,
+} from "../lib/validation/schemas";
+
+check("SubmitBookingRequestSchema accepts a valid brief, rejects a thin one", () => {
+  const ok = SubmitBookingRequestSchema.safeParse({
+    artistId: "6f9619ff-8b86-4d01-b42d-00c04fc964ff",
+    description: "Half sleeve, japanese style dragon wrapping the forearm",
+    color: "black-grey",
+  });
+  assert.ok(ok.success);
+  assert.equal(ok.data.flexibleDates, true);
+  const thin = SubmitBookingRequestSchema.safeParse({
+    artistId: "6f9619ff-8b86-4d01-b42d-00c04fc964ff",
+    description: "dragon",
+  });
+  assert.ok(!thin.success);
+});
+
+check("RespondToRequestSchema enforces propose-times, duration, and quote order", () => {
+  const base = {
+    action: "accept" as const,
+    requestId: "6f9619ff-8b86-4d01-b42d-00c04fc964ff",
+  };
+  assert.ok(
+    !RespondToRequestSchema.safeParse({ ...base, schedulingMode: "propose", proposedTimes: [] }).success
+  );
+  assert.ok(!RespondToRequestSchema.safeParse({ ...base, schedulingMode: "open_calendar" }).success);
+  assert.ok(
+    !RespondToRequestSchema.safeParse({
+      ...base,
+      schedulingMode: "open_calendar",
+      sessionDurationMin: 180,
+      quoteMinCents: 90_000,
+      quoteMaxCents: 50_000,
+    }).success
+  );
+  assert.ok(
+    RespondToRequestSchema.safeParse({
+      ...base,
+      schedulingMode: "propose",
+      proposedTimes: [{ startAt: "2026-08-01T17:00:00Z", endAt: "2026-08-01T20:00:00Z" }],
+    }).success
+  );
+});
+
+check("SlotsQuerySchema bounds the range", () => {
+  const q = { artistId: "6f9619ff-8b86-4d01-b42d-00c04fc964ff", durationMin: "60" };
+  assert.ok(SlotsQuerySchema.safeParse({ ...q, from: "2026-08-01", to: "2026-08-31" }).success);
+  assert.ok(!SlotsQuerySchema.safeParse({ ...q, from: "2026-08-01", to: "2026-12-01" }).success);
+  assert.ok(!SlotsQuerySchema.safeParse({ ...q, from: "2026-08-02", to: "2026-08-01" }).success);
+});
+
 console.log(`\n${passed} checks passed`);
