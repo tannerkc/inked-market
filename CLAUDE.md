@@ -178,9 +178,13 @@ These tensions affect every architecture and feature decision. Reference them wh
 - Portfolio images have `tags` for style-based discovery
 
 ### Booking Model
-- Not built yet. **Partner with existing platforms (Porter/InkBook) before building custom.**
-- Keep booking UI as a thin adapter layer that can swap backends
-- Offer embeddable widgets (`<iframe>` or "Book via Inked Market" button) for shops' existing websites
+- First-party booking engine (built 2026-07; spec: `docs/superpowers/specs/2026-07-14-booking-system-design.md`)
+- Four flows: custom requests (artist-gated with quote + deposit), consultations, flash slot booking, multi-session projects
+- Slots are derived, never stored (`lib/booking/availability.ts`); double-booking is impossible at the DB layer (gist exclusion constraint on active artist appointments)
+- Deposits run on the artist/studio's OWN Stripe/Square account (`lib/booking/deposits/`) — the platform never holds funds; manual mark-received fallback when no provider is linked
+- All transitions are status-guarded UPDATEs; `confirmDepositPaid` is the single idempotent paid-transition (webhook, verify-on-return, cron sweep, and manual confirmation converge on it)
+- Studio side: front-desk quick-add gated by the artist-granted `affiliations.manage_bookings`; walk-ins are studio-level rows with no overlap constraint (multi-chair)
+- Fast-follows deliberately deferred: Google Calendar sync, API-executed refunds, email/SMS reminders (`notifications` table is the outbox)
 
 ### Review Integrity
 - `Review.verified` boolean — only allow reviews from verified bookings (like Airbnb)
