@@ -54,7 +54,7 @@ function DirectBookingBranch({
   artistId: string;
   durationMin: number;
   facts: string;
-  onConfirm: (slot: Slot) => Promise<{ success: boolean; error?: string }>;
+  onConfirm: (slot: Slot) => Promise<{ success: boolean; error?: string; checkoutUrl?: string }>;
 }) {
   const { user } = useAuth();
   const [selected, setSelected] = useState<Slot | null>(null);
@@ -91,6 +91,11 @@ function DirectBookingBranch({
     setBusy(true);
     setError(null);
     const result = await onConfirm(selected);
+    if (result.success && result.checkoutUrl) {
+      // Deposit asked: straight to checkout; the return route lands on /dashboard.
+      window.location.assign(result.checkoutUrl);
+      return;
+    }
     setBusy(false);
     if (result.success) setBooked(true);
     else {

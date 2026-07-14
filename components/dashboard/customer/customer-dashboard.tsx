@@ -19,7 +19,7 @@ import { CustomerNotificationPrefsSection } from "./customer-notification-prefs-
 import { CustomerEditProfilePanel } from "./customer-edit-profile-panel";
 import { CustomerDesignBriefPanel } from "./customer-design-brief-panel";
 import { CustomerHealedPhotoPanel } from "./customer-healed-photo-panel";
-import { CustomerRequestPanel } from "@/components/booking";
+import { CustomerRequestPanel, PendingDepositBanner } from "@/components/booking";
 import { useCustomerDashboard } from "./use-customer-dashboard";
 import type { QuickAction, CustomerDashboardTab } from "@/lib/types";
 import type { TabItem } from "@/components/ui/tab-bar";
@@ -204,6 +204,7 @@ export function CustomerDashboard() {
                   participants={dashboard.participants}
                   currentUserId={dashboard.user?.id ?? ""}
                 />
+                <PendingDepositBanner records={dashboard.appointmentRecords} />
                 <CustomerAppointmentsSection
                   upcoming={dashboard.upcomingAppointments}
                   past={dashboard.pastAppointments}

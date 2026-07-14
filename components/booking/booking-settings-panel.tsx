@@ -3,8 +3,9 @@
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SelectRow, ToggleRow } from "./form-rows";
+import { FieldLabel, SelectRow, ToggleRow } from "./form-rows";
 import { useBookingSettings } from "./use-booking-settings";
+import { usePaymentStatus, type ProviderStatus } from "./use-payment-status";
 import type { BookingSettingsInput, ConsultLocation, SlotGranularity } from "@/lib/types/booking";
 
 const US_TIMEZONES = [
@@ -22,9 +23,60 @@ interface BookingSettingsPanelProps {
   onClose: () => void;
 }
 
+function ProviderRow({
+  label,
+  provider,
+  status,
+  onDisconnect,
+}: {
+  label: string;
+  provider: "stripe" | "square";
+  status: ProviderStatus;
+  onDisconnect: () => void;
+}) {
+  return (
+    <div className="flex min-h-[44px] items-center justify-between gap-3">
+      <div>
+        <FieldLabel>{label}</FieldLabel>
+        <p className="text-[10px] text-ink-black/25 dark:text-ink-cream/25">
+          {status.connected
+            ? status.accountName ?? "Connected"
+            : status.configured
+              ? "Deposits paid straight to your account"
+              : "Not configured on this deployment"}
+        </p>
+      </div>
+      {status.connected ? (
+        <button
+          type="button"
+          onClick={onDisconnect}
+          className="min-h-[44px] px-3 font-mono text-[11px] text-ink-black/40 hover:text-ink-black dark:text-ink-cream/40 dark:hover:text-ink-cream"
+        >
+          Disconnect
+        </button>
+      ) : status.configured ? (
+        <a
+          href={`/api/payments/${provider}/start`}
+          className="min-h-[44px] rounded-lg border border-ink-black/[0.08] px-4 py-2.5 font-mono text-[12px] font-medium dark:border-ink-cream/[0.08]"
+        >
+          Connect
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProps) {
   const { entity, settings, update, save, loading, saving, error } = useBookingSettings();
+  const payments = usePaymentStatus();
   const isStudio = Boolean(entity?.studioId);
+
+  const disconnect = (provider: "stripe" | "square") => {
+    void fetch(`/api/payments/${provider}/disconnect`, { method: "POST" }).then(() => {
+      void payments.refresh();
+      if (settings.paymentProvider === provider) update("paymentProvider", null);
+    });
+  };
 
   const set =
     <K extends keyof BookingSettingsInput>(key: K) =>
@@ -110,6 +162,44 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
             }))}
             onChange={(v) => update("defaultDepositCents", Number(v))}
           />
+
+          <div className="flex flex-col gap-3 rounded-[14px] border border-dashed border-ink-black/[0.08] p-4 dark:border-ink-cream/[0.08]">
+            <FieldLabel>Deposit payments</FieldLabel>
+            {payments.loading || !payments.status ? (
+              <p className="text-[11px] text-ink-black/25 dark:text-ink-cream/25">Loading...</p>
+            ) : (
+              <>
+                <ProviderRow
+                  label="Stripe"
+                  provider="stripe"
+                  status={payments.status.stripe}
+                  onDisconnect={() => disconnect("stripe")}
+                />
+                <ProviderRow
+                  label="Square"
+                  provider="square"
+                  status={payments.status.square}
+                  onDisconnect={() => disconnect("square")}
+                />
+                <SelectRow
+                  label="Collect deposits via"
+                  value={settings.paymentProvider ?? ""}
+                  options={[
+                    { value: "", label: "Manual (Venmo, cash)" },
+                    ...(payments.status.stripe.connected
+                      ? [{ value: "stripe", label: "Stripe" }]
+                      : []),
+                    ...(payments.status.square.connected
+                      ? [{ value: "square", label: "Square" }]
+                      : []),
+                  ]}
+                  onChange={(v) =>
+                    update("paymentProvider", v === "" ? null : (v as "stripe" | "square"))
+                  }
+                />
+              </>
+            )}
+          </div>
           <SelectRow
             label="Slot size"
             value={settings.slotGranularityMin}

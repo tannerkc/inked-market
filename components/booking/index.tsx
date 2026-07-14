@@ -2,6 +2,7 @@ export { ArtistRequestsSection } from "./artist-requests-section";
 export { BookingFlow } from "./booking-flow";
 export { BlockedDatesEditor } from "./blocked-dates-editor";
 export { CustomerRequestPanel } from "./customer-request-panel";
+export { PendingDepositBanner } from "./pending-deposit-banner";
 export { RequestDetailPanel } from "./request-detail-panel";
 export { SlotPicker } from "./slot-picker";
 export { UpcomingAppointmentsCard } from "./upcoming-appointments-card";

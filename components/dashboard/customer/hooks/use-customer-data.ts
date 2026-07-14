@@ -138,6 +138,7 @@ export function useCustomerData(userId: string | undefined) {
     sortedConversations,
     participants,
     appointments,
+    appointmentRecords,
     requestRecords,
     scheduledRequestIds,
     refreshBooking,

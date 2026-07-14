@@ -54,6 +54,11 @@ export function CustomerRequestPanel({
     setBusy(true);
     setError(null);
     const result = await scheduleFromRequest({ requestId: request.id, startAt, endAt });
+    if (result.success && result.checkoutUrl) {
+      // Deposit asked: straight to checkout; the return route lands on /dashboard.
+      window.location.assign(result.checkoutUrl);
+      return;
+    }
     setBusy(false);
     if (result.success) {
       setBooked(true);
