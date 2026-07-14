@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FrontDeskSchema } from "@/lib/validation/schemas";
 import { requireStudioOwner } from "@/lib/integrations/route-helpers";
+import { artistUserId, notifyUser } from "@/lib/booking/notify";
 
 interface ActionResult {
   success: boolean;
@@ -71,6 +72,14 @@ export async function frontDeskCreateAppointment(input: unknown): Promise<Action
       return { success: false, error: "That artist is already booked then." };
     }
     return { success: false, error: "Something went wrong — try again." };
+  }
+  if (d.artistId) {
+    const admin = createAdminClient();
+    await notifyUser(admin, await artistUserId(admin, d.artistId), "appointment_booked", {
+      actorName: `Front desk (${d.customerName})`,
+      apptType: d.type,
+      whenIso: new Date(startMs).toISOString(),
+    });
   }
   return { success: true };
 }

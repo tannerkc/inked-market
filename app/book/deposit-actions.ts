@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CancelAppointmentSchema } from "@/lib/validation/schemas";
 import { refundDecision } from "@/lib/booking/lifecycle";
+import { artistUserId, notifyUser } from "@/lib/booking/notify";
 import type { DepositStatus } from "@/lib/types/booking";
 
 interface ActionResult {
@@ -179,5 +180,18 @@ export async function cancelAppointment(
   if (!updated || updated.length === 0) {
     return { success: false, error: "This appointment was already handled." };
   }
+
+  // Notify the other party (best-effort).
+  const admin = createAdminClient();
+  const targetUserId =
+    cancelledBy === "customer"
+      ? appt.artist_id
+        ? await artistUserId(admin, appt.artist_id)
+        : null
+      : appt.customer_id;
+  await notifyUser(admin, targetUserId, "appointment_cancelled", {
+    actorName: cancelledBy === "customer" ? "Your client" : "The artist",
+    whenIso: appt.start_at,
+  });
   return { success: true, refund };
 }

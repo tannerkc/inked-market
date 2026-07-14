@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { applyDepositToAppointment } from "@/lib/booking/deposits/orchestrate";
+import { artistUserId, notifyUser } from "@/lib/booking/notify";
+import { postBookingMessage } from "@/lib/booking/messaging";
 import {
   BookConsultationSchema,
   BookFlashSchema,
@@ -96,11 +98,12 @@ export async function submitBookingRequest(
   }
 
   const d = parsed.data;
+  const customerName = await customerNameOf(supabase, user.id, user.email);
   const { data: created, error } = await supabase
     .from("booking_requests")
     .insert({
       customer_id: user.id,
-      customer_name: await customerNameOf(supabase, user.id, user.email),
+      customer_name: customerName,
       artist_id: d.artistId,
       description: d.description,
       placement: d.placement ?? null,
@@ -116,6 +119,11 @@ export async function submitBookingRequest(
     .select("id")
     .single();
   if (error || !created) return { success: false, error: GENERIC_ERROR };
+
+  const admin = createAdminClient();
+  await notifyUser(admin, await artistUserId(admin, d.artistId), "request_received", {
+    actorName: customerName ?? undefined,
+  });
   return { success: true, requestId: created.id };
 }
 
@@ -170,19 +178,52 @@ export async function respondToBookingRequest(input: unknown): Promise<ActionRes
     return { success: false, error: "This request was already handled." };
   }
 
+  const admin = createAdminClient();
+
   // Multi-session accepts open a project; the 1-row transition guarantee
   // above means this runs at most once per request.
   if (d.action === "accept" && request.isMultiSession) {
-    await createAdminClient()
-      .from("projects")
-      .insert({
-        request_id: request.id,
-        customer_id: request.customerId,
-        artist_id: request.artistId ?? null,
-        title: request.description.slice(0, 60),
-        estimated_sessions: request.estimatedSessions,
-        status: "active",
-      });
+    await admin.from("projects").insert({
+      request_id: request.id,
+      customer_id: request.customerId,
+      artist_id: request.artistId ?? null,
+      title: request.description.slice(0, 60),
+      estimated_sessions: request.estimatedSessions,
+      status: "active",
+    });
+  }
+
+  // Best-effort color: in-app notification + a system line in the thread.
+  await notifyUser(
+    admin,
+    request.customerId,
+    d.action === "accept" ? "request_accepted" : "request_declined",
+    { otherName: request.artistName }
+  );
+  const responderUserId = request.artistId ? await artistUserId(admin, request.artistId) : null;
+  if (responderUserId) {
+    const quote =
+      d.action === "accept" && (d.quoteMinCents !== undefined || d.quoteMaxCents !== undefined)
+        ? ` — quote $${((d.quoteMinCents ?? d.quoteMaxCents ?? 0) / 100).toFixed(0)}${
+            d.quoteMaxCents !== undefined && d.quoteMinCents !== undefined
+              ? `-$${(d.quoteMaxCents / 100).toFixed(0)}`
+              : ""
+          }`
+        : "";
+    const content =
+      d.action === "accept"
+        ? `[Booking] Accepted your request${quote}. ${
+            d.schedulingMode === "propose"
+              ? "I offered times — pick one from your dashboard."
+              : "Book a time from your dashboard."
+          }`
+        : `[Booking] Declined your request${d.responseMessage ? `: ${d.responseMessage}` : "."}`;
+    await postBookingMessage(admin, {
+      artistUserId: responderUserId,
+      customerId: request.customerId,
+      content,
+      requestId: request.id,
+    });
   }
   return { success: true };
 }
@@ -297,6 +338,11 @@ export async function scheduleFromRequest(
     description: `Tattoo deposit - ${request.artistName ?? "session"}`,
     origin: await requestOrigin(),
   });
+  await notifyUser(admin, await artistUserId(admin, request.artistId), "appointment_booked", {
+    actorName: request.customerName ?? undefined,
+    apptType: "session",
+    whenIso: chosen.startAt,
+  });
   return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }
 
@@ -371,6 +417,11 @@ export async function bookConsultation(
     depositCents: consultDeposit,
     description: "Consultation booking",
     origin: await requestOrigin(),
+  });
+  await notifyUser(admin, await artistUserId(admin, parsed.data.artistId), "appointment_booked", {
+    actorName: (await customerNameOf(supabase, user.id, user.email)) ?? undefined,
+    apptType: "consultation",
+    whenIso: chosen.startAt,
   });
   return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }
@@ -474,6 +525,11 @@ export async function bookFlash(
     depositCents: item.depositCents,
     description: `Deposit: ${item.title}`,
     origin: await requestOrigin(),
+  });
+  await notifyUser(admin, await artistUserId(admin, item.artistId), "appointment_booked", {
+    actorName: (await customerNameOf(supabase, user.id, user.email)) ?? undefined,
+    apptType: "flash",
+    whenIso: chosen.startAt,
   });
   return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }

@@ -552,4 +552,20 @@ check("project maps db->domain", () => {
   assert.equal(p.status, "active");
 });
 
+// ─── phase 6: notifications ──────────────────────────────────────────────
+import { buildNotification } from "../lib/booking/notify";
+
+check("buildNotification renders human copy per kind", () => {
+  assert.ok(buildNotification("request_received", { actorName: "Jess" }).message.includes("Jess"));
+  assert.ok(buildNotification("request_accepted", { otherName: "Mar" }).message.includes("Mar"));
+  assert.ok(
+    buildNotification("appointment_booked", {
+      actorName: "Jess",
+      apptType: "flash",
+      whenIso: "2026-08-01T17:00:00Z",
+    }).message.length > 10
+  );
+  assert.ok(buildNotification("deposit_paid", { actorName: "Jess" }).message.includes("deposit"));
+});
+
 console.log(`\n${passed} checks passed`);

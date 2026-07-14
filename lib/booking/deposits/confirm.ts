@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { artistUserId, notifyUser } from "@/lib/booking/notify";
 
 /**
  * The single idempotent paid-transition. Webhook, redirect verification,
@@ -17,8 +18,16 @@ export async function confirmDepositPaid(
     .eq("id", appointmentId)
     .eq("status", "pending_deposit")
     .eq("deposit_status", "pending")
-    .select("id");
-  if (confirmed && confirmed.length > 0) return "confirmed";
+    .select("id, artist_id, customer_name");
+  if (confirmed && confirmed.length > 0) {
+    const row = confirmed[0] as { artist_id: string | null; customer_name: string | null };
+    if (row.artist_id) {
+      await notifyUser(admin, await artistUserId(admin, row.artist_id), "deposit_paid", {
+        actorName: row.customer_name ?? undefined,
+      });
+    }
+    return "confirmed";
+  }
 
   const { data: refund } = await admin
     .from("appointments")
