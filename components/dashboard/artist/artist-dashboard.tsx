@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { AuthGuard } from "@/components/providers/auth-guard";
-import { useTheme } from "@/components/providers/theme-provider";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
-import { PhotoUploadIcon, CalendarIcon, LinkShareIcon } from "@/components/dashboard/dashboard-icons";
+import { PhotoUploadIcon, CalendarIcon, LinkShareIcon, BookingSettingsIcon } from "@/components/dashboard/dashboard-icons";
+import { BookingSettingsPanel } from "@/components/booking";
 import { ArtistBioSection } from "./artist-bio-section";
 import { ArtistPortfolioSection } from "./artist-portfolio-section";
 import { ArtistStudioSection } from "./artist-studio-section";
@@ -17,13 +18,12 @@ import { useArtistDashboard } from "./use-artist-dashboard";
 import type { QuickAction } from "@/lib/types";
 
 export function ArtistDashboard() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const dashboard = useArtistDashboard();
+  const [bookingSettingsOpen, setBookingSettingsOpen] = useState(false);
 
   const quickActions: QuickAction[] = [
     {
-      icon: <PhotoUploadIcon className={isDark ? "text-ink-red" : "text-ink-rust"} />,
+      icon: <PhotoUploadIcon className="text-ink-rust dark:text-ink-red" />,
       label: "Upload Photo",
       description: "Add to your portfolio",
     },
@@ -32,6 +32,14 @@ export function ArtistDashboard() {
       label: "Set Availability",
       description: "Let clients book you",
       onClick: () => dashboard.setAvailabilityOpen(true),
+      iconBgClass: "bg-ink-rust/[0.06]",
+      iconBorderClass: "border-ink-rust/[0.1]",
+    },
+    {
+      icon: <BookingSettingsIcon className="text-ink-rust" />,
+      label: "Booking Settings",
+      description: "Flows, deposits, and scheduling rules",
+      onClick: () => setBookingSettingsOpen(true),
       iconBgClass: "bg-ink-rust/[0.06]",
       iconBorderClass: "border-ink-rust/[0.1]",
     },
@@ -63,11 +71,11 @@ export function ArtistDashboard() {
             />
             <StatsPanel stats={dashboard.data.stats} />
             {/* Upcoming */}
-            <div className={`rounded-[20px] p-5 border ${isDark ? "bg-ink-cream/[0.02] border-ink-cream/[0.06]" : "bg-ink-black/[0.02] border-ink-black/[0.06]"}`}>
-              <p className={`font-mono text-[9px] tracking-[0.2em] uppercase mb-3 ${isDark ? "text-ink-cream/35" : "text-ink-black/35"}`}>Upcoming</p>
+            <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
+              <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">Upcoming</p>
               <div className="text-center py-4">
-                <p className={`text-[12px] ${isDark ? "text-ink-cream/40" : "text-ink-black/40"}`}>No upcoming bookings</p>
-                <p className={`text-[11px] mt-1 ${isDark ? "text-ink-cream/20" : "text-ink-black/20"}`}>Bookings appear once clients find you</p>
+                <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">No upcoming bookings</p>
+                <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">Bookings appear once clients find you</p>
               </div>
             </div>
           </>
@@ -109,6 +117,10 @@ export function ArtistDashboard() {
               onAddSlot={dashboard.handleAddSlot}
               onRemoveSlot={dashboard.handleRemoveSlot}
               onUpdateSlot={dashboard.handleUpdateSlot}
+            />
+            <BookingSettingsPanel
+              open={bookingSettingsOpen}
+              onClose={() => setBookingSettingsOpen(false)}
             />
             <ArtistFindStudioPanel
               open={dashboard.findStudioOpen}
