@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  BookConsultationSchema,
+  BookFlashSchema,
   RespondToRequestSchema,
   ScheduleFromRequestSchema,
   SubmitBookingRequestSchema,
@@ -11,7 +13,10 @@ import { validateChosenTime } from "@/lib/booking/scheduling";
 import { computeArtistSlotsRange, localDateOf } from "@/lib/booking/server-slots";
 import {
   type DbBookingSettings,
+  type DbFlashItem,
   effectiveRequestStatus,
+  mapDbBookingSettings,
+  mapDbFlashItem,
 } from "@/lib/supabase/booking-types";
 import { fetchRequestById } from "@/lib/data/supabase-booking";
 
@@ -28,6 +33,20 @@ async function requireUser() {
     data: { user },
   } = await supabase.auth.getUser();
   return { supabase, user };
+}
+
+/** Display-name snapshot for denormalized customer_name columns. */
+async function customerNameOf(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  email: string | undefined
+): Promise<string | null> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name")
+    .eq("id", userId)
+    .maybeSingle();
+  return profile?.name ?? email?.split("@")[0] ?? null;
 }
 
 export async function submitBookingRequest(
@@ -50,19 +69,12 @@ export async function submitBookingRequest(
     return { success: false, error: "This artist is not taking requests right now." };
   }
 
-  // Display-name snapshot (own profile is readable under RLS).
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("name")
-    .eq("id", user.id)
-    .maybeSingle();
-
   const d = parsed.data;
   const { data: created, error } = await supabase
     .from("booking_requests")
     .insert({
       customer_id: user.id,
-      customer_name: profile?.name ?? user.email?.split("@")[0] ?? null,
+      customer_name: await customerNameOf(supabase, user.id, user.email),
       artist_id: d.artistId,
       description: d.description,
       placement: d.placement ?? null,
@@ -225,6 +237,170 @@ export async function scheduleFromRequest(
     .select("id")
     .single();
   if (error) {
+    if (error.code === "23P01") {
+      return { success: false, error: "That time was just taken — pick another." };
+    }
+    return { success: false, error: GENERIC_ERROR };
+  }
+  return { success: true, appointmentId: created.id };
+}
+
+export async function bookConsultation(
+  input: unknown
+): Promise<ActionResult & { appointmentId?: string }> {
+  const parsed = BookConsultationSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+  const { supabase, user } = await requireUser();
+  if (!user) return { success: false, error: "Sign in to book a consultation." };
+
+  const admin = createAdminClient();
+  const { data: settingsRow } = await admin
+    .from("booking_settings")
+    .select("*")
+    .eq("artist_id", parsed.data.artistId)
+    .maybeSingle();
+  if (!settingsRow) return { success: false, error: "This artist is not taking consultations." };
+  const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
+  if (!settings.acceptingBookings || !settings.consultationsEnabled) {
+    return { success: false, error: "This artist is not taking consultations." };
+  }
+
+  const chosen = { startAt: parsed.data.startAt, endAt: parsed.data.endAt };
+  const now = new Date();
+  const localDate = localDateOf(chosen.startAt, settings.timezone);
+  const range = await computeArtistSlotsRange(admin, {
+    artistId: parsed.data.artistId,
+    durationMin: settings.consultDurationMin,
+    fromDate: localDate,
+    toDate: localDate,
+    now,
+  });
+  const verdict = validateChosenTime({
+    mode: "open_calendar",
+    proposedTimes: [],
+    openSlots: range?.slots ?? [],
+    chosen,
+    now,
+  });
+  if (!verdict.ok) return { success: false, error: verdict.error };
+
+  const { data: created, error } = await supabase
+    .from("appointments")
+    .insert({
+      customer_id: user.id,
+      customer_name: await customerNameOf(supabase, user.id, user.email),
+      artist_id: parsed.data.artistId,
+      type: "consultation",
+      start_at: chosen.startAt,
+      end_at: chosen.endAt,
+      timezone: settings.timezone,
+      status: "confirmed",
+      price_cents: settings.consultPriceCents > 0 ? settings.consultPriceCents : null,
+      deposit_cents: 0,
+      deposit_status: "not_required",
+    })
+    .select("id")
+    .single();
+  if (error) {
+    if (error.code === "23P01") {
+      return { success: false, error: "That time was just taken — pick another." };
+    }
+    return { success: false, error: GENERIC_ERROR };
+  }
+  return { success: true, appointmentId: created.id };
+}
+
+export async function bookFlash(
+  input: unknown
+): Promise<ActionResult & { appointmentId?: string }> {
+  const parsed = BookFlashSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+  const { supabase, user } = await requireUser();
+  if (!user) return { success: false, error: "Sign in to book this piece." };
+
+  const admin = createAdminClient();
+  const { data: itemRow } = await admin
+    .from("flash_items")
+    .select("*")
+    .eq("id", parsed.data.flashItemId)
+    .maybeSingle();
+  if (!itemRow) return { success: false, error: "This piece is no longer available." };
+  const item = mapDbFlashItem(itemRow as DbFlashItem);
+  if (!item.active) return { success: false, error: "This piece is no longer available." };
+
+  const { data: settingsRow } = await admin
+    .from("booking_settings")
+    .select("*")
+    .eq("artist_id", item.artistId)
+    .maybeSingle();
+  if (!settingsRow) return { success: false, error: "This artist is not taking flash bookings." };
+  const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
+  if (!settings.acceptingBookings || !settings.flashEnabled) {
+    return { success: false, error: "This artist is not taking flash bookings." };
+  }
+
+  const chosen = { startAt: parsed.data.startAt, endAt: parsed.data.endAt };
+  const now = new Date();
+  const localDate = localDateOf(chosen.startAt, settings.timezone);
+  const range = await computeArtistSlotsRange(admin, {
+    artistId: item.artistId,
+    durationMin: item.durationMin,
+    fromDate: localDate,
+    toDate: localDate,
+    now,
+  });
+  const verdict = validateChosenTime({
+    mode: "open_calendar",
+    proposedTimes: [],
+    openSlots: range?.slots ?? [],
+    chosen,
+    now,
+  });
+  if (!verdict.ok) return { success: false, error: verdict.error };
+
+  // One-off claim BEFORE insert: atomic active->inactive flip loses the race
+  // cleanly; a failed insert reverts the claim (compensating action).
+  let claimed = false;
+  if (item.oneOff) {
+    const { data: claimedRows } = await admin
+      .from("flash_items")
+      .update({ active: false })
+      .eq("id", item.id)
+      .eq("active", true)
+      .select("id");
+    if (!claimedRows || claimedRows.length === 0) {
+      return { success: false, error: "Someone just claimed this piece." };
+    }
+    claimed = true;
+  }
+
+  const { data: created, error } = await supabase
+    .from("appointments")
+    .insert({
+      customer_id: user.id,
+      customer_name: await customerNameOf(supabase, user.id, user.email),
+      artist_id: item.artistId,
+      flash_item_id: item.id,
+      type: "flash",
+      start_at: chosen.startAt,
+      end_at: chosen.endAt,
+      timezone: settings.timezone,
+      status: "confirmed",
+      price_cents: item.priceCents,
+      deposit_cents: item.depositCents,
+      deposit_status: "not_required",
+    })
+    .select("id")
+    .single();
+  if (error) {
+    if (claimed) {
+      // Compensating: give the piece back.
+      await admin.from("flash_items").update({ active: true }).eq("id", item.id);
+    }
     if (error.code === "23P01") {
       return { success: false, error: "That time was just taken — pick another." };
     }
