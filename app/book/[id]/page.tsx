@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getArtistByIdFromDb, getArtistBySlugFromDb } from "@/lib/data/supabase-artists";
 import { fetchActiveFlashItems, fetchBookingSettings } from "@/lib/data/supabase-booking";
+import { bookingCtaFor } from "@/lib/booking/flows";
 import { BookingFlow } from "@/components/booking";
 
 interface PageProps {
@@ -19,7 +20,11 @@ export default async function BookPage({ params }: PageProps) {
   if (!artist) notFound();
 
   const settings = await fetchBookingSettings(supabase, { artistId: artist.id });
-  const flashItems = settings?.flashEnabled ? await fetchActiveFlashItems(supabase, artist.id) : [];
+  const cta = bookingCtaFor(settings);
+  const flashItems =
+    cta.kind === "inbuilt" && settings?.flashEnabled
+      ? await fetchActiveFlashItems(supabase, artist.id)
+      : [];
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16">
@@ -28,6 +33,7 @@ export default async function BookPage({ params }: PageProps) {
         artistName={artist.name}
         settings={settings}
         flashItems={flashItems}
+        cta={cta}
       />
     </main>
   );

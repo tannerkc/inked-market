@@ -218,7 +218,7 @@ export const lineupIssues: LineupIssue[] = [
     id: "issue-007",
     number: 7,
     date: "2026-04-05",
-    coverStory: allSpotlights[0], // Maya Chen
+    coverStory: allSpotlights[0]!, // Maya Chen
     news: [
       {
         slug: "blue-ceramic-tattoos",
@@ -277,7 +277,7 @@ export const lineupIssues: LineupIssue[] = [
         ctaLabel: "Book Session",
       },
     ],
-    studioOfTheWeek: allSpotlights[1], // Eternal Canvas
+    studioOfTheWeek: allSpotlights[1]!, // Eternal Canvas
     editorsPicks: [
       {
         id: "4",
@@ -324,7 +324,7 @@ export const lineupIssues: LineupIssue[] = [
     id: "issue-006",
     number: 6,
     date: "2026-03-29",
-    coverStory: allSpotlights[2], // Marcus Rodriguez
+    coverStory: allSpotlights[2]!, // Marcus Rodriguez
     news: [
       {
         slug: "tattoo-aftercare-2026",
@@ -383,7 +383,7 @@ export const lineupIssues: LineupIssue[] = [
         ctaLabel: "RSVP",
       },
     ],
-    studioOfTheWeek: allSpotlights[3], // Sacred Art Tattoo
+    studioOfTheWeek: allSpotlights[3]!, // Sacred Art Tattoo
     editorsPicks: [
       {
         id: "8",
@@ -431,7 +431,7 @@ export const lineupIssues: LineupIssue[] = [
 // ─── Helpers ───
 
 export function getCurrentIssue(): LineupIssue {
-  return lineupIssues[0];
+  return lineupIssues[0]!;
 }
 
 export function getIssueById(id: string): LineupIssue | undefined {

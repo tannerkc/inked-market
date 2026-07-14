@@ -7,6 +7,8 @@ import {
   getStudioBySlugFromDb,
 } from "@/lib/data/supabase-studios";
 import { getArtistsForStudio } from "@/lib/data/supabase-artists";
+import { fetchBookHrefs, fetchBookingSettings } from "@/lib/data/supabase-booking";
+import { bookingCtaFor } from "@/lib/booking/flows";
 import { getReviewsForTarget } from "@/lib/data/supabase-reviews";
 import { getStudio, getStudioReviews } from "@/lib/data/shops";
 import type {
@@ -24,6 +26,9 @@ export interface StudioPageData {
   reviews: StudioSiteReview[];
   /** Full Review objects — the basic profile's ReviewPanel needs these. */
   rawReviews: Review[];
+  /** booking_mode-aware studio CTA: external link, null = suppress legacy
+   *  integrations link, undefined = no settings row (legacy behavior). */
+  studioBookingLink?: { url: string; platformName: string } | null;
   fromDb: boolean;
 }
 
@@ -80,6 +85,7 @@ export async function getStudioForPage(
             thumbsByArtist.set(img.artist_id, list);
           }
         }
+        const bookHrefs = await fetchBookHrefs(supabase, rosterIds);
         const artists: StudioSiteArtist[] = roster.map((a) => {
           const thumbs = thumbsByArtist.get(a.id) ?? [];
           return {
@@ -90,12 +96,24 @@ export async function getStudioForPage(
             photoCount: thumbs.length,
             photos: thumbs,
             profileHref: `/artists/${a.id}`,
-            bookHref: `/book/${a.id}`,
+            bookHref: bookHrefs.get(a.id),
           };
         });
         // The public site renders only what Publish stamped live — the working
         // draft (theme_config) is never shown here. No published theme = the
         // basic profile listing.
+        // Studio-level CTA honors the explicit booking mode: external mode
+        // surfaces the studio's own link; any other chosen mode suppresses
+        // the legacy integrations-derived link (null). No settings row keeps
+        // legacy behavior (undefined).
+        const studioSettings = await fetchBookingSettings(supabase, { studioId: studio.id });
+        const studioCta = bookingCtaFor(studioSettings);
+        const studioBookingLink = !studioSettings
+          ? undefined
+          : studioCta.kind === "external"
+            ? { url: studioCta.url, platformName: studioCta.domain }
+            : null;
+
         return {
           studio,
           config: studio.publishedThemeConfig
@@ -105,6 +123,7 @@ export async function getStudioForPage(
           artists,
           reviews: toSiteReviews(reviews),
           rawReviews: reviews,
+          studioBookingLink,
           fromDb: true,
         };
       }
@@ -123,7 +142,7 @@ export async function getStudioForPage(
     photoCount: 0,
     photos: [],
     profileHref: `/artists/${a.id}`,
-    bookHref: `/book/${a.id}`,
+    // Mock artists have no live booking settings — no Book link.
   }));
   const mockReviews = getStudioReviews(id);
   return {
@@ -134,6 +153,7 @@ export async function getStudioForPage(
     artists,
     reviews: toSiteReviews(mockReviews),
     rawReviews: mockReviews,
+    studioBookingLink: undefined,
     fromDb: false,
   };
 }

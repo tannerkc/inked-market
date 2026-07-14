@@ -70,20 +70,25 @@ export const mockStudios: Record<string, StudioWithArtists> = {
       facebook: "https://facebook.com/inkparadise",
     },
     integrations: {
-      googleBusiness: {
-        profileUrl: "https://maps.google.com/?cid=12345",
-        rating: 4.8,
-        reviewCount: 312,
+      google: {
+        status: "connected",
+        mode: "integrate",
+        linkUrl: "https://maps.google.com/?cid=12345",
+        importedCount: 312,
+        importedLabel: "reviews",
       },
       yelp: {
-        profileUrl: "https://www.yelp.com/biz/ink-paradise-studio-los-angeles",
-        rating: 4.5,
-        reviewCount: 87,
+        status: "connected",
+        mode: "integrate",
+        linkUrl: "https://www.yelp.com/biz/ink-paradise-studio-los-angeles",
+        importedCount: 87,
+        importedLabel: "reviews",
       },
-      booking: {
-        platform: "Porter",
-        bookingUrl: "https://porter.ink/inkparadise/book",
-        label: "Book on Porter",
+      // Porter has no public URL scheme — studios paste their booking link.
+      "other-booking": {
+        status: "connected",
+        mode: "integrate",
+        linkUrl: "https://porter.ink/inkparadise/book",
       },
     },
     createdAt: new Date("2023-01-01"),

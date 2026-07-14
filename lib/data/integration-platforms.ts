@@ -57,6 +57,7 @@ export const INTEGRATION_PLATFORMS: IntegrationPlatformMeta[] = [
     urlPlaceholder: "https://www.facebook.com/your-studio",
     urlPattern: /^https?:\/\/(www\.)?(facebook\.com|fb\.com)\/.+/i,
     minTier: null,
+    oauth: true,
   },
   // ── Booking ─────────────────────────────────────────────────────────
   {
@@ -65,10 +66,12 @@ export const INTEGRATION_PLATFORMS: IntegrationPlatformMeta[] = [
     name: "Square Appointments",
     description: "Sync your Square appointment calendar",
     integrateLabel: "Embed booking widget",
-    importLabel: "Import appointments and clients",
+    importLabel: "Import business hours",
+    oauthImportLabel: "Sync business hours",
     urlPlaceholder: "https://squareup.com/appointments/your-studio",
     urlPattern: /^https?:\/\/(www\.)?(squareup\.com|square\.site)\/.+/i,
     minTier: "shader",
+    oauth: true,
   },
   {
     id: "acuity",
@@ -78,8 +81,11 @@ export const INTEGRATION_PLATFORMS: IntegrationPlatformMeta[] = [
     integrateLabel: "Embed scheduling widget",
     importLabel: "Import appointments and clients",
     urlPlaceholder: "https://your-studio.acuityscheduling.com",
-    urlPattern: /^https?:\/\/[\w-]+\.acuityscheduling\.com/i,
+    // Acuity client pages live on acuityscheduling.com, as.me, and the
+    // Squarespace Scheduling flavor — all officially iframe-embeddable.
+    urlPattern: /^https?:\/\/[\w-]+\.(acuityscheduling\.com|squarespacescheduling\.com|as\.me)(\/|$)/i,
     minTier: "shader",
+    embed: { hosts: ["acuityscheduling.com", "squarespacescheduling.com", "as.me"] },
   },
   {
     id: "calendly",
@@ -91,6 +97,8 @@ export const INTEGRATION_PLATFORMS: IntegrationPlatformMeta[] = [
     urlPlaceholder: "https://calendly.com/your-studio",
     urlPattern: /^https?:\/\/(www\.)?calendly\.com\/.+/i,
     minTier: "shader",
+    embed: { hosts: ["calendly.com"] },
+    oauth: true,
   },
   {
     id: "booksy",
@@ -149,6 +157,19 @@ export const INTEGRATION_PLATFORMS: IntegrationPlatformMeta[] = [
   },
   // ── Business Profile ────────────────────────────────────────────────
   // (Google and Yelp business profiles are handled via the reviews entries above)
+  {
+    id: "instagram",
+    category: "business-profile",
+    name: "Instagram",
+    description: "Link your Instagram and import portfolio photos",
+    integrateLabel: "Link your profile",
+    importLabel: "Import portfolio photos",
+    urlPlaceholder: "https://www.instagram.com/yourstudio",
+    urlPattern: /^https?:\/\/(www\.)?instagram\.com\/.+/i,
+    minTier: null,
+    oauth: true,
+    oauthImportLabel: "Import photos",
+  },
   // ── POS ─────────────────────────────────────────────────────────────
   {
     id: "square-pos",

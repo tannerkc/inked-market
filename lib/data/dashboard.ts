@@ -1,3 +1,7 @@
+// DEMO DATA ONLY — the live dashboards derive everything from Supabase
+// (see components/dashboard/studio/use-studio-dashboard.ts). Keep these for
+// component-library showcases and offline demos; never import them from a
+// live dashboard path.
 import type { DashboardData, WeeklyAvailability, Affiliation } from "@/lib/types";
 
 export function getCustomerDashboardData(): DashboardData {

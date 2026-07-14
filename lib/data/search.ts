@@ -1,6 +1,7 @@
 import { mockArtists } from "@/lib/data/artists";
 import { mockStudios } from "@/lib/data/shops";
 import type { TattooStyle } from "@/lib/types";
+import type { Badge } from "@/lib/data/discover";
 
 type ArtistWithLocation = (typeof mockArtists)[string]  & {
   location?: { city: string; state: string };
@@ -35,6 +36,7 @@ export interface SearchResultItem {
   verified: boolean;
   artistCount?: number;
   yearsOfExperience?: number;
+  badges?: Badge[];
 }
 
 export interface SearchResponse {
@@ -42,6 +44,8 @@ export interface SearchResponse {
   total: number;
   page: number;
   hasMore: boolean;
+  /** True when results came from mock fallback (Supabase unavailable). */
+  isSample?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -135,6 +139,7 @@ export function searchArtists(filters: SearchFilters = {}): SearchResponse {
   if (q) {
     items = items.filter((item) => {
       const artist = mockArtists[item.id];
+      if (!artist) return false;
       const searchable = [
         artist.name,
         artist.bio,
@@ -148,6 +153,7 @@ export function searchArtists(filters: SearchFilters = {}): SearchResponse {
     const lowered = styles.map((s) => s.toLowerCase());
     items = items.filter((item) => {
       const artist = mockArtists[item.id];
+      if (!artist) return false;
       return artist.styles.some((s: TattooStyle) =>
         lowered.includes(s.toLowerCase())
       );
@@ -196,9 +202,9 @@ export function searchArtists(filters: SearchFilters = {}): SearchResponse {
       break;
     case "newest":
       items.sort((a, b) => {
-        const aDate = mockArtists[a.id].createdAt;
-        const bDate = mockArtists[b.id].createdAt;
-        return bDate.getTime() - aDate.getTime();
+        const aDate = mockArtists[a.id]?.createdAt?.getTime() ?? 0;
+        const bDate = mockArtists[b.id]?.createdAt?.getTime() ?? 0;
+        return bDate - aDate;
       });
       break;
   }
@@ -232,6 +238,7 @@ export function searchStudios(filters: SearchFilters = {}): SearchResponse {
   if (q) {
     items = items.filter((item) => {
       const studio = mockStudios[item.id];
+      if (!studio) return false;
       const searchable = [
         studio.name,
         studio.description,
@@ -246,15 +253,17 @@ export function searchStudios(filters: SearchFilters = {}): SearchResponse {
     const lowered = styles.map((s) => s.toLowerCase());
     items = items.filter((item) => {
       const studio = mockStudios[item.id];
+      if (!studio) return false;
       return studio.specialties.some((s) => lowered.includes(s.toLowerCase()));
     });
   }
 
   if (location) {
+    const target = location.toLowerCase().replace(/\s+/g, "-");
     items = items.filter((item) => {
       const studio = mockStudios[item.id];
-      const slug = slugifyLocation(studio.location.city, studio.location.state);
-      return slug === location.toLowerCase().replace(/\s+/g, "-");
+      if (!studio) return false;
+      return slugifyLocation(studio.location.city, studio.location.state) === target;
     });
   }
 
@@ -291,9 +300,9 @@ export function searchStudios(filters: SearchFilters = {}): SearchResponse {
       break;
     case "newest":
       items.sort((a, b) => {
-        const aDate = mockStudios[a.id].createdAt;
-        const bDate = mockStudios[b.id].createdAt;
-        return bDate.getTime() - aDate.getTime();
+        const aDate = mockStudios[a.id]?.createdAt?.getTime() ?? 0;
+        const bDate = mockStudios[b.id]?.createdAt?.getTime() ?? 0;
+        return bDate - aDate;
       });
       break;
   }

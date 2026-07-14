@@ -649,23 +649,29 @@ export function searchSuggestions(query: string): HelpSearchSuggestion[] {
     const matchesTags = article.tags.some((t) => t.includes(q));
 
     if (matchesTitle || matchesTags) {
-      suggestions.push({
-        title: article.title,
-        href: `/help/${article.categorySlug}/${article.slug}`,
-        audience: article.audiences[0],
-        format: article.format,
-      });
+      const articleAudience = article.audiences[0];
+      if (articleAudience) {
+        suggestions.push({
+          title: article.title,
+          href: `/help/${article.categorySlug}/${article.slug}`,
+          audience: articleAudience,
+          format: article.format,
+        });
+      }
     }
 
     if (article.faqItems) {
       for (const faq of article.faqItems) {
         if (faq.question.toLowerCase().includes(q)) {
-          suggestions.push({
-            title: faq.question,
-            href: `/help/${article.categorySlug}/${article.slug}#${faq.id}`,
-            audience: faq.audiences[0],
-            format: "faq",
-          });
+          const faqAudience = faq.audiences[0];
+          if (faqAudience) {
+            suggestions.push({
+              title: faq.question,
+              href: `/help/${article.categorySlug}/${article.slug}#${faq.id}`,
+              audience: faqAudience,
+              format: "faq",
+            });
+          }
         }
       }
     }

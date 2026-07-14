@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { enabledBookingFlows, type BookingFlowKind } from "@/lib/booking/flows";
+import { enabledBookingFlows, type BookingCta, type BookingFlowKind } from "@/lib/booking/flows";
 import type { Slot } from "@/lib/booking/availability";
 import type { ConsultLocation, FlashItem } from "@/lib/types/booking";
 import { bookConsultation, bookFlash } from "@/app/book/actions";
@@ -27,6 +27,7 @@ interface BookingFlowProps {
   artistName: string;
   settings: BookingFlowSettings | null;
   flashItems: FlashItem[];
+  cta: BookingCta;
 }
 
 const FLOW_COPY: Record<BookingFlowKind, { title: string; hint: string }> = {
@@ -132,14 +133,34 @@ function DirectBookingBranch({
   );
 }
 
-export function BookingFlow({ artistId, artistName, settings, flashItems }: BookingFlowProps) {
+export function BookingFlow({ artistId, artistName, settings, flashItems, cta }: BookingFlowProps) {
   const flows = settings ? enabledBookingFlows(settings) : [];
   const [kind, setKind] = useState<BookingFlowKind | null>(
     flows.length === 1 ? (flows[0] ?? null) : null
   );
   const [flashItem, setFlashItem] = useState<FlashItem | null>(null);
 
-  if (!settings || flows.length === 0) {
+  if (cta.kind === "external") {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-xl font-medium">Book with {artistName}</h1>
+        <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
+          {artistName} takes bookings on {cta.domain}.
+        </p>
+        <Button
+          variant="ink"
+          as="a"
+          href={cta.url}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+        >
+          Open {cta.domain}
+        </Button>
+      </div>
+    );
+  }
+
+  if (cta.kind !== "inbuilt" || !settings || flows.length === 0) {
     return (
       <p className="text-[14px] text-ink-black/60 dark:text-ink-cream/60">
         {artistName} is not taking bookings right now.

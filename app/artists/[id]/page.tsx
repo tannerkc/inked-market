@@ -23,6 +23,8 @@ import {
 } from "@/components/detail";
 import { getArtist, getArtistReviews } from "@/lib/data/artists";
 import { getArtistByIdFromDb } from "@/lib/data/supabase-artists";
+import { fetchBookingSettings } from "@/lib/data/supabase-booking";
+import { bookingCtaFor } from "@/lib/booking/flows";
 import { getReviewsForTarget } from "@/lib/data/supabase-reviews";
 import { SampleBadge } from "@/components/ui/sample-badge";
 import {
@@ -47,8 +49,11 @@ async function fetchArtist(id: string) {
       const supabase = await createClient();
       const dbArtist = await getArtistByIdFromDb(supabase, id);
       if (dbArtist) {
-        const reviews = await getReviewsForTarget(supabase, "artist", dbArtist.id);
-        return { artist: dbArtist, reviews, fromDb: true };
+        const [reviews, bookingSettings] = await Promise.all([
+          getReviewsForTarget(supabase, "artist", dbArtist.id),
+          fetchBookingSettings(supabase, { artistId: dbArtist.id }),
+        ]);
+        return { artist: dbArtist, reviews, bookingSettings, fromDb: true };
       }
     }
   } catch {
@@ -57,7 +62,7 @@ async function fetchArtist(id: string) {
 
   const artist = getArtist(id);
   if (!artist) return null;
-  return { artist, reviews: getArtistReviews(id), fromDb: false };
+  return { artist, reviews: getArtistReviews(id), bookingSettings: null, fromDb: false };
 }
 
 export async function generateMetadata({
@@ -77,6 +82,7 @@ export default async function ArtistPage({ params }: PageProps) {
   const result = await fetchArtist(id);
   if (!result) notFound();
   const { artist, reviews, fromDb } = result;
+  const cta = bookingCtaFor(result.bookingSettings);
 
   const issueBase = Number.parseInt(artist.id, 10);
   const issueNumber = Number.isNaN(issueBase) ? 47 : issueBase + 46;
@@ -152,15 +158,39 @@ export default async function ArtistPage({ params }: PageProps) {
 
         {/* CTA Row */}
         <div className="flex flex-wrap gap-2.5 mt-7 relative z-10">
-          <Button
-            variant="ink-red"
-            size="sm"
-            statusDot="bg-ink-cream shadow-ink-cream-glow"
-            as={Link}
-            href={`/book/${id}`}
-          >
-            Book Consultation
-          </Button>
+          {cta.kind === "inbuilt" ? (
+            <Button
+              variant="ink-red"
+              size="sm"
+              statusDot="bg-ink-cream shadow-ink-cream-glow"
+              as={Link}
+              href={`/book/${id}`}
+            >
+              Book Consultation
+            </Button>
+          ) : cta.kind === "external" ? (
+            <Button
+              variant="ink-red"
+              size="sm"
+              statusDot="bg-ink-cream shadow-ink-cream-glow"
+              as="a"
+              href={cta.url}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Book on {cta.domain}
+            </Button>
+          ) : (
+            <Button
+              variant="ink-red"
+              size="sm"
+              statusDot="bg-ink-cream shadow-ink-cream-glow"
+              as={Link}
+              href="/messages"
+            >
+              Get in touch
+            </Button>
+          )}
           <Button variant="ink-light-outline" size="sm">
             Follow
           </Button>
@@ -231,16 +261,31 @@ export default async function ArtistPage({ params }: PageProps) {
                 </div>
               ))}
             </div>
-            <Button
-              variant="ink-red"
-              size="sm"
-              statusDot="bg-ink-cream shadow-ink-cream-glow"
-              className="w-full mt-4 justify-center"
-              as={Link}
-              href={`/book/${id}`}
-            >
-              Book a Date
-            </Button>
+            {cta.kind === "external" ? (
+              <Button
+                variant="ink-red"
+                size="sm"
+                statusDot="bg-ink-cream shadow-ink-cream-glow"
+                className="w-full mt-4 justify-center"
+                as="a"
+                href={cta.url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+              >
+                Book on {cta.domain}
+              </Button>
+            ) : (
+              <Button
+                variant="ink-red"
+                size="sm"
+                statusDot="bg-ink-cream shadow-ink-cream-glow"
+                className="w-full mt-4 justify-center"
+                as={Link}
+                href={cta.kind === "inbuilt" ? `/book/${id}` : "/messages"}
+              >
+                {cta.kind === "inbuilt" ? "Book a Date" : "Get in touch"}
+              </Button>
+            )}
           </WidgetPanel>
 
           {/* Certifications + Social */}

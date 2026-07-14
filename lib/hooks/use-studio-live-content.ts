@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getReviewsForTarget } from "@/lib/data/supabase-reviews";
 import { getRosterArtistRows } from "@/lib/data/supabase-artists";
+import { fetchBookHrefs } from "@/lib/data/supabase-booking";
 import type { DbPortfolioImage } from "@/lib/supabase/types";
 import type {
   StudioSiteArtist,
@@ -45,6 +46,7 @@ async function fetchLiveContent(studioId: string): Promise<LiveData> {
     getRosterArtistRows(supabase, studioId),
     getReviewsForTarget(supabase, "studio", studioId),
   ]);
+  const bookHrefs = await fetchBookHrefs(supabase, rows.map((r) => r.id));
   const thumbsByArtist = new Map<string, DbPortfolioImage[]>();
   if (rows.length > 0) {
     const { data: portfolio } = await supabase
@@ -69,7 +71,7 @@ async function fetchLiveContent(studioId: string): Promise<LiveData> {
       photoCount: thumbs.length,
       photos: thumbs.map((t) => ({ id: t.id, url: t.url })),
       profileHref: `/artists/${r.id}`,
-      bookHref: `/book/${r.id}`,
+      bookHref: bookHrefs.get(r.id),
     };
   });
 

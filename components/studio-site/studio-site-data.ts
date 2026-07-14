@@ -79,6 +79,9 @@ export interface StudioSiteData {
 interface SiteDataExtras {
   artists?: StudioSiteArtist[];
   reviews?: StudioSiteReview[];
+  /** booking_mode-aware override: null suppresses the integrations-derived
+   * link (mode chosen, not external); undefined keeps legacy behavior. */
+  bookingLink?: { url: string; platformName: string } | null;
 }
 
 /** Build site data from a public Studio (real content). */
@@ -106,8 +109,10 @@ export function studioSiteDataFromStudio(
     coverImage: studio.coverImage || undefined,
     coverFocal: studio.coverFocal,
     coverImages: studio.coverImages ?? [],
-    bookingLink: getBookingLink(studio.integrations),
-    bookingEmbed: getBookingEmbed(studio.integrations),
+    bookingLink:
+      extras.bookingLink !== undefined ? extras.bookingLink : getBookingLink(studio.integrations),
+    bookingEmbed:
+      extras.bookingLink !== undefined ? null : getBookingEmbed(studio.integrations),
     reviewLinks: getReviewProfileLinks(studio.integrations, studio.googlePlaceId),
     googlePlaceId: studio.googlePlaceId,
     artists: extras.artists ?? [],

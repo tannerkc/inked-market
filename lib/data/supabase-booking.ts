@@ -13,6 +13,7 @@ import type {
   ProjectRecord,
 } from "@/lib/types/booking";
 import type { WeeklyAvailability } from "@/lib/types";
+import { bookingCtaFor } from "@/lib/booking/flows";
 import {
   type DbAppointment,
   type DbAvailabilityOverride,
@@ -286,6 +287,30 @@ export async function fetchArtistUpcomingAppointments(
     .order("start_at", { ascending: true })
     .limit(limit);
   return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
+}
+
+/**
+ * Booking hrefs for a set of artists, resolved through bookingCtaFor:
+ * inbuilt -> /book/{id}, external -> their https URL, message -> absent.
+ * One query; used by the studio-site roster mappers.
+ */
+export async function fetchBookHrefs(
+  supabase: SupabaseClient,
+  artistIds: string[]
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  if (artistIds.length === 0) return map;
+  const { data } = await supabase
+    .from("booking_settings")
+    .select("*")
+    .in("artist_id", artistIds);
+  for (const row of (data ?? []) as DbBookingSettings[]) {
+    if (!row.artist_id) continue;
+    const cta = bookingCtaFor(mapDbBookingSettings(row));
+    if (cta.kind === "inbuilt") map.set(row.artist_id, `/book/${row.artist_id}`);
+    else if (cta.kind === "external") map.set(row.artist_id, cta.url);
+  }
+  return map;
 }
 
 // ─── Phase 5: roster, grants, projects ────────────────────────────────────

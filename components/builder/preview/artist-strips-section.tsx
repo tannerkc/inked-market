@@ -138,13 +138,25 @@ function ArtistStrip({
         </div>
         <div className="ml-2 flex shrink-0 items-center gap-2">
           {artist.bookHref ? (
-            <Link
-              href={artist.bookHref}
-              className="text-[10px] @sm:text-[11px] font-medium hover:underline"
-              style={{ color: "var(--accent)" }}
-            >
-              Book
-            </Link>
+            artist.bookHref.startsWith("http") ? (
+              <a
+                href={artist.bookHref}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="text-[10px] @sm:text-[11px] font-medium hover:underline"
+                style={{ color: "var(--accent)" }}
+              >
+                Book
+              </a>
+            ) : (
+              <Link
+                href={artist.bookHref}
+                className="text-[10px] @sm:text-[11px] font-medium hover:underline"
+                style={{ color: "var(--accent)" }}
+              >
+                Book
+              </Link>
+            )
           ) : null}
           {artist.profileHref ? (
             <Link
@@ -242,13 +254,25 @@ function ArtistGallerySheet({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {artist.bookHref ? (
-            <Link
-              href={artist.bookHref}
-              className="text-[11px] font-medium transition-colors hover:underline"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Book
-            </Link>
+            artist.bookHref.startsWith("http") ? (
+              <a
+                href={artist.bookHref}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="text-[11px] font-medium transition-colors hover:underline"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Book
+              </a>
+            ) : (
+              <Link
+                href={artist.bookHref}
+                className="text-[11px] font-medium transition-colors hover:underline"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Book
+              </Link>
+            )
           ) : null}
           {artist.profileHref ? (
             <Link

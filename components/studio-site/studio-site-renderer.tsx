@@ -113,7 +113,9 @@ export function StudioSiteRenderer({
       observer.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [animationStyle, replayKey]);
+    // page + galleryBeforeAbout remount [data-animate] sections; the observer
+    // must re-attach or remounted sections stay at opacity 0 forever.
+  }, [animationStyle, replayKey, page, config.galleryBeforeAbout]);
 
   const section = (
     name: string,

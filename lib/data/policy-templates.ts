@@ -50,7 +50,7 @@ For large-scale pieces requiring multiple sessions, a single deposit covers the 
         "full-charge": "Full session charge for no-shows",
         "reschedule-only": "Reschedule only, no refunds",
       };
-      return map[f.noShowPolicy] || "";
+      return f.noShowPolicy ? map[f.noShowPolicy] ?? "" : "";
     },
     structuredFields: [
       {
