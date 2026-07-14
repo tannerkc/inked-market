@@ -11,6 +11,7 @@ import {
   BookFlashSchema,
   RespondToRequestSchema,
   ScheduleFromRequestSchema,
+  SetBookingModeSchema,
   SubmitBookingRequestSchema,
 } from "@/lib/validation/schemas";
 import { validateChosenTime } from "@/lib/booking/scheduling";
@@ -22,7 +23,12 @@ import {
   mapDbBookingSettings,
   mapDbFlashItem,
 } from "@/lib/supabase/booking-types";
-import { fetchProjectByRequest, fetchRequestById } from "@/lib/data/supabase-booking";
+import {
+  fetchProjectByRequest,
+  fetchRequestById,
+  resolveBookingEntity,
+  saveBookingSettings,
+} from "@/lib/data/supabase-booking";
 
 interface ActionResult {
   success: boolean;
@@ -87,13 +93,18 @@ export async function submitBookingRequest(
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in to send a booking request." };
 
-  // Artist must exist and be taking custom requests.
+  // Artist must exist, use inbuilt booking, and be taking custom requests.
   const { data: settingsRow } = await supabase
     .from("booking_settings")
-    .select("accepting_bookings, custom_requests_enabled")
+    .select("booking_mode, accepting_bookings, custom_requests_enabled")
     .eq("artist_id", parsed.data.artistId)
     .maybeSingle();
-  if (!settingsRow || !settingsRow.accepting_bookings || !settingsRow.custom_requests_enabled) {
+  if (
+    !settingsRow ||
+    settingsRow.booking_mode !== "inbuilt" ||
+    !settingsRow.accepting_bookings ||
+    !settingsRow.custom_requests_enabled
+  ) {
     return { success: false, error: "This artist is not taking requests right now." };
   }
 
@@ -125,6 +136,28 @@ export async function submitBookingRequest(
     actorName: customerName ?? undefined,
   });
   return { success: true, requestId: created.id };
+}
+
+/** The explicit booking-mode choice: inbuilt, external link-out, or off. */
+export async function setBookingMode(input: unknown): Promise<ActionResult> {
+  const parsed = SetBookingModeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+  const { supabase, user } = await requireUser();
+  if (!user) return { success: false, error: "Sign in first." };
+  const entity = await resolveBookingEntity(supabase);
+  if (!entity) return { success: false, error: "No artist or studio profile found." };
+
+  try {
+    await saveBookingSettings(supabase, entity, {
+      bookingMode: parsed.data.mode,
+      externalBookingUrl: parsed.data.mode === "external" ? parsed.data.externalUrl ?? null : null,
+    });
+  } catch {
+    return { success: false, error: GENERIC_ERROR };
+  }
+  return { success: true };
 }
 
 export async function respondToBookingRequest(input: unknown): Promise<ActionResult> {
@@ -364,7 +397,7 @@ export async function bookConsultation(
     .maybeSingle();
   if (!settingsRow) return { success: false, error: "This artist is not taking consultations." };
   const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
-  if (!settings.acceptingBookings || !settings.consultationsEnabled) {
+  if (settings.bookingMode !== "inbuilt" || !settings.acceptingBookings || !settings.consultationsEnabled) {
     return { success: false, error: "This artist is not taking consultations." };
   }
 
@@ -453,7 +486,7 @@ export async function bookFlash(
     .maybeSingle();
   if (!settingsRow) return { success: false, error: "This artist is not taking flash bookings." };
   const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
-  if (!settings.acceptingBookings || !settings.flashEnabled) {
+  if (settings.bookingMode !== "inbuilt" || !settings.acceptingBookings || !settings.flashEnabled) {
     return { success: false, error: "This artist is not taking flash bookings." };
   }
 
