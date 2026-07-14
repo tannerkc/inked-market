@@ -7,7 +7,12 @@ import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, CalendarIcon, LinkShareIcon, BookingSettingsIcon } from "@/components/dashboard/dashboard-icons";
-import { BookingSettingsPanel } from "@/components/booking";
+import {
+  ArtistRequestsSection,
+  BookingSettingsPanel,
+  RequestDetailPanel,
+  useArtistRequests,
+} from "@/components/booking";
 import { ArtistBioSection } from "./artist-bio-section";
 import { ArtistPortfolioSection } from "./artist-portfolio-section";
 import { ArtistStudioSection } from "./artist-studio-section";
@@ -19,6 +24,7 @@ import type { QuickAction } from "@/lib/types";
 
 export function ArtistDashboard() {
   const dashboard = useArtistDashboard();
+  const artistRequests = useArtistRequests();
   const [bookingSettingsOpen, setBookingSettingsOpen] = useState(false);
 
   const quickActions: QuickAction[] = [
@@ -82,6 +88,12 @@ export function ArtistDashboard() {
         }
         rightColumn={
           <>
+            <ArtistRequestsSection
+              pending={artistRequests.pending}
+              others={artistRequests.others}
+              loading={artistRequests.loading}
+              onSelect={artistRequests.setSelected}
+            />
             <ArtistBioSection
               bioEditing={dashboard.bioEditing}
               setBioEditing={dashboard.setBioEditing}
@@ -125,6 +137,13 @@ export function ArtistDashboard() {
             <BookingSettingsPanel
               open={bookingSettingsOpen}
               onClose={() => setBookingSettingsOpen(false)}
+            />
+            <RequestDetailPanel
+              request={artistRequests.selected}
+              onClose={() => artistRequests.setSelected(null)}
+              onRespond={artistRequests.respond}
+              responding={artistRequests.responding}
+              error={artistRequests.error}
             />
             <ArtistFindStudioPanel
               open={dashboard.findStudioOpen}
