@@ -26,6 +26,7 @@ function fmtQuote(min: number | null, max: number | null): string | null {
 interface CustomerRequestPanelProps {
   request: BookingRequestRecord | null;
   scheduled: boolean;
+  sessionCount: number;
   onClose: () => void;
   onChanged: () => void;
 }
@@ -33,6 +34,7 @@ interface CustomerRequestPanelProps {
 export function CustomerRequestPanel({
   request,
   scheduled,
+  sessionCount,
   onClose,
   onChanged,
 }: CustomerRequestPanelProps) {
@@ -117,11 +119,39 @@ export function CustomerRequestPanel({
           </p>
         ) : null}
 
-        {booked || scheduled ? (
+        {(booked || scheduled) &&
+        request.isMultiSession &&
+        request.schedulingMode === "open_calendar" &&
+        status === "accepted" &&
+        request.artistId ? (
+          // Multi-session + open calendar: scheduling stays available for the
+          // next sitting. Propose-mode projects book session 1 only (offered
+          // times are single-use); further sessions are arranged via the artist.
+          <div className="flex flex-col gap-3">
+            <div className="rounded-[14px] border border-dashed border-ink-black/[0.08] p-4 dark:border-ink-cream/[0.08]">
+              <FieldLabel>
+                Sessions booked: {Math.max(sessionCount, booked ? 1 : 0)}
+                {request.estimatedSessions ? ` of ~${request.estimatedSessions}` : ""}
+              </FieldLabel>
+              <p className="mt-1 text-[12px] text-ink-black/60 dark:text-ink-cream/60">
+                Book your next session below.
+              </p>
+            </div>
+            <SlotPicker
+              artistId={request.artistId}
+              durationMin={request.sessionDurationMin ?? 180}
+              disabled={busy}
+              onPick={(slot) => void schedule(slot.startAt, slot.endAt)}
+            />
+          </div>
+        ) : booked || scheduled ? (
           <div className="rounded-[14px] border border-dashed border-ink-black/[0.08] p-4 dark:border-ink-cream/[0.08]">
             <FieldLabel>Scheduled</FieldLabel>
             <p className="mt-1 text-[12px] text-ink-black/60 dark:text-ink-cream/60">
               Your session is on the calendar — see Upcoming Appointments.
+              {request.isMultiSession && request.schedulingMode === "propose"
+                ? " Further sessions are arranged directly with the artist."
+                : ""}
             </p>
           </div>
         ) : status === "accepted" && request.schedulingMode === "propose" ? (

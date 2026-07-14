@@ -150,6 +150,11 @@ export function RequestDetailPanel({
         {status !== "pending" ? (
           <div className="rounded-[14px] border border-dashed border-ink-black/[0.08] p-4 dark:border-ink-cream/[0.08]">
             <FieldLabel>Status: {status}</FieldLabel>
+            {request.isMultiSession ? (
+              <p className="mt-1 font-mono text-[11px] text-ink-black/40 dark:text-ink-cream/40">
+                Multi-session project{request.estimatedSessions ? ` · ~${request.estimatedSessions} sessions` : ""}
+              </p>
+            ) : null}
             {request.responseMessage ? (
               <p className="mt-2 text-[12px] text-ink-black/60 dark:text-ink-cream/60">
                 {request.responseMessage}

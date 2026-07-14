@@ -276,6 +276,14 @@ export function CustomerDashboard() {
             <CustomerRequestPanel
               request={selectedRequest}
               scheduled={selectedRequestId ? dashboard.scheduledRequestIds.has(selectedRequestId) : false}
+              sessionCount={
+                dashboard.appointmentRecords.filter(
+                  (a) =>
+                    a.requestId === selectedRequestId &&
+                    a.status !== "cancelled" &&
+                    a.status !== "no_show"
+                ).length
+              }
               onClose={() => setSelectedRequestId(null)}
               onChanged={() => void dashboard.refreshBooking()}
             />

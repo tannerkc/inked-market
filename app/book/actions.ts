@@ -20,7 +20,7 @@ import {
   mapDbBookingSettings,
   mapDbFlashItem,
 } from "@/lib/supabase/booking-types";
-import { fetchRequestById } from "@/lib/data/supabase-booking";
+import { fetchProjectByRequest, fetchRequestById } from "@/lib/data/supabase-booking";
 
 interface ActionResult {
   success: boolean;
@@ -169,6 +169,21 @@ export async function respondToBookingRequest(input: unknown): Promise<ActionRes
   if (!updated || updated.length === 0) {
     return { success: false, error: "This request was already handled." };
   }
+
+  // Multi-session accepts open a project; the 1-row transition guarantee
+  // above means this runs at most once per request.
+  if (d.action === "accept" && request.isMultiSession) {
+    await createAdminClient()
+      .from("projects")
+      .insert({
+        request_id: request.id,
+        customer_id: request.customerId,
+        artist_id: request.artistId ?? null,
+        title: request.description.slice(0, 60),
+        estimated_sessions: request.estimatedSessions,
+        status: "active",
+      });
+  }
   return { success: true };
 }
 
@@ -267,6 +282,13 @@ export async function scheduleFromRequest(
       return { success: false, error: "That time was just taken — pick another." };
     }
     return { success: false, error: GENERIC_ERROR };
+  }
+  // Link multi-session bookings to their project.
+  if (request.isMultiSession) {
+    const project = await fetchProjectByRequest(admin, request.id);
+    if (project) {
+      await admin.from("appointments").update({ project_id: project.id }).eq("id", created.id);
+    }
   }
   const { checkoutUrl } = await applyDepositToAppointment(admin, {
     appointmentId: created.id,
