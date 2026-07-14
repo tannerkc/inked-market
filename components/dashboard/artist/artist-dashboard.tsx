@@ -117,6 +117,10 @@ export function ArtistDashboard() {
               onAddSlot={dashboard.handleAddSlot}
               onRemoveSlot={dashboard.handleRemoveSlot}
               onUpdateSlot={dashboard.handleUpdateSlot}
+              onSave={dashboard.saveAvailability}
+              blockedDates={dashboard.blockedDates}
+              onAddBlocked={dashboard.addBlocked}
+              onRemoveBlocked={dashboard.removeBlocked}
             />
             <BookingSettingsPanel
               open={bookingSettingsOpen}

@@ -4,7 +4,6 @@ import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Input } from "@/components/ui/input";
 import { SectionLabel } from "@/components/ui/section-label";
 import { AffiliationRow } from "@/components/dashboard/affiliation-row";
-import { useTheme } from "@/components/providers/theme-provider";
 import type { Affiliation } from "@/lib/types";
 
 interface ArtistFindStudioPanelProps {
@@ -26,9 +25,6 @@ export function ArtistFindStudioPanel({
   studioAffiliation,
   onRequestToJoin,
 }: ArtistFindStudioPanelProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   return (
     <SlideOverPanel
       open={open}
@@ -38,7 +34,6 @@ export function ArtistFindStudioPanel({
       <div className="space-y-5">
         <Input
           label="Search"
-          variant={isDark ? "dark" : "light"}
           value={studioSearch}
           onChange={(e) => setStudioSearch(e.target.value)}
           placeholder="Search studios by name or location..."
@@ -46,7 +41,7 @@ export function ArtistFindStudioPanel({
 
         <div>
           {filteredStudios.length === 0 ? (
-            <p className={`text-[12px] text-center py-4 ${isDark ? "text-ink-cream/25" : "text-ink-black/25"}`}>
+            <p className="text-[12px] text-center py-4 text-ink-black/25 dark:text-ink-cream/25">
               No studios found
             </p>
           ) : (
@@ -67,7 +62,7 @@ export function ArtistFindStudioPanel({
 
         {studioAffiliation && (
           <>
-            <SectionLabel label="your request" variant={isDark ? "dark-muted" : "parchment"} stretch />
+            <SectionLabel label="your request" variant="muted" stretch />
             <AffiliationRow
               name={studioAffiliation.name}
               avatarUrl={studioAffiliation.avatarUrl}

@@ -4,7 +4,6 @@ import * as React from "react";
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Button } from "@/components/ui/button";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { useTheme } from "@/components/providers/theme-provider";
 import { cn } from "@/lib/utils";
 import { DAYS_OF_WEEK } from "@/lib/constants/schedule";
 
@@ -21,6 +20,8 @@ interface WeeklySchedulePanelProps {
   renderDayContent: (day: string) => React.ReactNode;
   /** Optional master toggle (e.g. "Taking bookings") rendered above the day list */
   masterToggle?: React.ReactNode;
+  /** Optional content rendered between the day list and the save button */
+  footer?: React.ReactNode;
   saveLabel?: string;
   onSave: () => void;
 }
@@ -34,20 +35,18 @@ export function WeeklySchedulePanel({
   onToggleDay,
   renderDayContent,
   masterToggle,
+  footer,
   saveLabel = "Save",
   onSave,
 }: WeeklySchedulePanelProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   return (
     <SlideOverPanel open={open} onClose={onClose} title={title}>
       <div className="space-y-3">
-        {description && (
-          <p className={`text-[12px] mb-4 ${isDark ? "text-ink-cream/40" : "text-ink-black/40"}`}>
+        {description ? (
+          <p className="text-[12px] mb-4 text-ink-black/40 dark:text-ink-cream/40">
             {description}
           </p>
-        )}
+        ) : null}
 
         {masterToggle}
 
@@ -59,34 +58,29 @@ export function WeeklySchedulePanel({
                 key={day}
                 className={cn(
                   "rounded-[14px] border p-3 px-4 transition-opacity mb-2",
-                  isDark ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]" : "border-ink-black/[0.06] bg-ink-black/[0.02]",
+                  "border-ink-black/[0.06] bg-ink-black/[0.02] dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]",
                   !enabled && "opacity-50"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <ToggleSwitch
-                      checked={enabled}
-                      onChange={() => onToggleDay(day)}
-                      size="sm"
-                    />
-                    <span className={cn(
-                      "font-mono text-[10px] tracking-[0.1em] uppercase",
-                      isDark ? "text-ink-cream/60" : "text-ink-black/60"
-                    )}>
+                    <ToggleSwitch checked={enabled} onChange={() => onToggleDay(day)} size="sm" />
+                    <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-black/60 dark:text-ink-cream/60">
                       {day}
                     </span>
                   </div>
                 </div>
-                {enabled && (
+                {enabled ? (
                   <div className="mt-2.5 ml-[44px]">
                     {renderDayContent(day)}
                   </div>
-                )}
+                ) : null}
               </div>
             );
           })}
         </div>
+
+        {footer}
 
         <Button variant="ink" className="w-full mt-4" onClick={onSave}>{saveLabel}</Button>
         <Button variant="ink-outline" className="w-full" onClick={onClose}>Cancel</Button>

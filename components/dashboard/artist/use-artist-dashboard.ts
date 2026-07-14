@@ -1,175 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
-import { getArtistDashboardData, getDefaultAvailability, getStudioSearchResults } from "@/lib/data/dashboard";
-import type { WeeklyAvailability, Affiliation } from "@/lib/types";
+import { getArtistDashboardData } from "@/lib/data/dashboard";
+import { useArtistProfileForm } from "./hooks/use-artist-profile-form";
+import { useArtistBio } from "./hooks/use-artist-bio";
+import { useWeeklyAvailability } from "./hooks/use-weekly-availability";
+import { useStudioAffiliation } from "./hooks/use-studio-affiliation";
 
 export function useArtistDashboard() {
   const { user, updateUser } = useAuth();
 
-  const mockData = getArtistDashboardData();
-  const data = {
-    ...mockData,
-    name: user?.name || "",
-    tags: user?.styles || [],
-  };
+  const profile = useArtistProfileForm(user, updateUser);
+  const bio = useArtistBio(updateUser);
+  const availability = useWeeklyAvailability();
+  const affiliation = useStudioAffiliation();
 
-  // Bio state
-  const [bioEditing, setBioEditing] = useState(false);
-  const [bioText, setBioText] = useState("");
-
-  // Panel open/close
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [findStudioOpen, setFindStudioOpen] = useState(false);
-
-  // Availability state
-  const [takingBookings, setTakingBookings] = useState(true);
-  const [availability, setAvailability] = useState<WeeklyAvailability>(getDefaultAvailability());
-
-  // Profile form
-  const [profileForm, setProfileForm] = useState({
-    firstName: user?.name?.split(" ")[0] || "",
-    lastName: user?.name?.split(" ").slice(1).join(" ") || "",
-    location: user?.location || "",
-    bio: user?.bio || "",
-    styles: (user?.styles || []) as string[],
-    instagram: user?.instagram || "",
-    website: user?.website || "",
-    tiktok: user?.tiktok || "",
-  });
-
-  // Sync profile form when user loads asynchronously
+  // Sync profile form when the user object's identity changes (e.g. async load,
+  // name update from elsewhere). Single effect, single re-sync target.
+  const syncedName = useRef<string | undefined>(undefined);
   useEffect(() => {
-    if (user) {
-      setProfileForm({
-        firstName: user.name?.split(" ")[0] || "",
-        lastName: user.name?.split(" ").slice(1).join(" ") || "",
-        location: user.location || "",
-        bio: user.bio || "",
-        styles: (user.styles || []) as string[],
-        instagram: user.instagram || "",
-        website: user.website || "",
-        tiktok: user.tiktok || "",
-      });
-    }
-  }, [user?.name]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!user || syncedName.current === user.name) return;
+    syncedName.current = user.name;
+    profile.loadFromUser(user);
+  }, [user, profile]);
 
-  // Studio affiliation
-  const [studioSearch, setStudioSearch] = useState("");
-  const [studioAffiliation, setStudioAffiliation] = useState<Affiliation | null>(null);
-
-  const allStudios = getStudioSearchResults();
-  const filteredStudios = studioSearch
-    ? allStudios.filter(
-        (s) =>
-          s.name.toLowerCase().includes(studioSearch.toLowerCase()) ||
-          s.location.toLowerCase().includes(studioSearch.toLowerCase())
-      )
-    : allStudios;
-
-  const handleRequestToJoin = (studio: { id: string; name: string; avatarUrl?: string; location: string }) => {
-    setStudioAffiliation({
-      id: studio.id,
-      name: studio.name,
-      avatarUrl: studio.avatarUrl,
-      status: "pending-request",
-      role: "studio",
-    });
-    setFindStudioOpen(false);
-  };
-
-  const handleToggleDay = (day: string, enabled: boolean) => {
-    setAvailability((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], enabled },
-    }));
-  };
-
-  const handleAddSlot = (day: string) => {
-    setAvailability((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        slots: [...prev[day].slots, { start: "10:00 AM", end: "6:00 PM" }],
-      },
-    }));
-  };
-
-  const handleRemoveSlot = (day: string, index: number) => {
-    setAvailability((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        slots: prev[day].slots.filter((_, i) => i !== index),
-      },
-    }));
-  };
-
-  const handleUpdateSlot = (day: string, index: number, field: "start" | "end", value: string) => {
-    setAvailability((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        slots: prev[day].slots.map((slot, i) =>
-          i === index ? { ...slot, [field]: value } : slot
-        ),
-      },
-    }));
-  };
-
-  const handleSaveBio = () => {
-    updateUser({ bio: bioText });
-  };
-
-  const handleSaveProfile = () => {
-    updateUser({
-      name: `${profileForm.firstName} ${profileForm.lastName}`.trim(),
-      styles: profileForm.styles,
-      location: profileForm.location,
-      bio: profileForm.bio,
-      instagram: profileForm.instagram,
-      website: profileForm.website,
-      tiktok: profileForm.tiktok,
-    });
-    setEditProfileOpen(false);
+  const data = {
+    ...getArtistDashboardData(),
+    name: user?.name ?? "",
+    tags: user?.styles ?? [],
   };
 
   return {
     data,
     user,
-    // Bio
-    bioEditing,
-    setBioEditing,
-    bioText,
-    setBioText,
-    handleSaveBio,
-    // Panels
-    editProfileOpen,
-    setEditProfileOpen,
-    availabilityOpen,
-    setAvailabilityOpen,
-    findStudioOpen,
-    setFindStudioOpen,
-    // Availability
-    takingBookings,
-    setTakingBookings,
-    availability,
-    handleToggleDay,
-    handleAddSlot,
-    handleRemoveSlot,
-    handleUpdateSlot,
-    // Profile form
-    profileForm,
-    setProfileForm,
-    handleSaveProfile,
-    // Studio affiliation
-    studioSearch,
-    setStudioSearch,
-    studioAffiliation,
-    setStudioAffiliation,
-    filteredStudios,
-    handleRequestToJoin,
+    ...profile,
+    ...bio,
+    ...availability,
+    ...affiliation,
   };
 }

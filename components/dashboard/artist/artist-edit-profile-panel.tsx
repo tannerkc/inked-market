@@ -3,7 +3,6 @@
 import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useTheme } from "@/components/providers/theme-provider";
 import { tattooStyleOptions } from "@/lib/data/signup-styles";
 
 interface ProfileForm {
@@ -28,9 +27,6 @@ interface ArtistEditProfilePanelProps {
 const ARTIST_STYLE_OPTIONS = tattooStyleOptions;
 
 export function ArtistEditProfilePanel({ open, onClose, profileForm, setProfileForm, onSave }: ArtistEditProfilePanelProps) {
-  const { mode } = useTheme();
-  const variant = mode === "dark" ? "dark" : "light";
-
   return (
     <EditProfilePanel
       open={open}
@@ -51,11 +47,11 @@ export function ArtistEditProfilePanel({ open, onClose, profileForm, setProfileF
       onSave={onSave}
     >
       <div className="grid grid-cols-2 gap-3">
-        <Input label="First Name" variant={variant} value={profileForm.firstName} onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })} placeholder="First name" />
-        <Input label="Last Name" variant={variant} value={profileForm.lastName} onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })} placeholder="Last name" />
+        <Input label="First Name" value={profileForm.firstName} onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })} placeholder="First name" />
+        <Input label="Last Name" value={profileForm.lastName} onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })} placeholder="Last name" />
       </div>
-      <Input label="Location" variant={variant} value={profileForm.location} onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })} placeholder="City, State" />
-      <Textarea label="Bio" variant={variant} value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="Tell clients about your work, style, and experience..." rows={4} />
+      <Input label="Location" value={profileForm.location} onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })} placeholder="City, State" />
+      <Textarea label="Bio" value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="Tell clients about your work, style, and experience..." rows={4} />
     </EditProfilePanel>
   );
 }
