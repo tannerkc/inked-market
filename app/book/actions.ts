@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { applyDepositToAppointment } from "@/lib/booking/deposits/orchestrate";
 import {
   BookConsultationSchema,
   BookFlashSchema,
@@ -33,6 +35,30 @@ async function requireUser() {
     data: { user },
   } = await supabase.auth.getUser();
   return { supabase, user };
+}
+
+const HOLD_HOURS = 24;
+
+/** Insert fields for the deposit state machine: a deposit ask holds the slot. */
+function depositInsertFields(depositCents: number): {
+  status: "pending_deposit" | "confirmed";
+  deposit_status: "pending" | "not_required";
+  hold_expires_at: string | null;
+} {
+  if (depositCents > 0) {
+    return {
+      status: "pending_deposit",
+      deposit_status: "pending",
+      hold_expires_at: new Date(Date.now() + HOLD_HOURS * 3_600_000).toISOString(),
+    };
+  }
+  return { status: "confirmed", deposit_status: "not_required", hold_expires_at: null };
+}
+
+/** Origin for checkout return URLs, from the action's request headers. */
+async function requestOrigin(): Promise<string> {
+  const h = await headers();
+  return h.get("origin") ?? `https://${h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3002"}`;
 }
 
 /** Display-name snapshot for denormalized customer_name columns. */
@@ -165,7 +191,7 @@ export async function withdrawBookingRequest(requestId: string): Promise<ActionR
 
 export async function scheduleFromRequest(
   input: unknown
-): Promise<ActionResult & { appointmentId?: string }> {
+): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
   const parsed = ScheduleFromRequestSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
@@ -219,6 +245,7 @@ export async function scheduleFromRequest(
   });
   if (!verdict.ok) return { success: false, error: verdict.error };
 
+  const depositCents = request.depositCents ?? 0;
   const { data: created, error } = await supabase
     .from("appointments")
     .insert({
@@ -230,9 +257,8 @@ export async function scheduleFromRequest(
       start_at: chosen.startAt,
       end_at: chosen.endAt,
       timezone,
-      status: "confirmed",
-      deposit_cents: request.depositCents ?? 0,
-      deposit_status: "not_required", // phase 4 wires real deposits
+      deposit_cents: depositCents,
+      ...depositInsertFields(depositCents),
     })
     .select("id")
     .single();
@@ -242,12 +268,19 @@ export async function scheduleFromRequest(
     }
     return { success: false, error: GENERIC_ERROR };
   }
-  return { success: true, appointmentId: created.id };
+  const { checkoutUrl } = await applyDepositToAppointment(admin, {
+    appointmentId: created.id,
+    artistId: request.artistId,
+    depositCents,
+    description: `Tattoo deposit - ${request.artistName ?? "session"}`,
+    origin: await requestOrigin(),
+  });
+  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }
 
 export async function bookConsultation(
   input: unknown
-): Promise<ActionResult & { appointmentId?: string }> {
+): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
   const parsed = BookConsultationSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
@@ -286,6 +319,8 @@ export async function bookConsultation(
   });
   if (!verdict.ok) return { success: false, error: verdict.error };
 
+  // A paid consult charges its price through the deposit rails (spec).
+  const consultDeposit = settings.consultPriceCents;
   const { data: created, error } = await supabase
     .from("appointments")
     .insert({
@@ -296,10 +331,9 @@ export async function bookConsultation(
       start_at: chosen.startAt,
       end_at: chosen.endAt,
       timezone: settings.timezone,
-      status: "confirmed",
       price_cents: settings.consultPriceCents > 0 ? settings.consultPriceCents : null,
-      deposit_cents: 0,
-      deposit_status: "not_required",
+      deposit_cents: consultDeposit,
+      ...depositInsertFields(consultDeposit),
     })
     .select("id")
     .single();
@@ -309,12 +343,19 @@ export async function bookConsultation(
     }
     return { success: false, error: GENERIC_ERROR };
   }
-  return { success: true, appointmentId: created.id };
+  const { checkoutUrl } = await applyDepositToAppointment(admin, {
+    appointmentId: created.id,
+    artistId: parsed.data.artistId,
+    depositCents: consultDeposit,
+    description: "Consultation booking",
+    origin: await requestOrigin(),
+  });
+  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }
 
 export async function bookFlash(
   input: unknown
-): Promise<ActionResult & { appointmentId?: string }> {
+): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
   const parsed = BookFlashSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
@@ -389,10 +430,9 @@ export async function bookFlash(
       start_at: chosen.startAt,
       end_at: chosen.endAt,
       timezone: settings.timezone,
-      status: "confirmed",
       price_cents: item.priceCents,
       deposit_cents: item.depositCents,
-      deposit_status: "not_required",
+      ...depositInsertFields(item.depositCents),
     })
     .select("id")
     .single();
@@ -406,5 +446,12 @@ export async function bookFlash(
     }
     return { success: false, error: GENERIC_ERROR };
   }
-  return { success: true, appointmentId: created.id };
+  const { checkoutUrl } = await applyDepositToAppointment(admin, {
+    appointmentId: created.id,
+    artistId: item.artistId,
+    depositCents: item.depositCents,
+    description: `Deposit: ${item.title}`,
+    origin: await requestOrigin(),
+  });
+  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
 }
