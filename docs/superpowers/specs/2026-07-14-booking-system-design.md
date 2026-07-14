@@ -197,5 +197,6 @@ Each phase is one implementation plan, shippable in order:
 - API-executed refunds (recorded as `refund_due` only).
 - Email/SMS reminders (notifications table is the outbox).
 - Studio chair-capacity limits for concurrent walk-ins.
+- Customer-facing online booking of studio-level walk-ins (front desk quick-add covers walk-ins; they do not pre-book by definition).
 - Platform fees on deposits (explicitly: the platform never touches funds in v1).
 - AI-assisted brief triage, waitlists, recurring appointments.
