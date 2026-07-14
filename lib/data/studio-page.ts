@@ -17,8 +17,13 @@ import type {
 export interface StudioPageData {
   studio: Studio;
   config: StudioThemeConfig;
+  /** True when the studio has published a custom builder site (Shader/Magnum).
+   *  False → the route renders the basic profile-style listing instead. */
+  hasPublishedSite: boolean;
   artists: StudioSiteArtist[];
   reviews: StudioSiteReview[];
+  /** Full Review objects — the basic profile's ReviewPanel needs these. */
+  rawReviews: Review[];
   fromDb: boolean;
 }
 
@@ -85,13 +90,21 @@ export async function getStudioForPage(
             photoCount: thumbs.length,
             photos: thumbs,
             profileHref: `/artists/${a.id}`,
+            bookHref: `/book/${a.id}`,
           };
         });
+        // The public site renders only what Publish stamped live — the working
+        // draft (theme_config) is never shown here. No published theme = the
+        // basic profile listing.
         return {
           studio,
-          config: studio.themeConfig ? remapLegacyTemplate(studio.themeConfig) : defaultThemeConfig,
+          config: studio.publishedThemeConfig
+            ? remapLegacyTemplate(studio.publishedThemeConfig)
+            : defaultThemeConfig,
+          hasPublishedSite: Boolean(studio.publishedThemeConfig),
           artists,
           reviews: toSiteReviews(reviews),
+          rawReviews: reviews,
           fromDb: true,
         };
       }
@@ -110,12 +123,17 @@ export async function getStudioForPage(
     photoCount: 0,
     photos: [],
     profileHref: `/artists/${a.id}`,
+    bookHref: `/book/${a.id}`,
   }));
+  const mockReviews = getStudioReviews(id);
   return {
     studio,
     config: defaultThemeConfig,
+    // Sample studios always demo the full themed site (badge marks them).
+    hasPublishedSite: true,
     artists,
-    reviews: toSiteReviews(getStudioReviews(id)),
+    reviews: toSiteReviews(mockReviews),
+    rawReviews: mockReviews,
     fromDb: false,
   };
 }

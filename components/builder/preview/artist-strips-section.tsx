@@ -136,15 +136,26 @@ function ArtistStrip({
             </div>
           </div>
         </div>
-        {artist.profileHref ? (
-          <Link
-            href={artist.profileHref}
-            className="text-[10px] @sm:text-[11px] font-medium shrink-0 ml-2 hover:underline"
-            style={{ color: "var(--accent)" }}
-          >
-            View profile &#8599;
-          </Link>
-        ) : null}
+        <div className="ml-2 flex shrink-0 items-center gap-2">
+          {artist.bookHref ? (
+            <Link
+              href={artist.bookHref}
+              className="text-[10px] @sm:text-[11px] font-medium hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
+              Book
+            </Link>
+          ) : null}
+          {artist.profileHref ? (
+            <Link
+              href={artist.profileHref}
+              className="text-[10px] @sm:text-[11px] font-medium hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
+              View profile &#8599;
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       {/* Photo strip — sizing handled by CSS in globals.css via data attributes */}
@@ -229,15 +240,26 @@ function ArtistGallerySheet({
             {artist.photoCount} photos
           </div>
         </div>
-        {artist.profileHref ? (
-          <Link
-            href={artist.profileHref}
-            className="text-[11px] font-medium shrink-0 transition-colors hover:underline"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            View profile &#8599;
-          </Link>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-2">
+          {artist.bookHref ? (
+            <Link
+              href={artist.bookHref}
+              className="text-[11px] font-medium transition-colors hover:underline"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Book
+            </Link>
+          ) : null}
+          {artist.profileHref ? (
+            <Link
+              href={artist.profileHref}
+              className="text-[11px] font-medium transition-colors hover:underline"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              View profile &#8599;
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       {/* 3-col portrait grid — each photo has a distinct muted tone */}

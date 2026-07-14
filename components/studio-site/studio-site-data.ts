@@ -1,7 +1,11 @@
-import type { Studio } from "@/lib/types";
+import type { Studio, CoverFocal } from "@/lib/types";
 import type { StudioData, BusinessHours } from "@/lib/repositories/types";
-import type { StudioIntegrations } from "@/lib/types/integrations";
-import { getBookingLink } from "@/lib/utils/studio-content";
+import {
+  getBookingLink,
+  getBookingEmbed,
+  getReviewProfileLinks,
+  type ReviewProfileLink,
+} from "@/lib/utils/studio-content";
 
 /** A roster artist as the artist-strips section needs it. */
 export interface StudioSiteArtist {
@@ -12,6 +16,8 @@ export interface StudioSiteArtist {
   photoCount: number;
   photos: { id: string; url?: string }[];
   profileHref?: string;
+  /** Booking entry (/book/[id]) — live artists only; the /book page is authoritative. */
+  bookHref?: string;
 }
 
 /** A review as the details section needs it. */
@@ -46,8 +52,18 @@ export interface StudioSiteData {
   images: string[];
   /** Hero cover photo URL. Unset → hero renders its designed placeholder texture. */
   coverImage?: string;
+  /** Cover focal point — heroes keep this spot in frame via background-position. */
+  coverFocal?: CoverFocal;
+  /** Dedicated cover photos — multi-photo heroes lead with these in heroCoverMode "multi". */
+  coverImages: string[];
   /** Resolved booking destination (first connected booking-category integration). */
   bookingLink?: { url: string; platformName: string } | null;
+  /** Official iframe src for the active booking platform (Calendly/Acuity only) — null for link-out vendors. */
+  bookingEmbed?: { src: string; platformName: string } | null;
+  /** Connected review-platform profiles (Google/Yelp/Trustpilot/Facebook) with write-review deep links. */
+  reviewLinks: ReviewProfileLink[];
+  /** Google place id — powers keyless review/maps deep links for Google-seeded studios. */
+  googlePlaceId?: string;
   /** True only when the builder's Sample Data toggle is on. Never set for live/public data. */
   isSample?: boolean;
   /** Studio roster. Empty → artist-strips section hides itself. */
@@ -85,9 +101,15 @@ export function studioSiteDataFromStudio(
     instagram: studio.socialLinks?.instagram,
     website: studio.socialLinks?.website,
     facebook: studio.socialLinks?.facebook,
+    tiktok: studio.socialLinks?.tiktok,
     images: studio.images ?? [],
     coverImage: studio.coverImage || undefined,
-    bookingLink: getBookingLink(studio.integrations as StudioIntegrations | undefined),
+    coverFocal: studio.coverFocal,
+    coverImages: studio.coverImages ?? [],
+    bookingLink: getBookingLink(studio.integrations),
+    bookingEmbed: getBookingEmbed(studio.integrations),
+    reviewLinks: getReviewProfileLinks(studio.integrations, studio.googlePlaceId),
+    googlePlaceId: studio.googlePlaceId,
     artists: extras.artists ?? [],
     reviews: extras.reviews ?? [],
     rating: studio.rating,
@@ -119,7 +141,12 @@ export function studioSiteDataFromStudioData(
     facebook: data?.facebook,
     images: data?.images ?? [],
     coverImage: data?.coverImage,
+    coverFocal: data?.coverFocal,
+    coverImages: data?.coverImages ?? [],
     bookingLink: getBookingLink(data?.integrations),
+    bookingEmbed: getBookingEmbed(data?.integrations),
+    reviewLinks: getReviewProfileLinks(data?.integrations, data?.googlePlaceId),
+    googlePlaceId: data?.googlePlaceId,
     artists: extras.artists ?? [],
     reviews: extras.reviews ?? [],
   };
