@@ -252,6 +252,7 @@ export interface DbAppointment {
   deposit_status: DepositStatus;
   deposit_provider: string | null;
   deposit_checkout_id: string | null;
+  deposit_checkout_url: string | null;
   deposit_paid_at: string | null;
   hold_expires_at: string | null;
   notes: string | null;
@@ -312,6 +313,7 @@ export function mapDbAppointment(row: DbAppointment): AppointmentRecord {
     priceCents: row.price_cents,
     depositCents: row.deposit_cents,
     depositStatus: row.deposit_status,
+    depositCheckoutUrl: row.deposit_checkout_url,
     notes: row.notes,
     customerNotes: row.customer_notes,
   };

@@ -406,7 +406,8 @@ const DB_APPT: DbAppointment = {
   start_at: "2026-08-01T17:00:00Z", end_at: "2026-08-01T20:00:00Z", timezone: "America/New_York",
   status: "confirmed", cancelled_by: null, cancellation_reason: null,
   price_cents: 90000, deposit_cents: 10000, deposit_status: "not_required",
-  deposit_provider: null, deposit_checkout_id: null, deposit_paid_at: null, hold_expires_at: null,
+  deposit_provider: null, deposit_checkout_id: null, deposit_checkout_url: null,
+  deposit_paid_at: null, hold_expires_at: null,
   notes: null, customer_notes: null, created_at: "2026-07-14", updated_at: "2026-07-14",
   artists: { name: "Mar Delgado" }, studios: null,
 };
@@ -461,6 +462,47 @@ check("flash item maps db->domain", () => {
   assert.equal(f.artistId, "a1");
   assert.equal(f.priceCents, 25000);
   assert.equal(f.oneOff, true);
+});
+
+// ─── phase 4: deposits ───────────────────────────────────────────────────
+import { createHmac } from "node:crypto";
+import { verifyStripeSignature, verifySquareSignature } from "../lib/booking/deposits/signatures";
+import { depositPlanFor } from "../lib/booking/deposits/plan";
+
+check("stripe webhook signature verifies and rejects", () => {
+  const secret = "whsec_test";
+  const body = '{"id":"evt_1"}';
+  const t = 1_800_000_000;
+  const v1 = createHmac("sha256", secret).update(`${t}.${body}`).digest("hex");
+  const header = `t=${t},v1=${v1}`;
+  assert.ok(verifyStripeSignature(body, header, secret, t + 60));
+  assert.ok(!verifyStripeSignature(body, header, secret, t + 600)); // stale
+  assert.ok(!verifyStripeSignature(body, `t=${t},v1=deadbeef`, secret, t + 60));
+  assert.ok(!verifyStripeSignature(body, null, secret, t + 60));
+});
+
+check("square webhook signature verifies and rejects", () => {
+  const key = "sq_sig_key";
+  const url = "https://example.com/api/webhooks/square";
+  const body = '{"event_id":"e1"}';
+  const sig = createHmac("sha256", key).update(url + body).digest("base64");
+  assert.ok(verifySquareSignature(body, sig, key, url));
+  assert.ok(!verifySquareSignature(body, sig, key, "https://example.com/other"));
+  assert.ok(!verifySquareSignature(body, null, key, url));
+});
+
+check("depositPlanFor picks provider, manual, or none", () => {
+  const base = { depositCents: 10000, provider: "stripe" as const, connected: true, configured: true };
+  assert.equal(depositPlanFor(base), "provider");
+  assert.equal(depositPlanFor({ ...base, depositCents: 0 }), "none");
+  assert.equal(depositPlanFor({ ...base, connected: false }), "manual");
+  assert.equal(depositPlanFor({ ...base, configured: false }), "manual");
+  assert.equal(depositPlanFor({ ...base, provider: null }), "manual");
+});
+
+check("appointment mapper carries deposit checkout url", () => {
+  const vm = mapDbAppointment({ ...DB_APPT, deposit_checkout_url: "https://pay.example/x" });
+  assert.equal(vm.depositCheckoutUrl, "https://pay.example/x");
 });
 
 console.log(`\n${passed} checks passed`);

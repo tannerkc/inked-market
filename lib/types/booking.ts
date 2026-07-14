@@ -162,6 +162,7 @@ export interface AppointmentRecord {
   priceCents: number | null;
   depositCents: number;
   depositStatus: DepositStatus;
+  depositCheckoutUrl: string | null;
   notes: string | null;
   customerNotes: string | null;
 }
