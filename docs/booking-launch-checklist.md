@@ -52,7 +52,8 @@ Local `.env.local` AND Vercel project env (production + preview):
 One pass through every flow on `:3002` (or a preview deploy). Use three browsers/profiles: artist, studio owner, customer.
 
 **Artist setup**
-- [ ] Dashboard → Booking Settings: enable custom requests + consultations + flash; set consult length/price, default deposit, slot size, buffer, notice, window, timezone, cancellation policy → Save → reload → persists
+- [ ] Fresh artist: dashboard shows the "How do you want to take bookings?" prompt → choose "Use Inked booking" → prompt disappears, Booking Settings opens. Repeat on a second account choosing "I use another tool" with a Calendly URL → their public page shows "Book on calendly.com" and `/book/[id]` shows the hand-off card. A third choosing "Not now" → page shows "Get in touch".
+- [ ] Dashboard → Booking Settings: mode selector at top (switching to External swaps the panel to a URL field); with Inked booking: enable custom requests + consultations + flash; set consult length/price, default deposit, slot size, buffer, notice, window, timezone, cancellation policy → Save → reload → persists
 - [ ] Set Availability: edit weekly days/blocks, block a date → Save → reload → persists
 - [ ] Manage Flash: add a piece (image, price, duration, deposit, one-of-a-kind on)
 
