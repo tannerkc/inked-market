@@ -1,9 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import { markDepositReceived, waiveDeposit } from "@/app/book/deposit-actions";
+import {
+  cancelAppointment,
+  completeAppointment,
+  markDepositReceived,
+  markNoShow,
+  waiveDeposit,
+} from "@/app/book/deposit-actions";
 import { useArtistUpcoming } from "./use-artist-upcoming";
 import type { AppointmentRecord } from "@/lib/types/booking";
+
+function LifecycleActions({
+  appointment,
+  onDone,
+}: {
+  appointment: AppointmentRecord;
+  onDone: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const run = async (fn: () => Promise<{ success: boolean }>) => {
+    setBusy(true);
+    await fn();
+    setBusy(false);
+    onDone();
+  };
+
+  const buttonClass =
+    "rounded-full border border-ink-black/[0.1] px-2.5 py-1 font-mono text-[10px] text-ink-black/40 disabled:opacity-40 dark:border-ink-cream/[0.1] dark:text-ink-cream/40";
+
+  return (
+    <div className="mt-1 flex gap-2">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void run(() => completeAppointment(appointment.id))}
+        className="rounded-full border border-ink-sage/40 px-2.5 py-1 font-mono text-[10px] text-ink-sage disabled:opacity-40"
+      >
+        Complete
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void run(() => markNoShow(appointment.id))}
+        className={buttonClass}
+      >
+        No-show
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void run(() => cancelAppointment({ appointmentId: appointment.id }))}
+        className={buttonClass}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
 
 function DepositActions({
   appointment,
@@ -95,6 +150,9 @@ export function UpcomingAppointmentsCard() {
               </div>
               {a.status === "pending_deposit" && a.depositStatus === "pending" ? (
                 <DepositActions appointment={a} onDone={() => void refresh()} />
+              ) : null}
+              {a.status === "confirmed" ? (
+                <LifecycleActions appointment={a} onDone={() => void refresh()} />
               ) : null}
             </div>
           ))}

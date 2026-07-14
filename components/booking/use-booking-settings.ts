@@ -5,8 +5,10 @@ import { copyDefinedFields } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
   fetchBookingSettings,
+  fetchOwnGrantRows,
   resolveBookingEntity,
   saveBookingSettings,
+  setManageBookings,
 } from "@/lib/data/supabase-booking";
 import {
   DEFAULT_BOOKING_SETTINGS,
@@ -14,10 +16,17 @@ import {
   type BookingSettingsInput,
 } from "@/lib/types/booking";
 
+export interface GrantRow {
+  id: string;
+  manageBookings: boolean;
+  studioName: string;
+}
+
 export function useBookingSettings() {
   const supabaseRef = useRef(createClient());
   const [entity, setEntity] = useState<BookingEntityRef | null>(null);
   const [settings, setSettings] = useState<BookingSettingsInput>(DEFAULT_BOOKING_SETTINGS);
+  const [grants, setGrants] = useState<GrantRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +40,13 @@ export function useBookingSettings() {
         if (!cancelled) setLoading(false);
         return;
       }
-      const existing = await fetchBookingSettings(supabase, resolved);
+      const [existing, grantRows] = await Promise.all([
+        fetchBookingSettings(supabase, resolved),
+        resolved.artistId ? fetchOwnGrantRows(supabase, resolved.artistId) : Promise.resolve([]),
+      ]);
       if (cancelled) return;
       setEntity(resolved);
+      setGrants(grantRows);
       if (existing) {
         setSettings((prev) => {
           const next: BookingSettingsInput = { ...prev };
@@ -68,5 +81,10 @@ export function useBookingSettings() {
     }
   }, [entity, settings]);
 
-  return { entity, settings, update, save, loading, saving, error };
+  const toggleGrant = useCallback(async (id: string, value: boolean) => {
+    await setManageBookings(supabaseRef.current, id, value);
+    setGrants((prev) => prev.map((g) => (g.id === id ? { ...g, manageBookings: value } : g)));
+  }, []);
+
+  return { entity, settings, grants, toggleGrant, update, save, loading, saving, error };
 }

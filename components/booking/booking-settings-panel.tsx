@@ -67,7 +67,8 @@ function ProviderRow({
 }
 
 export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProps) {
-  const { entity, settings, update, save, loading, saving, error } = useBookingSettings();
+  const { entity, settings, grants, toggleGrant, update, save, loading, saving, error } =
+    useBookingSettings();
   const payments = usePaymentStatus();
   const isStudio = Boolean(entity?.studioId);
 
@@ -244,6 +245,21 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
             }))}
             onChange={set("timezone")}
           />
+
+          {!isStudio && grants.length > 0 ? (
+            <div className="flex flex-col gap-3 rounded-[14px] border border-dashed border-ink-black/[0.08] p-4 dark:border-ink-cream/[0.08]">
+              <FieldLabel>Studio front desk</FieldLabel>
+              {grants.map((g) => (
+                <ToggleRow
+                  key={g.id}
+                  label={g.studioName}
+                  hint="Front desk can accept requests and manage your calendar"
+                  checked={g.manageBookings}
+                  onChange={(v) => void toggleGrant(g.id, v)}
+                />
+              ))}
+            </div>
+          ) : null}
 
           <Textarea
             label="Cancellation policy"
