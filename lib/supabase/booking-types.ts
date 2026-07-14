@@ -6,6 +6,7 @@ import type {
   AppointmentType,
   AvailabilityOverride,
   AvailabilityRule,
+  BookingMode,
   BookingRequestRecord,
   BookingSettings,
   BookingSettingsInput,
@@ -27,6 +28,8 @@ export interface DbBookingSettings {
   id: string;
   artist_id: string | null;
   studio_id: string | null;
+  booking_mode: BookingMode | null;
+  external_booking_url: string | null;
   accepting_bookings: boolean;
   custom_requests_enabled: boolean;
   consultations_enabled: boolean;
@@ -73,6 +76,8 @@ export function mapDbBookingSettings(row: DbBookingSettings): BookingSettings {
     id: row.id,
     artistId: row.artist_id ?? undefined,
     studioId: row.studio_id ?? undefined,
+    bookingMode: row.booking_mode,
+    externalBookingUrl: row.external_booking_url,
     acceptingBookings: row.accepting_bookings,
     customRequestsEnabled: row.custom_requests_enabled,
     consultationsEnabled: row.consultations_enabled,
@@ -94,6 +99,8 @@ export function mapDbBookingSettings(row: DbBookingSettings): BookingSettings {
 }
 
 const SETTINGS_COLUMN: Record<keyof BookingSettingsInput, string> = {
+  bookingMode: "booking_mode",
+  externalBookingUrl: "external_booking_url",
   acceptingBookings: "accepting_bookings",
   customRequestsEnabled: "custom_requests_enabled",
   consultationsEnabled: "consultations_enabled",

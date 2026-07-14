@@ -211,6 +211,7 @@ import { getDefaultAvailability } from "../lib/data/dashboard";
 
 const DB_SETTINGS: DbBookingSettings = {
   id: "s1", artist_id: "a1", studio_id: null,
+  booking_mode: "inbuilt", external_booking_url: null,
   accepting_bookings: true, custom_requests_enabled: true,
   consultations_enabled: false, flash_enabled: false, walk_ins_enabled: false,
   consult_duration_min: 30, consult_price_cents: 0, consult_location: "in_person",
@@ -566,6 +567,67 @@ check("buildNotification renders human copy per kind", () => {
     }).message.length > 10
   );
   assert.ok(buildNotification("deposit_paid", { actorName: "Jess" }).message.includes("deposit"));
+});
+
+// ─── booking mode + CTA resolver ─────────────────────────────────────────
+import { bookingCtaFor } from "../lib/booking/flows";
+import { SetBookingModeSchema } from "../lib/validation/schemas";
+
+check("bookingCtaFor resolves inbuilt, external, and message", () => {
+  const base = {
+    bookingMode: "inbuilt" as const,
+    acceptingBookings: true,
+    customRequestsEnabled: true,
+    consultationsEnabled: false,
+    flashEnabled: false,
+    externalBookingUrl: null,
+  };
+  assert.deepEqual(bookingCtaFor(base), { kind: "inbuilt" });
+  assert.deepEqual(bookingCtaFor({ ...base, acceptingBookings: false }), { kind: "message" });
+  assert.deepEqual(bookingCtaFor({ ...base, customRequestsEnabled: false }), { kind: "message" });
+  const ext = bookingCtaFor({
+    ...base,
+    bookingMode: "external",
+    externalBookingUrl: "https://calendly.com/mar-ink",
+  });
+  assert.deepEqual(ext, {
+    kind: "external",
+    url: "https://calendly.com/mar-ink",
+    domain: "calendly.com",
+  });
+  assert.deepEqual(
+    bookingCtaFor({ ...base, bookingMode: "external", externalBookingUrl: null }),
+    { kind: "message" }
+  );
+  assert.deepEqual(bookingCtaFor({ ...base, bookingMode: "off" }), { kind: "message" });
+  assert.deepEqual(bookingCtaFor(null), { kind: "message" });
+});
+
+check("bookingCtaFor: unchosen mode (null) never shows booking", () => {
+  assert.deepEqual(
+    bookingCtaFor({
+      bookingMode: null,
+      acceptingBookings: true,
+      customRequestsEnabled: true,
+      consultationsEnabled: true,
+      flashEnabled: true,
+      externalBookingUrl: null,
+    }),
+    { kind: "message" }
+  );
+});
+
+check("SetBookingModeSchema requires https url for external", () => {
+  assert.ok(SetBookingModeSchema.safeParse({ mode: "inbuilt" }).success);
+  assert.ok(SetBookingModeSchema.safeParse({ mode: "off" }).success);
+  assert.ok(
+    SetBookingModeSchema.safeParse({ mode: "external", externalUrl: "https://squareup.com/book/x" })
+      .success
+  );
+  assert.ok(!SetBookingModeSchema.safeParse({ mode: "external" }).success);
+  assert.ok(
+    !SetBookingModeSchema.safeParse({ mode: "external", externalUrl: "http://insecure.com" }).success
+  );
 });
 
 console.log(`\n${passed} checks passed`);

@@ -128,6 +128,18 @@ export const BookFlashSchema = z.object({
 });
 export type BookFlashInput = z.infer<typeof BookFlashSchema>;
 
+export const SetBookingModeSchema = z
+  .object({
+    mode: z.enum(["inbuilt", "external", "off"]),
+    externalUrl: z.string().trim().url().startsWith("https://").max(500).optional(),
+  })
+  .superRefine((d, ctx) => {
+    if (d.mode === "external" && !d.externalUrl) {
+      ctx.addIssue({ code: "custom", message: "Paste your booking link" });
+    }
+  });
+export type SetBookingModeInput = z.infer<typeof SetBookingModeSchema>;
+
 export const FrontDeskSchema = z
   .object({
     artistId: z.string().uuid().optional(),

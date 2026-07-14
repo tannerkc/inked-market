@@ -13,11 +13,15 @@ export interface BookingEntityRef {
 export type ConsultLocation = "in_person" | "virtual";
 export type PaymentProvider = "stripe" | "square";
 export type SlotGranularity = 15 | 30 | 60;
+/** How an entity takes bookings; null = not yet chosen (drives the prompt). */
+export type BookingMode = "inbuilt" | "external" | "off";
 
 export interface BookingSettings {
   id: string;
   artistId?: string;
   studioId?: string;
+  bookingMode: BookingMode | null;
+  externalBookingUrl: string | null;
   acceptingBookings: boolean;
   customRequestsEnabled: boolean;
   consultationsEnabled: boolean;
@@ -40,8 +44,10 @@ export interface BookingSettings {
 /** Editable fields (no identity) — what the settings form manipulates. */
 export type BookingSettingsInput = Omit<BookingSettings, "id" | "artistId" | "studioId">;
 
-/** Mirrors migration 019 column defaults exactly. */
+/** Mirrors migration 019/022 column defaults exactly. */
 export const DEFAULT_BOOKING_SETTINGS: BookingSettingsInput = {
+  bookingMode: null,
+  externalBookingUrl: null,
   acceptingBookings: true,
   customRequestsEnabled: true,
   consultationsEnabled: false,
