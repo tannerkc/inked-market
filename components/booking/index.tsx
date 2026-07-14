@@ -4,6 +4,7 @@ export { BlockedDatesEditor } from "./blocked-dates-editor";
 export { CustomerRequestPanel } from "./customer-request-panel";
 export { RequestDetailPanel } from "./request-detail-panel";
 export { SlotPicker } from "./slot-picker";
+export { UpcomingAppointmentsCard } from "./upcoming-appointments-card";
 export { useArtistRequests } from "./use-artist-requests";
 export { BookingSettingsPanel } from "./booking-settings-panel";
 export { BookingRequestFlow } from "./request-flow";

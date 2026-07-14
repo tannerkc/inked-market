@@ -12,6 +12,7 @@ import {
   BookingSettingsPanel,
   FlashManagerPanel,
   RequestDetailPanel,
+  UpcomingAppointmentsCard,
   useArtistRequests,
 } from "@/components/booking";
 import { ArtistBioSection } from "./artist-bio-section";
@@ -86,14 +87,7 @@ export function ArtistDashboard() {
               onEdit={() => dashboard.setEditProfileOpen(true)}
             />
             <StatsPanel stats={dashboard.data.stats} />
-            {/* Upcoming */}
-            <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
-              <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">Upcoming</p>
-              <div className="text-center py-4">
-                <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">No upcoming bookings</p>
-                <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">Bookings appear once clients find you</p>
-              </div>
-            </div>
+            <UpcomingAppointmentsCard />
           </>
         }
         rightColumn={
