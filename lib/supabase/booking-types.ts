@@ -1,15 +1,23 @@
 // Db row shapes + mappers for booking tables (migration 019), following
 // the DbStudio/mapDbStudioToStudioData pattern in lib/supabase/types.ts.
 import type {
+  AppointmentLifecycleStatus,
+  AppointmentRecord,
+  AppointmentType,
   AvailabilityOverride,
   AvailabilityRule,
+  BookingRequestRecord,
   BookingSettings,
   BookingSettingsInput,
   ConsultLocation,
+  DepositStatus,
   PaymentProvider,
+  ProposedTime,
+  RequestStatus,
+  SchedulingMode,
   SlotGranularity,
 } from "@/lib/types/booking";
-import type { WeeklyAvailability } from "@/lib/types";
+import type { Appointment, BookingRequest, WeeklyAvailability } from "@/lib/types";
 import { hm12ToHm, hmToHm12 } from "@/lib/booking/time";
 
 export interface DbBookingSettings {
@@ -181,4 +189,175 @@ export function rulesToWeekly(
       : { ...baseDay, enabled: false };
   });
   return out;
+}
+
+// ─── Phase 2: requests + appointments ─────────────────────────────────────
+
+interface EmbeddedName {
+  name: string;
+}
+
+export interface DbBookingRequest {
+  id: string;
+  customer_id: string;
+  customer_name: string | null;
+  artist_id: string | null;
+  studio_id: string | null;
+  type: string;
+  description: string;
+  placement: string | null;
+  size_category: string | null;
+  budget_range: string | null;
+  is_color: boolean | null;
+  reference_image_urls: string[] | null;
+  preferred_timing: string | null;
+  flexible_dates: boolean;
+  is_multi_session: boolean;
+  estimated_sessions: number | null;
+  status: RequestStatus;
+  expires_at: string;
+  response_message: string | null;
+  quote_min_cents: number | null;
+  quote_max_cents: number | null;
+  deposit_cents: number | null;
+  scheduling_mode: SchedulingMode | null;
+  session_duration_min: number | null;
+  proposed_times: ProposedTime[] | null;
+  conversation_id: string | null;
+  created_at: string;
+  updated_at: string;
+  artists?: EmbeddedName | null;
+  studios?: EmbeddedName | null;
+}
+
+export interface DbAppointment {
+  id: string;
+  customer_id: string | null;
+  customer_name: string | null;
+  artist_id: string | null;
+  studio_id: string | null;
+  request_id: string | null;
+  project_id: string | null;
+  flash_item_id: string | null;
+  type: AppointmentType;
+  start_at: string;
+  end_at: string;
+  timezone: string;
+  status: AppointmentLifecycleStatus;
+  cancelled_by: string | null;
+  cancellation_reason: string | null;
+  price_cents: number | null;
+  deposit_cents: number;
+  deposit_status: DepositStatus;
+  deposit_provider: string | null;
+  deposit_checkout_id: string | null;
+  deposit_paid_at: string | null;
+  hold_expires_at: string | null;
+  notes: string | null;
+  customer_notes: string | null;
+  created_at: string;
+  updated_at: string;
+  artists?: EmbeddedName | null;
+  studios?: EmbeddedName | null;
+}
+
+export function mapDbBookingRequest(row: DbBookingRequest): BookingRequestRecord {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    customerName: row.customer_name,
+    artistId: row.artist_id ?? undefined,
+    studioId: row.studio_id ?? undefined,
+    artistName: row.artists?.name,
+    studioName: row.studios?.name,
+    description: row.description,
+    placement: row.placement,
+    sizeCategory: row.size_category,
+    budgetRange: row.budget_range,
+    isColor: row.is_color,
+    referenceImageUrls: row.reference_image_urls ?? [],
+    preferredTiming: row.preferred_timing,
+    flexibleDates: row.flexible_dates,
+    isMultiSession: row.is_multi_session,
+    estimatedSessions: row.estimated_sessions,
+    status: row.status,
+    expiresAt: row.expires_at,
+    responseMessage: row.response_message,
+    quoteMinCents: row.quote_min_cents,
+    quoteMaxCents: row.quote_max_cents,
+    depositCents: row.deposit_cents,
+    schedulingMode: row.scheduling_mode,
+    sessionDurationMin: row.session_duration_min,
+    proposedTimes: row.proposed_times ?? [],
+    createdAt: row.created_at,
+  };
+}
+
+export function mapDbAppointment(row: DbAppointment): AppointmentRecord {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    customerName: row.customer_name,
+    artistId: row.artist_id ?? undefined,
+    studioId: row.studio_id ?? undefined,
+    artistName: row.artists?.name,
+    studioName: row.studios?.name,
+    requestId: row.request_id,
+    type: row.type,
+    startAt: row.start_at,
+    endAt: row.end_at,
+    timezone: row.timezone,
+    status: row.status,
+    priceCents: row.price_cents,
+    depositCents: row.deposit_cents,
+    depositStatus: row.deposit_status,
+    notes: row.notes,
+    customerNotes: row.customer_notes,
+  };
+}
+
+/** Lazy expiry: a pending request past its window reads as expired between cron runs. */
+export function effectiveRequestStatus(
+  r: { status: RequestStatus; expiresAt: string },
+  now: Date
+): RequestStatus {
+  if (r.status === "pending" && Date.parse(r.expiresAt) < now.getTime()) return "expired";
+  return r.status;
+}
+
+// ─── Legacy view-model bridges (customer dashboard sections) ──────────────
+
+export function requestToViewModel(r: BookingRequestRecord): BookingRequest {
+  const summary = r.description.length > 140 ? `${r.description.slice(0, 140)}...` : r.description;
+  return {
+    id: r.id,
+    createdAt: new Date(r.createdAt),
+    updatedAt: new Date(r.createdAt),
+    customerId: r.customerId,
+    artistId: r.artistId ?? "",
+    artistName: r.artistName ?? "Artist",
+    studioId: r.studioId,
+    studioName: r.studioName,
+    flexibleDates: r.flexibleDates,
+    status: effectiveRequestStatus(r, new Date()),
+    summary,
+  };
+}
+
+export function appointmentToViewModel(a: AppointmentRecord): Appointment {
+  const legacyStatus =
+    a.status === "pending_deposit" ? "pending" : a.status === "no_show" ? "cancelled" : a.status;
+  return {
+    id: a.id,
+    createdAt: new Date(a.startAt),
+    updatedAt: new Date(a.startAt),
+    customerId: a.customerId ?? "",
+    artistId: a.artistId ?? "",
+    artistName: a.artistName ?? "Artist",
+    studioId: a.studioId,
+    studioName: a.studioName,
+    date: new Date(a.startAt),
+    duration: Math.round((Date.parse(a.endAt) - Date.parse(a.startAt)) / 60_000),
+    status: legacyStatus,
+  };
 }

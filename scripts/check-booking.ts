@@ -348,4 +348,75 @@ check("validateChosenTime: open calendar requires slot membership", () => {
   );
 });
 
+// ─── request/appointment mappers ─────────────────────────────────────────
+import {
+  mapDbBookingRequest,
+  mapDbAppointment,
+  requestToViewModel,
+  appointmentToViewModel,
+  effectiveRequestStatus,
+  type DbBookingRequest,
+  type DbAppointment,
+} from "../lib/supabase/booking-types";
+
+const DB_REQUEST: DbBookingRequest = {
+  id: "r1", customer_id: "u1", customer_name: "Jess", artist_id: "a1", studio_id: null,
+  type: "custom", description: "Fine-line floral piece on the right shoulder blade",
+  placement: "shoulder", size_category: "medium", budget_range: "600-1200", is_color: false,
+  reference_image_urls: ["https://x/1.webp"], preferred_timing: "weekends", flexible_dates: true,
+  is_multi_session: false, estimated_sessions: null,
+  status: "pending", expires_at: "2026-07-28T00:00:00Z",
+  response_message: null, quote_min_cents: null, quote_max_cents: null, deposit_cents: null,
+  scheduling_mode: null, session_duration_min: null, proposed_times: null, conversation_id: null,
+  created_at: "2026-07-14T00:00:00Z", updated_at: "2026-07-14T00:00:00Z",
+  artists: { name: "Mar Delgado" }, studios: null,
+};
+
+check("booking request maps db->domain with embedded names", () => {
+  const r = mapDbBookingRequest(DB_REQUEST);
+  assert.equal(r.artistId, "a1");
+  assert.equal(r.artistName, "Mar Delgado");
+  assert.equal(r.isColor, false);
+  assert.deepEqual(r.proposedTimes, []);
+});
+
+check("effectiveRequestStatus applies lazy expiry", () => {
+  const base = { status: "pending" as const, expiresAt: "2026-07-28T00:00:00Z" };
+  assert.equal(effectiveRequestStatus(base, new Date("2026-07-20T00:00:00Z")), "pending");
+  assert.equal(effectiveRequestStatus(base, new Date("2026-08-01T00:00:00Z")), "expired");
+  assert.equal(
+    effectiveRequestStatus(
+      { status: "accepted", expiresAt: "2026-07-28T00:00:00Z" },
+      new Date("2026-08-01T00:00:00Z")
+    ),
+    "accepted"
+  );
+});
+
+check("request view model summarizes for the legacy section", () => {
+  const vm = requestToViewModel(mapDbBookingRequest(DB_REQUEST));
+  assert.equal(vm.artistName, "Mar Delgado");
+  assert.equal(vm.status, "pending");
+  assert.ok(vm.summary.includes("Fine-line floral"));
+});
+
+const DB_APPT: DbAppointment = {
+  id: "ap1", customer_id: "u1", customer_name: null, artist_id: "a1", studio_id: null,
+  request_id: "r1", project_id: null, flash_item_id: null, type: "session",
+  start_at: "2026-08-01T17:00:00Z", end_at: "2026-08-01T20:00:00Z", timezone: "America/New_York",
+  status: "confirmed", cancelled_by: null, cancellation_reason: null,
+  price_cents: 90000, deposit_cents: 10000, deposit_status: "not_required",
+  deposit_provider: null, deposit_checkout_id: null, deposit_paid_at: null, hold_expires_at: null,
+  notes: null, customer_notes: null, created_at: "2026-07-14", updated_at: "2026-07-14",
+  artists: { name: "Mar Delgado" }, studios: null,
+};
+
+check("appointment maps to legacy view model with duration minutes", () => {
+  const vm = appointmentToViewModel(mapDbAppointment(DB_APPT));
+  assert.equal(vm.duration, 180);
+  assert.equal(vm.status, "confirmed");
+  assert.equal(vm.artistName, "Mar Delgado");
+  assert.ok(vm.date instanceof Date);
+});
+
 console.log(`\n${passed} checks passed`);
