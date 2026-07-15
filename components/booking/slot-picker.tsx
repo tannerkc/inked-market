@@ -5,7 +5,7 @@ import type { Slot } from "@/lib/booking/availability";
 import { zonedParts } from "@/lib/booking/tz";
 
 interface SlotPickerProps {
-  artistId: string;
+  entity: { artistId?: string; studioId?: string };
   durationMin: number;
   onPick: (slot: Slot) => void;
   disabled?: boolean;
@@ -27,7 +27,7 @@ function fmtTime(iso: string, timeZone: string): string {
   });
 }
 
-export function SlotPicker({ artistId, durationMin, onPick, disabled }: SlotPickerProps) {
+export function SlotPicker({ entity, durationMin, onPick, disabled }: SlotPickerProps) {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [timezone, setTimezone] = useState("America/New_York");
   const [loading, setLoading] = useState(true);
@@ -39,8 +39,11 @@ export function SlotPicker({ artistId, durationMin, onPick, disabled }: SlotPick
       setLoading(true);
       const from = new Date().toISOString().slice(0, 10);
       const to = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+      const target = entity.artistId
+        ? `artistId=${entity.artistId}`
+        : `studioId=${entity.studioId ?? ""}`;
       const res = await fetch(
-        `/api/booking/slots?artistId=${artistId}&durationMin=${durationMin}&from=${from}&to=${to}`
+        `/api/booking/slots?${target}&durationMin=${durationMin}&from=${from}&to=${to}`
       );
       if (cancelled) return;
       if (res.ok) {
@@ -55,7 +58,7 @@ export function SlotPicker({ artistId, durationMin, onPick, disabled }: SlotPick
     return () => {
       cancelled = true;
     };
-  }, [artistId, durationMin]);
+  }, [entity.artistId, entity.studioId, durationMin]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, Slot[]>();

@@ -179,6 +179,20 @@ export async function fetchArtistRequests(
   return ((data ?? []) as DbBookingRequest[]).map(mapDbBookingRequest);
 }
 
+/** Requests targeted at the STUDIO itself (walk-in-style asks, no artist). */
+export async function fetchStudioRequests(
+  supabase: SupabaseClient,
+  studioId: string
+): Promise<BookingRequestRecord[]> {
+  const { data } = await supabase
+    .from("booking_requests")
+    .select(REQUEST_SELECT)
+    .eq("studio_id", studioId)
+    .is("artist_id", null)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as DbBookingRequest[]).map(mapDbBookingRequest);
+}
+
 export async function fetchRequestById(
   supabase: SupabaseClient,
   id: string

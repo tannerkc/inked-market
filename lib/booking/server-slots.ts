@@ -22,17 +22,25 @@ export function localDateOf(iso: string, timeZone: string): string {
   return `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}`;
 }
 
-export async function computeArtistSlotsRange(
+export interface SlotsEntity {
+  artistId?: string;
+  studioId?: string;
+}
+
+export async function computeEntitySlotsRange(
   admin: SupabaseClient,
-  input: { artistId: string; durationMin: number; fromDate: string; toDate: string; now?: Date }
+  input: { entity: SlotsEntity; durationMin: number; fromDate: string; toDate: string; now?: Date }
 ): Promise<{ slots: Slot[]; timezone: string; settings: BookingSettings } | null> {
-  const { artistId, durationMin, fromDate, toDate } = input;
+  const { entity, durationMin, fromDate, toDate } = input;
   const now = input.now ?? new Date();
+  const column = entity.artistId ? "artist_id" : "studio_id";
+  const entityId = entity.artistId ?? entity.studioId;
+  if (!entityId) return null;
 
   const { data: settingsRow } = await admin
     .from("booking_settings")
     .select("*")
-    .eq("artist_id", artistId)
+    .eq(column, entityId)
     .maybeSingle();
   if (!settingsRow) return null;
   const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
@@ -41,22 +49,26 @@ export async function computeArtistSlotsRange(
   }
 
   const [rulesRes, overridesRes, busyRes] = await Promise.all([
-    admin.from("availability_rules").select("*").eq("artist_id", artistId),
+    admin.from("availability_rules").select("*").eq(column, entityId),
     admin
       .from("availability_overrides")
       .select("*")
-      .eq("artist_id", artistId)
+      .eq(column, entityId)
       .gte("date", fromDate)
       .lte("date", toDate),
     // Active appointments overlapping the window: end after window start AND
-    // start before window end (day-padded for timezone edges).
-    admin
-      .from("appointments")
-      .select("start_at, end_at")
-      .eq("artist_id", artistId)
-      .in("status", ["pending_deposit", "confirmed"])
-      .gte("end_at", `${fromDate}T00:00:00Z`)
-      .lte("start_at", `${toDate}T23:59:59Z`),
+    // start before window end (day-padded for timezone edges). Studio-level
+    // entities skip busy subtraction — studios run multiple chairs, and their
+    // rows carry no overlap constraint by design.
+    entity.artistId
+      ? admin
+          .from("appointments")
+          .select("start_at, end_at")
+          .eq("artist_id", entity.artistId)
+          .in("status", ["pending_deposit", "confirmed"])
+          .gte("end_at", `${fromDate}T00:00:00Z`)
+          .lte("start_at", `${toDate}T23:59:59Z`)
+      : Promise.resolve({ data: [] as { start_at: string; end_at: string }[] }),
   ]);
 
   const slots = computeOpenSlots({
@@ -80,4 +92,18 @@ export async function computeArtistSlotsRange(
   });
 
   return { slots, timezone: settings.timezone, settings };
+}
+
+/** Back-compat wrapper — artist-scoped callers. */
+export async function computeArtistSlotsRange(
+  admin: SupabaseClient,
+  input: { artistId: string; durationMin: number; fromDate: string; toDate: string; now?: Date }
+): Promise<{ slots: Slot[]; timezone: string; settings: BookingSettings } | null> {
+  return computeEntitySlotsRange(admin, {
+    entity: { artistId: input.artistId },
+    durationMin: input.durationMin,
+    fromDate: input.fromDate,
+    toDate: input.toDate,
+    now: input.now,
+  });
 }

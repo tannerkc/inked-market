@@ -23,8 +23,8 @@ interface BookingFlowSettings {
 }
 
 interface BookingFlowProps {
-  artistId: string;
-  artistName: string;
+  entity: { artistId?: string; studioId?: string };
+  entityName: string;
   settings: BookingFlowSettings | null;
   flashItems: FlashItem[];
   cta: BookingCta;
@@ -47,12 +47,12 @@ function fmtPrice(cents: number): string {
 
 /** Slot picker + inline confirm + success, shared by consult and flash branches. */
 function DirectBookingBranch({
-  artistId,
+  entity,
   durationMin,
   facts,
   onConfirm,
 }: {
-  artistId: string;
+  entity: { artistId?: string; studioId?: string };
   durationMin: number;
   facts: string;
   onConfirm: (slot: Slot) => Promise<{ success: boolean; error?: string; checkoutUrl?: string }>;
@@ -127,14 +127,16 @@ function DirectBookingBranch({
           </div>
         </div>
       ) : (
-        <SlotPicker artistId={artistId} durationMin={durationMin} onPick={setSelected} disabled={busy} />
+        <SlotPicker entity={entity} durationMin={durationMin} onPick={setSelected} disabled={busy} />
       )}
     </div>
   );
 }
 
-export function BookingFlow({ artistId, artistName, settings, flashItems, cta }: BookingFlowProps) {
-  const flows = settings ? enabledBookingFlows(settings) : [];
+export function BookingFlow({ entity, entityName, settings, flashItems, cta }: BookingFlowProps) {
+  // Flash is artist-anchored; studio targets offer requests + consults only.
+  const allFlows = settings ? enabledBookingFlows(settings) : [];
+  const flows = entity.studioId ? allFlows.filter((f) => f !== "flash") : allFlows;
   const [kind, setKind] = useState<BookingFlowKind | null>(
     flows.length === 1 ? (flows[0] ?? null) : null
   );
@@ -143,9 +145,9 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
   if (cta.kind === "external") {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-medium">Book with {artistName}</h1>
+        <h1 className="text-xl font-medium">Book with {entityName}</h1>
         <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
-          {artistName} takes bookings on {cta.domain}.
+          {entityName} takes bookings on {cta.domain}.
         </p>
         <Button
           variant="ink"
@@ -163,7 +165,7 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
   if (cta.kind !== "inbuilt" || !settings || flows.length === 0) {
     return (
       <p className="text-[14px] text-ink-black/60 dark:text-ink-cream/60">
-        {artistName} is not taking bookings right now.
+        {entityName} is not taking bookings right now.
       </p>
     );
   }
@@ -172,7 +174,7 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-medium">Book with {artistName}</h1>
+      <h1 className="text-xl font-medium">Book with {entityName}</h1>
 
       {kind === null ? (
         <div className="flex flex-col gap-3">
@@ -211,8 +213,8 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
 
           {kind === "custom" ? (
             <BookingRequestFlow
-              artistId={artistId}
-              artistName={artistName}
+              entity={entity}
+              entityName={entityName}
               acceptingRequests
               embedded
             />
@@ -220,11 +222,16 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
 
           {kind === "consultation" ? (
             <DirectBookingBranch
-              artistId={artistId}
+              entity={entity}
               durationMin={settings.consultDurationMin}
               facts={`${settings.consultDurationMin} min consultation · ${fmtPrice(settings.consultPriceCents)} · ${consultLocation}`}
               onConfirm={(slot) =>
-                bookConsultation({ artistId, startAt: slot.startAt, endAt: slot.endAt })
+                bookConsultation({
+                  artistId: entity.artistId,
+                  studioId: entity.studioId,
+                  startAt: slot.startAt,
+                  endAt: slot.endAt,
+                })
               }
             />
           ) : null}
@@ -272,7 +279,7 @@ export function BookingFlow({ artistId, artistName, settings, flashItems, cta }:
                 Back to flash
               </button>
               <DirectBookingBranch
-                artistId={artistId}
+                entity={entity}
                 durationMin={flashItem.durationMin}
                 facts={`${flashItem.title} · ${fmtPrice(flashItem.priceCents)} · ${flashItem.durationMin / 60}h${flashItem.oneOff ? " · 1 of 1" : ""}`}
                 onConfirm={(slot) =>

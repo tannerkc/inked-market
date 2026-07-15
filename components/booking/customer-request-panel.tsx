@@ -123,7 +123,7 @@ export function CustomerRequestPanel({
         request.isMultiSession &&
         request.schedulingMode === "open_calendar" &&
         status === "accepted" &&
-        request.artistId ? (
+        (request.artistId || request.studioId) ? (
           // Multi-session + open calendar: scheduling stays available for the
           // next sitting. Propose-mode projects book session 1 only (offered
           // times are single-use); further sessions are arranged via the artist.
@@ -138,7 +138,7 @@ export function CustomerRequestPanel({
               </p>
             </div>
             <SlotPicker
-              artistId={request.artistId}
+              entity={{ artistId: request.artistId, studioId: request.studioId }}
               durationMin={request.sessionDurationMin ?? 180}
               disabled={busy}
               onPick={(slot) => void schedule(slot.startAt, slot.endAt)}
@@ -169,11 +169,13 @@ export function CustomerRequestPanel({
               </button>
             ))}
           </div>
-        ) : status === "accepted" && request.schedulingMode === "open_calendar" && request.artistId ? (
+        ) : status === "accepted" &&
+          request.schedulingMode === "open_calendar" &&
+          (request.artistId || request.studioId) ? (
           <div className="flex flex-col gap-2">
             <FieldLabel>Pick a time</FieldLabel>
             <SlotPicker
-              artistId={request.artistId}
+              entity={{ artistId: request.artistId, studioId: request.studioId }}
               durationMin={request.sessionDurationMin ?? 180}
               disabled={busy}
               onPick={(slot) => void schedule(slot.startAt, slot.endAt)}

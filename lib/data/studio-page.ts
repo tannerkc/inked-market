@@ -95,24 +95,26 @@ export async function getStudioForPage(
             styles: a.specialties.slice(0, 3),
             photoCount: thumbs.length,
             photos: thumbs,
-            profileHref: `/artists/${a.id}`,
+            profileHref: `/artists/${a.slug ?? a.id}`,
             bookHref: bookHrefs.get(a.id),
           };
         });
         // The public site renders only what Publish stamped live — the working
         // draft (theme_config) is never shown here. No published theme = the
         // basic profile listing.
-        // Studio-level CTA honors the explicit booking mode: external mode
-        // surfaces the studio's own link; any other chosen mode suppresses
-        // the legacy integrations-derived link (null). No settings row keeps
-        // legacy behavior (undefined).
+        // Studio-level CTA honors the explicit booking mode: inbuilt surfaces
+        // the internal /book flow, external surfaces the studio's own link,
+        // off (or unchosen) suppresses the legacy integrations-derived link.
+        // No settings row keeps legacy behavior (undefined).
         const studioSettings = await fetchBookingSettings(supabase, { studioId: studio.id });
         const studioCta = bookingCtaFor(studioSettings);
         const studioBookingLink = !studioSettings
           ? undefined
-          : studioCta.kind === "external"
-            ? { url: studioCta.url, platformName: studioCta.domain }
-            : null;
+          : studioCta.kind === "inbuilt"
+            ? { url: `/book/${studio.id}`, platformName: "Inked Market" }
+            : studioCta.kind === "external"
+              ? { url: studioCta.url, platformName: studioCta.domain }
+              : null;
 
         return {
           studio,

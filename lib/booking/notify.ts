@@ -71,3 +71,25 @@ export async function artistUserId(
     .maybeSingle();
   return data?.user_id ?? data?.claimed_by ?? null;
 }
+
+export async function studioOwnerUserId(
+  admin: SupabaseClient,
+  studioId: string
+): Promise<string | null> {
+  const { data } = await admin
+    .from("studios")
+    .select("claimed_by")
+    .eq("id", studioId)
+    .maybeSingle();
+  return data?.claimed_by ?? null;
+}
+
+/** Recipient for a booking target: the artist's user, else the studio owner. */
+export async function bookingTargetUserId(
+  admin: SupabaseClient,
+  target: { artistId?: string | null; studioId?: string | null }
+): Promise<string | null> {
+  if (target.artistId) return artistUserId(admin, target.artistId);
+  if (target.studioId) return studioOwnerUserId(admin, target.studioId);
+  return null;
+}

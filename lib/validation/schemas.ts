@@ -47,19 +47,26 @@ export type ContactForm = z.infer<typeof ContactFormSchema>;
 const isoDatetime = z.string().datetime();
 const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
 
-export const SubmitBookingRequestSchema = z.object({
-  artistId: z.string().uuid(),
-  description: z.string().trim().min(20, "Tell the artist a bit more (20+ characters)").max(3000),
+export const SubmitBookingRequestSchema = z
+  .object({
+    artistId: z.string().uuid().optional(),
+    studioId: z.string().uuid().optional(),
+    description: z.string().trim().min(20, "Tell the artist a bit more (20+ characters)").max(3000),
   placement: z.string().trim().max(100).optional(),
   sizeCategory: z.enum(["small", "medium", "large", "xl"]).optional(),
   budgetRange: z.enum(["under-300", "300-600", "600-1200", "1200-plus"]).optional(),
   color: z.enum(["color", "black-grey"]).optional(),
   referenceImageUrls: z.array(z.string().url()).max(5).default([]),
   preferredTiming: z.string().trim().max(200).optional(),
-  flexibleDates: z.boolean().default(true),
-  isMultiSession: z.boolean().default(false),
-  estimatedSessions: z.number().int().min(2).max(20).optional(),
-});
+    flexibleDates: z.boolean().default(true),
+    isMultiSession: z.boolean().default(false),
+    estimatedSessions: z.number().int().min(2).max(20).optional(),
+  })
+  .superRefine((d, ctx) => {
+    if ((d.artistId === undefined) === (d.studioId === undefined)) {
+      ctx.addIssue({ code: "custom", message: "Pick an artist or a studio, not both" });
+    }
+  });
 export type SubmitBookingRequestInput = z.infer<typeof SubmitBookingRequestSchema>;
 
 const proposedTimeSchema = z
@@ -114,11 +121,18 @@ export const ScheduleFromRequestSchema = z.object({
 });
 export type ScheduleFromRequestInput = z.infer<typeof ScheduleFromRequestSchema>;
 
-export const BookConsultationSchema = z.object({
-  artistId: z.string().uuid(),
-  startAt: isoDatetime,
-  endAt: isoDatetime,
-});
+export const BookConsultationSchema = z
+  .object({
+    artistId: z.string().uuid().optional(),
+    studioId: z.string().uuid().optional(),
+    startAt: isoDatetime,
+    endAt: isoDatetime,
+  })
+  .superRefine((d, ctx) => {
+    if ((d.artistId === undefined) === (d.studioId === undefined)) {
+      ctx.addIssue({ code: "custom", message: "Pick an artist or a studio, not both" });
+    }
+  });
 export type BookConsultationInput = z.infer<typeof BookConsultationSchema>;
 
 export const BookFlashSchema = z.object({
@@ -171,10 +185,14 @@ export const CancelAppointmentSchema = z.object({
 
 export const SlotsQuerySchema = z
   .object({
-    artistId: z.string().uuid(),
+    artistId: z.string().uuid().optional(),
+    studioId: z.string().uuid().optional(),
     durationMin: z.coerce.number().int().min(15).max(720),
     from: dateOnly,
     to: dateOnly,
+  })
+  .refine((q) => (q.artistId === undefined) !== (q.studioId === undefined), {
+    message: "Pass exactly one of artistId or studioId",
   })
   .refine(
     (q) => {

@@ -33,16 +33,16 @@ const COLORS = [
 ];
 
 interface BookingRequestFlowProps {
-  artistId: string;
-  artistName: string;
+  entity: { artistId?: string; studioId?: string };
+  entityName: string;
   acceptingRequests: boolean;
   /** True when rendered inside the /book chooser, which owns the heading. */
   embedded?: boolean;
 }
 
 export function BookingRequestFlow({
-  artistId,
-  artistName,
+  entity,
+  entityName,
   acceptingRequests,
   embedded = false,
 }: BookingRequestFlowProps) {
@@ -64,14 +64,14 @@ export function BookingRequestFlow({
   if (!acceptingRequests) {
     return (
       <p className="text-[14px] text-ink-black/60 dark:text-ink-cream/60">
-        {artistName} is not taking custom requests right now.
+        {entityName} is not taking custom requests right now.
       </p>
     );
   }
   if (!user) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-medium">Request a booking with {artistName}</h1>
+        <h1 className="text-xl font-medium">Request a booking with {entityName}</h1>
         <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
           Sign in to send a request.
         </p>
@@ -92,7 +92,7 @@ export function BookingRequestFlow({
           <h1 className="text-xl font-medium">Request sent</h1>
         )}
         <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
-          {artistName} will review your idea and reply with a quote and times. Track it from your
+          {entityName} will review your idea and reply with a quote and times. Track it from your
           dashboard.
         </p>
         <Button variant="ink" as={Link} href="/dashboard">
@@ -119,7 +119,8 @@ export function BookingRequestFlow({
     setSubmitting(true);
     setError(null);
     const result = await submitBookingRequest({
-      artistId,
+      artistId: entity.artistId,
+      studioId: entity.studioId,
       description,
       placement: placement || undefined,
       sizeCategory: size || undefined,
@@ -138,7 +139,7 @@ export function BookingRequestFlow({
   return (
     <div className="space-y-6">
       {embedded ? null : (
-        <h1 className="text-xl font-medium">Request a booking with {artistName}</h1>
+        <h1 className="text-xl font-medium">Request a booking with {entityName}</h1>
       )}
 
       <Textarea

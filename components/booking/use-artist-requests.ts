@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { fetchArtistRequests, resolveBookingEntity } from "@/lib/data/supabase-booking";
+import {
+  fetchArtistRequests,
+  fetchStudioRequests,
+  resolveBookingEntity,
+} from "@/lib/data/supabase-booking";
 import { respondToBookingRequest } from "@/app/book/actions";
 import { effectiveRequestStatus } from "@/lib/supabase/booking-types";
 import type { BookingRequestRecord } from "@/lib/types/booking";
@@ -19,11 +23,11 @@ export function useArtistRequests() {
   const load = useCallback(async () => {
     const supabase = supabaseRef.current;
     const entity = await resolveBookingEntity(supabase);
-    if (!entity?.artistId) {
-      setLoading(false);
-      return;
+    if (entity?.artistId) {
+      setRequests(await fetchArtistRequests(supabase, entity.artistId));
+    } else if (entity?.studioId) {
+      setRequests(await fetchStudioRequests(supabase, entity.studioId));
     }
-    setRequests(await fetchArtistRequests(supabase, entity.artistId));
     setLoading(false);
   }, []);
 
@@ -33,11 +37,12 @@ export function useArtistRequests() {
       const supabase = supabaseRef.current;
       const entity = await resolveBookingEntity(supabase);
       if (cancelled) return;
-      if (!entity?.artistId) {
-        setLoading(false);
-        return;
+      let rows: BookingRequestRecord[] = [];
+      if (entity?.artistId) {
+        rows = await fetchArtistRequests(supabase, entity.artistId);
+      } else if (entity?.studioId) {
+        rows = await fetchStudioRequests(supabase, entity.studioId);
       }
-      const rows = await fetchArtistRequests(supabase, entity.artistId);
       if (cancelled) return;
       setRequests(rows);
       setLoading(false);

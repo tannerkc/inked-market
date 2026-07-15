@@ -9,20 +9,21 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export async function postBookingMessage(
   admin: SupabaseClient,
   input: {
-    artistUserId: string;
+    /** The responding party's user id (artist user or studio owner). */
+    senderUserId: string;
     customerId: string;
     content: string;
     requestId: string;
   }
 ): Promise<void> {
   try {
-    const { artistUserId, customerId, content, requestId } = input;
+    const { senderUserId, customerId, content, requestId } = input;
 
     // Find-or-create the two-party conversation.
     const { data: existing } = await admin
       .from("conversations")
       .select("id, unread_count")
-      .contains("participant_ids", [artistUserId, customerId])
+      .contains("participant_ids", [senderUserId, customerId])
       .limit(1)
       .maybeSingle();
 
@@ -43,7 +44,7 @@ export async function postBookingMessage(
       const { data: created } = await admin
         .from("conversations")
         .insert({
-          participant_ids: [artistUserId, customerId],
+          participant_ids: [senderUserId, customerId],
           last_message: content,
           last_message_at: new Date().toISOString(),
           unread_count: { [customerId]: 1 },
@@ -56,7 +57,7 @@ export async function postBookingMessage(
 
     await admin.from("messages").insert({
       conversation_id: conversationId,
-      sender_id: artistUserId,
+      sender_id: senderUserId,
       content,
     });
     await admin

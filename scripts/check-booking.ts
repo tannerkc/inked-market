@@ -630,4 +630,28 @@ check("SetBookingModeSchema requires https url for external", () => {
   );
 });
 
+// ─── studio booking targets ──────────────────────────────────────────────
+check("SubmitBookingRequestSchema takes artist XOR studio target", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00c04fc964ff";
+  const brief = { description: "Walk-in friendly studio piece, flexible on artist" };
+  assert.ok(SubmitBookingRequestSchema.safeParse({ ...brief, artistId: uuid }).success);
+  assert.ok(SubmitBookingRequestSchema.safeParse({ ...brief, studioId: uuid }).success);
+  assert.ok(!SubmitBookingRequestSchema.safeParse({ ...brief }).success);
+  assert.ok(
+    !SubmitBookingRequestSchema.safeParse({ ...brief, artistId: uuid, studioId: uuid }).success
+  );
+});
+
+check("studio flows exclude flash (flash is artist-anchored)", () => {
+  const flows = enabledBookingFlows({
+    acceptingBookings: true,
+    customRequestsEnabled: true,
+    consultationsEnabled: true,
+    flashEnabled: true,
+  });
+  assert.deepEqual(flows, ["custom", "consultation", "flash"]);
+  const studioFlows = flows.filter((f) => f !== "flash");
+  assert.deepEqual(studioFlows, ["custom", "consultation"]);
+});
+
 console.log(`\n${passed} checks passed`);

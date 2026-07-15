@@ -12,7 +12,8 @@ interface ActionResult {
   error?: string;
 }
 
-/** The caller must own the artist on the appointment. Returns the artist id. */
+/** The caller must be the appointment's provider: its artist, or (for
+ * studio-level rows) the studio owner. */
 async function requireAppointmentArtist(
   appointmentId: string
 ): Promise<{ ok: true; supabase: Awaited<ReturnType<typeof createClient>> } | { ok: false; error: string }> {
@@ -24,19 +25,32 @@ async function requireAppointmentArtist(
 
   const { data: appt } = await supabase
     .from("appointments")
-    .select("artist_id")
+    .select("artist_id, studio_id")
     .eq("id", appointmentId)
     .maybeSingle();
-  if (!appt?.artist_id) return { ok: false, error: "Appointment not found." };
+  if (!appt || (!appt.artist_id && !appt.studio_id)) {
+    return { ok: false, error: "Appointment not found." };
+  }
 
-  const { data: artistRow } = await supabase
-    .from("artists")
-    .select("id")
-    .eq("id", appt.artist_id)
-    .or(`user_id.eq.${user.id},claimed_by.eq.${user.id}`)
-    .maybeSingle();
-  if (!artistRow) return { ok: false, error: "Only the artist can manage this deposit." };
-  return { ok: true, supabase };
+  if (appt.artist_id) {
+    const { data: artistRow } = await supabase
+      .from("artists")
+      .select("id")
+      .eq("id", appt.artist_id)
+      .or(`user_id.eq.${user.id},claimed_by.eq.${user.id}`)
+      .maybeSingle();
+    if (artistRow) return { ok: true, supabase };
+  }
+  if (appt.studio_id) {
+    const { data: studioRow } = await supabase
+      .from("studios")
+      .select("id")
+      .eq("id", appt.studio_id)
+      .eq("claimed_by", user.id)
+      .maybeSingle();
+    if (studioRow) return { ok: true, supabase };
+  }
+  return { ok: false, error: "Only the provider can manage this appointment." };
 }
 
 async function settleDeposit(
@@ -125,12 +139,13 @@ export async function cancelAppointment(
   // RLS-visible row or nothing: the caller must already be a party.
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, customer_id, artist_id, start_at, status, deposit_status")
+    .select("id, customer_id, artist_id, studio_id, start_at, status, deposit_status")
     .eq("id", parsed.data.appointmentId)
     .maybeSingle();
   if (!appt) return { success: false, error: "Appointment not found." };
 
   const isCustomer = appt.customer_id === user.id;
+  let isStudioOwner = false;
   if (!isCustomer) {
     const { data: artistRow } = await supabase
       .from("artists")
@@ -138,9 +153,20 @@ export async function cancelAppointment(
       .eq("id", appt.artist_id ?? "")
       .or(`user_id.eq.${user.id},claimed_by.eq.${user.id}`)
       .maybeSingle();
-    if (!artistRow) return { success: false, error: "Only a party to the booking can cancel." };
+    if (!artistRow && appt.studio_id) {
+      const { data: studioRow } = await supabase
+        .from("studios")
+        .select("id")
+        .eq("id", appt.studio_id)
+        .eq("claimed_by", user.id)
+        .maybeSingle();
+      isStudioOwner = Boolean(studioRow);
+    }
+    if (!artistRow && !isStudioOwner) {
+      return { success: false, error: "Only a party to the booking can cancel." };
+    }
   }
-  const cancelledBy = isCustomer ? "customer" : "artist";
+  const cancelledBy = isCustomer ? "customer" : isStudioOwner ? "studio" : "artist";
 
   // Cancellation window from the artist's settings (default 48h).
   let windowHours = 48;

@@ -9,10 +9,13 @@ import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, InviteArtistIcon, LinkShareIcon, BookingSettingsIcon, CalendarIcon } from "@/components/dashboard/dashboard-icons";
 import {
+  ArtistRequestsSection,
   BookingModePrompt,
   BookingSettingsPanel,
   FrontDeskPanel,
+  RequestDetailPanel,
   RosterScheduleCard,
+  useArtistRequests,
 } from "@/components/booking";
 import { StudioPageCard } from "./studio-page-card";
 import { StudioArtistsSection } from "./studio-artists-section";
@@ -39,6 +42,7 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
   const [photosOpen, setPhotosOpen] = useState(false);
   const [bookingSettingsOpen, setBookingSettingsOpen] = useState(false);
   const [frontDeskOpen, setFrontDeskOpen] = useState(false);
+  const studioRequests = useArtistRequests();
 
   const quickActions: QuickAction[] = [
     {
@@ -135,6 +139,12 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
         rightColumn={
           <>
             <BookingModePrompt onOpenSettings={() => setBookingSettingsOpen(true)} />
+            <ArtistRequestsSection
+              pending={studioRequests.pending}
+              others={studioRequests.others}
+              loading={studioRequests.loading}
+              onSelect={studioRequests.setSelected}
+            />
             <StudioPageCard />
             <StudioArtistsSection
               roster={dashboard.roster}
@@ -152,6 +162,13 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
               onClose={() => setBookingSettingsOpen(false)}
             />
             <FrontDeskPanel open={frontDeskOpen} onClose={() => setFrontDeskOpen(false)} />
+            <RequestDetailPanel
+              request={studioRequests.selected}
+              onClose={() => studioRequests.setSelected(null)}
+              onRespond={studioRequests.respond}
+              responding={studioRequests.responding}
+              error={studioRequests.error}
+            />
             <StudioEditInfoPanel
               open={dashboard.editStudioOpen}
               onClose={() => dashboard.setEditStudioOpen(false)}
