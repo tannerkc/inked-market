@@ -9,7 +9,7 @@ import { getPlatformMeta } from "@/lib/data/integration-platforms";
 
 // ─── Tier gating ────────────────────────────────────────────────────────────
 
-const TIER_ORDER: Record<TierSlug, number> = { liner: 0, shader: 1, magnum: 2 };
+export const TIER_ORDER: Record<TierSlug, number> = { liner: 0, shader: 1, magnum: 2 };
 
 export function tierMeetsRequirement(userTier: TierSlug | null, required: TierSlug): boolean {
   if (!userTier) return false;

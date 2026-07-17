@@ -79,6 +79,9 @@ export interface Studio extends BaseEntity {
   // Seeding & claim fields (populated by Supabase, optional for backwards compat)
   slug?: string;
   source?: StudioSource;
+  /** Listed on the marketplace (studios.is_visible). RLS hides false rows from
+   *  everyone but the owner, so receiving false here means the viewer owns it. */
+  isVisible?: boolean;
   googlePlaceId?: string;
   claimedBy?: string;
   claimedAt?: Date;
@@ -107,6 +110,8 @@ export interface Artist extends BaseEntity {
   yearsOfExperience: number;
   certifications?: string[];
   location?: { city: string; state: string };
+  /** Public URL slug (/artists/[slug]) — populated by Supabase. */
+  slug?: string;
 }
 
 export interface PortfolioImage {
@@ -221,6 +226,8 @@ export interface ChecklistItem {
   id: string;
   label: string;
   completed: boolean;
+  /** Must be complete before the studio can go live (be publicly listed). */
+  required?: boolean;
   skippedLabel?: string;
 }
 
@@ -291,7 +298,7 @@ export interface QuickAction {
 
 export type TierSlug = "liner" | "shader" | "magnum";
 export type BillingCycle = "monthly" | "annual";
-export type BillingStatus = "active" | "cancelled" | "draft";
+export type BillingStatus = "none" | "trialing" | "active" | "past_due" | "cancelled";
 
 export interface NotificationPreferences {
   marketing: boolean;
