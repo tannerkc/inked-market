@@ -9,21 +9,48 @@ import {
   ProgressBar,
   BillingToggle,
   SignupTierCard,
+  ConfirmEmailNotice,
+  useSignupCompletion,
 } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { artistTiers } from "@/lib/data/signup-tiers";
 import { useAuth } from "@/components/providers/auth-provider";
 
 export default function ArtistPlanPage() {
-  const { updateSignupProgress, completeSignup, signupProgress } = useAuth();
+  const { updateSignupProgress, signupProgress } = useAuth();
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedTier, setSelectedTier] = useState(signupProgress.plan || "Liner");
+  // Paid pick: the account is created first, then Stripe Checkout (14-day
+  // trial, no card). Abandoning checkout leaves the new account on Liner.
+  const destination =
+    selectedTier === "Shader"
+      ? `/billing/start?tier=shader&cycle=${isAnnual ? "annual" : "monthly"}&intent=upgrade`
+      : "/dashboard";
+  const { complete, error, confirmEmail, pending } = useSignupCompletion(destination);
 
   const handleActivate = () => {
-    updateSignupProgress({ plan: selectedTier });
-    completeSignup();
-    window.location.href = "/dashboard";
+    void complete({ plan: selectedTier });
   };
+
+  if (confirmEmail) {
+    return (
+      <div className="text-center">
+        <ProgressBar currentStep={4} totalSteps={4} />
+        <Eyebrow text="One Last Thing" color="red" />
+        <Headline
+          variant="mixed"
+          size="sm"
+          words={[
+            { text: "Confirm", font: "pirata" },
+            { text: "Your", font: "rye" },
+            { text: "Email", font: "cook", color: "text-ink-red" },
+          ]}
+        />
+        <Subtitle text="Your artist account is created — verify your email to unlock the dashboard." className="mb-6" />
+        <ConfirmEmailNotice email={confirmEmail} />
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
@@ -62,6 +89,10 @@ export default function ArtistPlanPage() {
         ))}
       </div>
 
+      {error ? (
+        <p className="text-ink-red text-[11px] font-mono tracking-[0.1em] text-left mb-3">{error}</p>
+      ) : null}
+
       <Button
         type="button"
         variant="ink"
@@ -69,8 +100,9 @@ export default function ArtistPlanPage() {
         statusDot
         className="w-full"
         onClick={handleActivate}
+        disabled={pending}
       >
-        Activate Account
+        {pending ? "Creating Account…" : "Activate Account"}
       </Button>
 
       <Link

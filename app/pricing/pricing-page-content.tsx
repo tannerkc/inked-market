@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "@/components/providers/theme-provider";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/auth-provider";
 import { PageHero, BackToTop } from "@/components/content";
 import { Divider } from "@/components/ui/divider";
 import {
@@ -18,8 +19,6 @@ import {
   studioTiers as signupStudioTiers,
 } from "@/lib/data/signup-tiers";
 
-/* ─── Tier data (prices from signup-tiers.ts, features expanded for pricing page) */
-
 interface TierData {
   name: string;
   price: number;
@@ -32,11 +31,10 @@ interface TierData {
 
 const artistTiers: TierData[] = [
   {
-    name: signupArtistTiers[0].name,
-    price: signupArtistTiers[0].price,
-    annualPrice: signupArtistTiers[0].annualPrice,
-    description:
-      "Manage your profile and gallery on your studio\u2019s page.",
+    name: signupArtistTiers[0]!.name,
+    price: signupArtistTiers[0]!.price,
+    annualPrice: signupArtistTiers[0]!.annualPrice,
+    description: "Manage your profile and gallery on your studio’s page.",
     features: [
       { text: "Profile & gallery management", included: true },
       { text: "Gallery displayed on studio page", included: true },
@@ -47,11 +45,10 @@ const artistTiers: TierData[] = [
     ctaLabel: "Get Started Free",
   },
   {
-    name: signupArtistTiers[1].name,
-    price: signupArtistTiers[1].price,
-    annualPrice: signupArtistTiers[1].annualPrice,
-    description:
-      "Go independent. Get your own listing and be discovered by clients.",
+    name: signupArtistTiers[1]!.name,
+    price: signupArtistTiers[1]!.price,
+    annualPrice: signupArtistTiers[1]!.annualPrice,
+    description: "Go independent. Get your own listing and be discovered by clients.",
     features: [
       { text: "Profile & gallery management", included: true },
       { text: "Gallery displayed on studio page", included: true },
@@ -65,11 +62,10 @@ const artistTiers: TierData[] = [
 
 const studioTiers: TierData[] = [
   {
-    name: signupStudioTiers[0].name,
-    price: signupStudioTiers[0].price,
-    annualPrice: signupStudioTiers[0].annualPrice,
-    description:
-      "A professional profile page to showcase your studio on the marketplace.",
+    name: signupStudioTiers[0]!.name,
+    price: signupStudioTiers[0]!.price,
+    annualPrice: signupStudioTiers[0]!.annualPrice,
+    description: "A professional profile page to showcase your studio on the marketplace.",
     features: [
       { text: "Profile-style listing", included: true },
       { text: "Discover marketplace presence", included: true },
@@ -81,11 +77,10 @@ const studioTiers: TierData[] = [
     ],
   },
   {
-    name: signupStudioTiers[1].name,
-    price: signupStudioTiers[1].price,
-    annualPrice: signupStudioTiers[1].annualPrice,
-    description:
-      "A fully customizable template website to represent your brand.",
+    name: signupStudioTiers[1]!.name,
+    price: signupStudioTiers[1]!.price,
+    annualPrice: signupStudioTiers[1]!.annualPrice,
+    description: "A fully customizable template website to represent your brand.",
     features: [
       { text: "Profile-style listing", included: true },
       { text: "Discover marketplace presence", included: true },
@@ -98,11 +93,10 @@ const studioTiers: TierData[] = [
     recommended: true,
   },
   {
-    name: signupStudioTiers[2].name,
-    price: signupStudioTiers[2].price,
-    annualPrice: signupStudioTiers[2].annualPrice,
-    description:
-      "Full creative control with exclusive templates and premium search placement.",
+    name: signupStudioTiers[2]!.name,
+    price: signupStudioTiers[2]!.price,
+    annualPrice: signupStudioTiers[2]!.annualPrice,
+    description: "Full creative control with exclusive templates and premium search placement.",
     features: [
       { text: "Profile-style listing", included: true },
       { text: "Discover marketplace presence", included: true },
@@ -115,32 +109,36 @@ const studioTiers: TierData[] = [
   },
 ];
 
-/* ─── Page ───────────────────────────────────────────────────── */
-
 export function PricingPageContent() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   const [audience, setAudience] = useState<Audience>("studios");
   const [isAnnual, setIsAnnual] = useState(false);
+  const { user } = useAuth();
+  const router = useRouter();
 
   const tiers = audience === "artists" ? artistTiers : studioTiers;
   const isArtists = audience === "artists";
 
+  // Signed-in pros go straight to Stripe Checkout for paid tiers; everyone
+  // else routes into the matching signup flow (plan choice happens there).
+  const selectTier = (tierName: string) => {
+    const slug = tierName.toLowerCase();
+    const roleMatches =
+      (isArtists && user?.role === "artist") || (!isArtists && user?.role === "studio");
+    const isFreeArtistTier = isArtists && slug === "liner";
+    if (roleMatches && !isFreeArtistTier) {
+      router.push(`/billing/start?tier=${slug}&cycle=${isAnnual ? "annual" : "monthly"}&intent=upgrade`);
+    } else {
+      router.push(isArtists ? "/signup/artist" : "/signup/studio");
+    }
+  };
+
   return (
-    <div
-      className={
-        isDark
-          ? "min-h-screen bg-ink-black"
-          : "min-h-screen bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark"
-      }
-    >
+    <div className="min-h-screen bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark dark:bg-ink-black dark:bg-none">
       <PageHero
         headline="PRICING"
         subtitle="simple · transparent · flexible"
         eyebrow="Plans"
         accentColor="rust"
-        variant={mode}
         description="Choose the plan that fits your goals. Upgrade, downgrade, or cancel anytime."
       />
 
@@ -151,7 +149,6 @@ export function PricingPageContent() {
           onAudienceChange={setAudience}
           isAnnual={isAnnual}
           onBillingChange={setIsAnnual}
-          variant={mode}
           className="mb-12"
         />
 
@@ -175,26 +172,24 @@ export function PricingPageContent() {
               features={tier.features}
               recommended={tier.recommended}
               ctaLabel={tier.ctaLabel}
-              variant={mode}
+              onSelect={() => selectTier(tier.name)}
             />
           ))}
         </div>
 
         {/* Search Boost callout — artists only */}
-        {isArtists && (
-          <SearchBoostCallout variant={mode} className="mt-8" />
-        )}
+        {isArtists && <SearchBoostCallout className="mt-8" />}
 
-        <Divider variant={isDark ? "dark" : "light"} className="my-16" />
+        <Divider className="my-16" />
 
         {/* FAQ */}
-        <PricingFaq variant={mode} className="mb-16" />
+        <PricingFaq className="mb-16" />
 
         {/* CTA */}
-        <PricingCta audience={audience} variant={mode} />
+        <PricingCta audience={audience} />
       </div>
 
-      <BackToTop variant={mode} />
+      <BackToTop />
     </div>
   );
 }

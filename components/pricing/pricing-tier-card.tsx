@@ -16,7 +16,7 @@ interface PricingTierCardProps {
   features: PricingFeature[];
   recommended?: boolean;
   ctaLabel?: string;
-  variant?: "light" | "dark";
+  onSelect?: () => void;
   className?: string;
 }
 
@@ -29,10 +29,9 @@ function PricingTierCard({
   features,
   recommended = false,
   ctaLabel = "Get Started",
-  variant = "dark",
+  onSelect,
   className,
 }: PricingTierCardProps) {
-  const isDark = variant === "dark";
   const showAnnual = isAnnual && annualPrice !== undefined;
   const displayPrice = showAnnual ? annualPrice : price;
   const isFree = price === 0;
@@ -42,76 +41,40 @@ function PricingTierCard({
       className={cn(
         "relative flex flex-col p-7 rounded-2xl border transition-all duration-300",
         recommended
-          ? isDark
-            ? "border-ink-rust/40 bg-ink-cream/[0.05]"
-            : "border-ink-rust/40 bg-ink-black/[0.04]"
-          : isDark
-            ? "border-ink-cream/[0.06] bg-ink-cream/[0.03]"
-            : "border-ink-black/[0.06] bg-ink-black/[0.02]",
+          ? "border-ink-rust/40 bg-ink-black/[0.04] dark:bg-ink-cream/[0.05]"
+          : "border-ink-black/[0.06] bg-ink-black/[0.02] dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.03]",
         className
       )}
     >
       {/* Best Value badge */}
       {recommended && (
-        <div
-          className={cn(
-            "absolute -top-3 left-7 px-3 py-1 rounded-full font-mono text-[9px] tracking-[0.15em] uppercase",
-            isDark
-              ? "bg-ink-rust text-ink-cream"
-              : "bg-ink-rust text-white"
-          )}
-        >
+        <div className="absolute -top-3 left-7 px-3 py-1 rounded-full font-mono text-[9px] tracking-[0.15em] uppercase bg-ink-rust text-white dark:text-ink-cream">
           Best Value
         </div>
       )}
 
       {/* Tier name */}
-      <span
-        className={cn(
-          "font-mono text-[10px] tracking-[0.15em] uppercase mb-4",
-          isDark ? "text-ink-cream/30" : "text-ink-black/30"
-        )}
-      >
+      <span className="font-mono text-[10px] tracking-[0.15em] uppercase mb-4 text-ink-black/30 dark:text-ink-cream/30">
         {name}
       </span>
 
       {/* Price */}
       <div className="mb-2">
         {isFree ? (
-          <span
-            className={cn(
-              "text-4xl font-bold",
-              isDark ? "text-ink-cream" : "text-ink-black"
-            )}
-          >
+          <span className="text-4xl font-bold text-ink-black dark:text-ink-cream">
             Free
           </span>
         ) : (
           <div className="flex items-baseline gap-1">
             {showAnnual && (
-              <span
-                className={cn(
-                  "text-lg line-through mr-1",
-                  isDark ? "text-ink-cream/20" : "text-ink-black/20"
-                )}
-              >
+              <span className="text-lg line-through mr-1 text-ink-black/20 dark:text-ink-cream/20">
                 ${price.toFixed(2)}
               </span>
             )}
-            <span
-              className={cn(
-                "text-4xl font-bold",
-                isDark ? "text-ink-cream" : "text-ink-black"
-              )}
-            >
+            <span className="text-4xl font-bold text-ink-black dark:text-ink-cream">
               ${displayPrice.toFixed(2)}
             </span>
-            <span
-              className={cn(
-                "text-sm",
-                isDark ? "text-ink-cream/30" : "text-ink-black/30"
-              )}
-            >
+            <span className="text-sm text-ink-black/30 dark:text-ink-cream/30">
               /mo
             </span>
           </div>
@@ -120,12 +83,7 @@ function PricingTierCard({
 
       {/* Annual billing note */}
       {showAnnual && !isFree && (
-        <p
-          className={cn(
-            "font-mono text-[9px] tracking-[0.1em] uppercase mb-4",
-            isDark ? "text-ink-cream/20" : "text-ink-black/20"
-          )}
-        >
+        <p className="font-mono text-[9px] tracking-[0.1em] uppercase mb-4 text-ink-black/20 dark:text-ink-cream/20">
           Billed annually
         </p>
       )}
@@ -133,12 +91,7 @@ function PricingTierCard({
       {isFree && <div className="mb-4" />}
 
       {/* Description */}
-      <p
-        className={cn(
-          "text-sm leading-relaxed mb-6",
-          isDark ? "text-ink-cream/40" : "text-ink-black/40"
-        )}
-      >
+      <p className="text-sm leading-relaxed mb-6 text-ink-black/40 dark:text-ink-cream/40">
         {description}
       </p>
 
@@ -162,10 +115,7 @@ function PricingTierCard({
               </svg>
             ) : (
               <svg
-                className={cn(
-                  "w-4 h-4 mt-0.5 shrink-0",
-                  isDark ? "text-ink-cream/15" : "text-ink-black/15"
-                )}
+                className="w-4 h-4 mt-0.5 shrink-0 text-ink-black/15 dark:text-ink-cream/15"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -182,12 +132,8 @@ function PricingTierCard({
               className={cn(
                 "text-sm",
                 feature.included
-                  ? isDark
-                    ? "text-ink-cream/60"
-                    : "text-ink-black/60"
-                  : isDark
-                    ? "text-ink-cream/20"
-                    : "text-ink-black/20"
+                  ? "text-ink-black/60 dark:text-ink-cream/60"
+                  : "text-ink-black/20 dark:text-ink-cream/20"
               )}
             >
               {feature.text}
@@ -198,15 +144,10 @@ function PricingTierCard({
 
       {/* CTA button */}
       <Button
-        variant={
-          recommended
-            ? "ink-red"
-            : isDark
-              ? "ink-light-outline"
-              : "ink-outline"
-        }
+        variant={recommended ? "ink-red" : "ink-outline"}
         size="md"
         className="w-full"
+        onClick={onSelect}
       >
         {ctaLabel}
       </Button>
