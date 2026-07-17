@@ -1,5 +1,6 @@
 /** Billing invariants. Run: npx tsx scripts/check-billing.ts */
 import { resolveEntitlement, ENTITLED_SUB_STATUSES } from "../lib/billing/entitlements-core";
+import { priceIdFor, lookupPrice, PAID_TIERS } from "../lib/billing/catalog";
 
 let failed = 0;
 function check(name: string, cond: boolean) {
@@ -29,6 +30,23 @@ check("future-expiry grant counts", resolveEntitlement({ tier: null, status: nul
 check("revoked grant ignored", resolveEntitlement({ tier: null, status: null }, [g("magnum", null, past)], NOW).tier === null);
 check("best of many grants", resolveEntitlement({ tier: null, status: null }, [g("liner"), g("magnum"), g("shader")], NOW).tier === "magnum");
 check("entitled statuses frozen", ENTITLED_SUB_STATUSES.join(",") === "trialing,active,past_due");
+
+console.log("\ncatalog round-trip");
+process.env.STRIPE_PRICE_ARTIST_SHADER_MONTHLY = "price_a_sm";
+process.env.STRIPE_PRICE_ARTIST_SHADER_ANNUAL = "price_a_sa";
+process.env.STRIPE_PRICE_STUDIO_LINER_MONTHLY = "price_s_lm";
+process.env.STRIPE_PRICE_STUDIO_LINER_ANNUAL = "price_s_la";
+process.env.STRIPE_PRICE_STUDIO_SHADER_MONTHLY = "price_s_sm";
+process.env.STRIPE_PRICE_STUDIO_SHADER_ANNUAL = "price_s_sa";
+process.env.STRIPE_PRICE_STUDIO_MAGNUM_MONTHLY = "price_s_mm";
+process.env.STRIPE_PRICE_STUDIO_MAGNUM_ANNUAL = "price_s_ma";
+
+check("artist shader monthly", priceIdFor("artist", "shader", "monthly") === "price_a_sm");
+check("studio magnum annual", priceIdFor("studio", "magnum", "annual") === "price_s_ma");
+check("reverse lookup", JSON.stringify(lookupPrice("price_s_sa")) === JSON.stringify({ role: "studio", tier: "shader", cycle: "annual" }));
+check("unknown price -> null", lookupPrice("price_nope") === null);
+check("artist liner is not purchasable", (() => { try { priceIdFor("artist", "liner", "monthly"); return false; } catch { return true; } })());
+check("paid tiers frozen", JSON.stringify(PAID_TIERS) === JSON.stringify({ artist: ["shader"], studio: ["liner", "shader", "magnum"] }));
 
 if (failed) { console.error(`\n${failed} check(s) failed`); process.exit(1); }
 console.log("\nAll billing checks passed");
