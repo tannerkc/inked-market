@@ -1,93 +1,73 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useEntitlement } from "@/lib/hooks/use-entitlement";
 import { artistTiers, studioTiers } from "@/lib/data/signup-tiers";
-import type { BillingInfo, BillingCycle, BillingStatus, TierSlug } from "@/lib/types";
+import { startCheckout, openBillingPortal } from "@/app/billing/actions";
+import type { BillingCycle, TierSlug } from "@/lib/types";
 
-const DEFAULT_BILLING: BillingInfo = {
-  plan: null,
-  cycle: "monthly",
-  status: "draft",
-};
-
+/** Billing state + actions, backed by profiles (the entitlement engine's
+ *  output) and Stripe Checkout/Portal. This client never mutates billing
+ *  fields — lapse/downgrade/unpublish all happen server-side (webhook sync,
+ *  cron sweep), so the old client-side lapse sweep is gone. */
 export function usePlanBilling() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const role = user?.role ?? "customer";
-  const billing: BillingInfo = { ...DEFAULT_BILLING, ...user?.billing };
+  const entitlement = useEntitlement();
 
-  // Derive plan from legacy `plan` field if billing not yet set
-  const effectivePlan = useMemo((): TierSlug | null => {
-    if (billing.plan) return billing.plan;
-    // Map legacy plan names
-    const legacy = user?.plan?.toLowerCase();
-    if (!legacy || legacy === "free") return role === "artist" ? "liner" : null;
-    if (legacy === "pro" || legacy === "shader") return "shader";
-    if (legacy === "basic" || legacy === "liner") return "liner";
-    if (legacy === "studio" || legacy === "magnum") return "magnum";
-    return null;
-  }, [billing.plan, user?.plan, role]);
-
-  const effectiveStatus = useMemo((): BillingStatus => {
-    if (billing.status !== "draft") return billing.status;
-    if (effectivePlan && (role === "artist" ? effectivePlan !== "liner" : true)) return "active";
-    if (role === "artist") return "active"; // artists always have at least liner
-    return "draft"; // studio with no plan
-  }, [billing.status, effectivePlan, role]);
+  // Artists are always at least Liner (free tier); studios start with nothing.
+  const currentPlan: TierSlug | null =
+    entitlement.tier ?? (role === "artist" ? "liner" : null);
 
   const tiers = role === "studio" ? studioTiers : artistTiers;
-  const [cycle, setCycle] = useState<BillingCycle>(billing.cycle);
+  const [cycle, setCycle] = useState<BillingCycle>(entitlement.cycle);
+  const [busy, setBusy] = useState(false);
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
 
+  // Paid plan changes all go through Stripe Checkout; the webhook + return
+  // route write the new state.
   const changePlan = useCallback(
     (newPlan: TierSlug) => {
-      const nextBilling = new Date();
-      nextBilling.setMonth(nextBilling.getMonth() + (cycle === "annual" ? 12 : 1));
-
-      const updated: BillingInfo = {
-        plan: newPlan,
-        cycle,
-        status: "active",
-        nextBillingDate: nextBilling.toISOString(),
-        cancelledAt: undefined,
-      };
-      updateUser({ billing: updated, plan: newPlan });
+      if (busy) return;
+      setBusy(true);
+      void startCheckout({ tier: newPlan, cycle, intent: "upgrade" }).then((r) => {
+        if (r.url) window.location.assign(r.url);
+        else setBusy(false);
+      });
     },
-    [cycle, updateUser]
+    [busy, cycle]
   );
 
-  const cancelPlan = useCallback(() => {
-    const updated: BillingInfo = {
-      ...billing,
-      plan: effectivePlan,
-      status: "cancelled",
-      cancelledAt: new Date().toISOString(),
-    };
-    updateUser({ billing: updated });
-    setShowConfirmCancel(false);
-  }, [billing, effectivePlan, updateUser]);
+  // Cancel/resume/card/plan-switch for existing subscribers: Stripe Portal.
+  const manageBilling = useCallback(() => {
+    if (busy) return;
+    setBusy(true);
+    void openBillingPortal().then((r) => {
+      if (r.url) window.location.assign(r.url);
+      else setBusy(false);
+    });
+  }, [busy]);
 
-  const resumePlan = useCallback(() => {
-    const updated: BillingInfo = {
-      ...billing,
-      plan: effectivePlan,
-      status: "active",
-      cancelledAt: undefined,
-    };
-    updateUser({ billing: updated });
-  }, [billing, effectivePlan, updateUser]);
+  const cancelPlan = useCallback(() => {
+    setShowConfirmCancel(false);
+    manageBilling();
+  }, [manageBilling]);
 
   return {
     role,
     tiers,
-    currentPlan: effectivePlan,
-    status: effectiveStatus,
+    currentPlan,
+    tierSource: entitlement.source,
+    status: entitlement.status,
+    nextBillingDate: entitlement.nextBillingDate,
+    cancelledAt: entitlement.cancelledAt,
     cycle,
     setCycle,
-    billing,
     changePlan,
     cancelPlan,
-    resumePlan,
+    manageBilling,
+    busy,
     showConfirmCancel,
     setShowConfirmCancel,
   };

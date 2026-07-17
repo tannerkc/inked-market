@@ -2,15 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useEntitlement } from "@/lib/hooks/use-entitlement";
 import { Button } from "@/components/ui/button";
 import { SettingsSection } from "./settings-section";
 import { ConfirmationDialog } from "./confirmation-dialog";
 
 export function DangerZoneSection() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const { user, logout } = useAuth();
 
   const [showDeactivate, setShowDeactivate] = useState(false);
@@ -35,7 +33,8 @@ export function DangerZoneSection() {
     logout();
   }, [user?.id, logout]);
 
-  const hasPaidPlan = user?.billing?.status === "active" && user?.billing?.plan && user.billing.plan !== "liner";
+  const { tier, source } = useEntitlement();
+  const hasPaidPlan = source === "subscription" && tier !== null && tier !== "liner";
   const isStudioWithArtists = user?.role === "studio"; // In production, check roster count
   const isArtistWithStudio = user?.role === "artist"; // In production, check affiliation
 
@@ -50,18 +49,14 @@ export function DangerZoneSection() {
       <div className={cn(cardClass, "mb-4")}>
         <div className="flex items-center justify-between">
           <div>
-            <p className={cn("text-[12px] font-medium", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+            <p className="text-[12px] font-medium text-ink-black/60 dark:text-ink-cream/60">
               Deactivate Account
             </p>
-            <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/25" : "text-ink-black/25")}>
+            <p className="text-[10px] mt-0.5 text-ink-black/25 dark:text-ink-cream/25">
               Hides your profile, pauses billing. Reactivate by logging back in.
             </p>
           </div>
-          <Button
-            variant={isDark ? "ink-light-outline" : "ink-outline"}
-            size="sm"
-            onClick={() => setShowDeactivate(true)}
-          >
+          <Button variant="ink-outline" size="sm" onClick={() => setShowDeactivate(true)}>
             Deactivate
           </Button>
         </div>
@@ -71,10 +66,10 @@ export function DangerZoneSection() {
       <div className={cardClass}>
         <div className="flex items-center justify-between">
           <div>
-            <p className={cn("text-[12px] font-medium text-ink-red/70")}>
+            <p className="text-[12px] font-medium text-ink-red/70">
               Delete Account
             </p>
-            <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/25" : "text-ink-black/25")}>
+            <p className="text-[10px] mt-0.5 text-ink-black/25 dark:text-ink-cream/25">
               Permanently removes your profile, portfolio, and all associated data. This cannot be undone.
             </p>
           </div>
@@ -94,10 +89,10 @@ export function DangerZoneSection() {
         onConfirm={handleDeactivate}
       >
         <div className="space-y-2">
-          <p className={cn("text-[11px]", isDark ? "text-ink-cream/40" : "text-ink-black/40")}>
+          <p className="text-[11px] text-ink-black/40 dark:text-ink-cream/40">
             Your account will be hidden from all public views and your subscription billing will be paused.
           </p>
-          <p className={cn("text-[11px]", isDark ? "text-ink-cream/40" : "text-ink-black/40")}>
+          <p className="text-[11px] text-ink-black/40 dark:text-ink-cream/40">
             You can reactivate your account at any time by logging back in.
           </p>
         </div>
@@ -114,10 +109,10 @@ export function DangerZoneSection() {
         requireTyped="DELETE"
       >
         <div className="space-y-2">
-          <p className={cn("text-[11px]", isDark ? "text-ink-cream/40" : "text-ink-black/40")}>
+          <p className="text-[11px] text-ink-black/40 dark:text-ink-cream/40">
             This action is permanent and cannot be undone. The following will be removed:
           </p>
-          <ul className={cn("text-[11px] space-y-1 pl-3", isDark ? "text-ink-cream/30" : "text-ink-black/30")}>
+          <ul className="text-[11px] space-y-1 pl-3 text-ink-black/30 dark:text-ink-cream/30">
             <li>• Your profile and all associated data</li>
             {user?.role === "artist" && <li>• Your portfolio and gallery images</li>}
             {user?.role === "studio" && <li>• Your studio listing and page</li>}
@@ -140,7 +135,7 @@ export function DangerZoneSection() {
             </p>
           )}
 
-          <p className={cn("text-[10px] mt-2", isDark ? "text-ink-cream/20" : "text-ink-black/20")}>
+          <p className="text-[10px] mt-2 text-ink-black/20 dark:text-ink-cream/20">
             Your reviews will remain visible but will no longer display your name or link to your profile.
           </p>
         </div>

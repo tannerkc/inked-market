@@ -331,13 +331,8 @@ export interface PrivacyPreferences {
   showReviewHistory?: boolean;
 }
 
-export interface BillingInfo {
-  plan: TierSlug | null;
-  cycle: BillingCycle;
-  nextBillingDate?: string;
-  cancelledAt?: string;
-  status: BillingStatus;
-}
+// Billing state lives on profiles (tier, tier_source, billing_status…), read
+// via useEntitlement() and written only by lib/billing/entitlements.ts.
 
 export interface ConnectedAccount {
   handle?: string;

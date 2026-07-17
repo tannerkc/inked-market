@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useEntitlement } from "@/lib/hooks/use-entitlement";
 import type { PrivacyPreferences } from "@/lib/types";
 
 const DEFAULTS: PrivacyPreferences = {
@@ -38,8 +39,8 @@ export function usePrivacy() {
   );
 
   // Artist on free tier can't appear in search
-  const plan = user?.billing?.plan ?? user?.plan?.toLowerCase();
-  const isFreeTier = user?.role === "artist" && (!plan || plan === "liner" || plan === "free");
+  const { tier } = useEntitlement();
+  const isFreeTier = user?.role === "artist" && (!tier || tier === "liner");
 
   return { prefs, toggle, setPortfolioVisibility, role: user?.role ?? "customer", isFreeTier };
 }
