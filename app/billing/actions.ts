@@ -25,8 +25,10 @@ async function requireUser() {
 const CheckoutInput = z.object({
   tier: z.enum(["liner", "shader", "magnum"]),
   cycle: z.enum(["monthly", "annual"]),
-  intent: z.enum(["publish", "upgrade"]),
+  intent: z.enum(["publish", "upgrade", "golive"]),
 });
+
+const CANCEL_PATHS = { publish: "/dashboard/builder", golive: "/dashboard", upgrade: "/settings" } as const;
 
 export async function startCheckout(raw: unknown): Promise<{ url?: string; error?: string }> {
   try {
@@ -63,7 +65,7 @@ export async function startCheckout(raw: unknown): Promise<{ url?: string; error
       intent: input.intent,
       withTrial: !bc.trial_used,
       successUrl: `${appUrl()}/api/billing/return?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: input.intent === "publish" ? `${appUrl()}/dashboard/builder` : `${appUrl()}/settings`,
+      cancelUrl: `${appUrl()}${CANCEL_PATHS[input.intent]}`,
     });
     return { url: session.url };
   } catch (err) {

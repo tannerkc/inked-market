@@ -40,7 +40,7 @@ export async function createSubscriptionCheckout(input: {
   customerId: string;
   priceId: string;
   userId: string;
-  intent: "publish" | "upgrade";
+  intent: "publish" | "upgrade" | "golive";
   withTrial: boolean;
   successUrl: string;
   cancelUrl: string;

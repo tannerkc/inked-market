@@ -21,6 +21,9 @@ interface StudioContextValue {
   studio: StudioData | null;
   loading: boolean;
   update: (partial: Partial<StudioData>) => Promise<void>;
+  /** Local-state merge with NO DB write — for fields the server just wrote
+   *  (publish columns are client-write-blocked by trg_studios_publish_guard). */
+  applyLocal: (partial: Partial<StudioData>) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -65,7 +68,12 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
         seeded.current = true;
         const initial = seedStudioFromAuthUser(user);
         await repo.set(initial);
-        setStudio(initial);
+        // Re-read so the fresh row's id/slug are in state immediately —
+        // photo uploads and Share Listing need them before any reload.
+        setStudio((await repo.get()) ?? initial);
+        setLoading(false);
+      } else {
+        // No stored studio and no user (logged-out / empty local) — stop loading.
         setLoading(false);
       }
     });
@@ -79,8 +87,12 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     [repo],
   );
 
+  const applyLocal = useCallback((partial: Partial<StudioData>) => {
+    setStudio((prev) => ({ ...(prev ?? ({} as StudioData)), ...partial }));
+  }, []);
+
   return (
-    <StudioContext.Provider value={{ studio, loading, update }}>
+    <StudioContext.Provider value={{ studio, loading, update, applyLocal }}>
       {children}
     </StudioContext.Provider>
   );

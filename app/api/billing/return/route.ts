@@ -26,6 +26,24 @@ export async function GET(request: Request) {
       dest.searchParams.set(result.ok ? "published" : "upgraded", "1");
       return NextResponse.redirect(dest);
     }
+    if (session.metadata.intent === "golive" && session.metadata.user_id) {
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("tier")
+        .eq("id", session.metadata.user_id)
+        .maybeSingle();
+      const dest = new URL("/dashboard", url.origin);
+      if (profile?.tier) {
+        await admin
+          .from("studios")
+          .update({ is_visible: true })
+          .eq("claimed_by", session.metadata.user_id);
+        dest.searchParams.set("live", "1");
+      } else {
+        dest.searchParams.set("upgraded", "1");
+      }
+      return NextResponse.redirect(dest);
+    }
     settings.searchParams.set("upgraded", "1");
     return NextResponse.redirect(settings);
   } catch (err) {

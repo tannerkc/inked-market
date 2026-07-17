@@ -1,294 +1,144 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useStudio } from "@/lib/providers/studio-provider";
-import { getStudioDashboardData, getArtistSearchResults, getStudioRoster } from "@/lib/data/dashboard";
-import { computeAutoSpecialties } from "@/lib/utils/compute-auto-specialties";
-import type { Affiliation, StudioService } from "@/lib/types";
+import { usePlanBilling } from "@/components/settings/use-plan-billing";
+import { setStudioVisibility } from "@/app/dashboard/builder/actions";
+import { startCheckout } from "@/app/billing/actions";
 import {
-  countActiveIntegrations,
-  connectIntegration,
-  disconnectIntegration,
-} from "@/lib/utils/integration-helpers";
-import { getPlatformMeta } from "@/lib/data/integration-platforms";
-import type { IntegrationPlatform, IntegrationPlatformMeta, IntegrationMode } from "@/lib/types/integrations";
+  buildStudioChecklist,
+  checklistProgress,
+  missingRequiredSteps,
+} from "@/lib/utils/studio-onboarding";
+import type { StudioData } from "@/lib/repositories";
+import type { DashboardData, TierSlug } from "@/lib/types";
+import { useStudioForm } from "./hooks/use-studio-form";
+import { useBusinessHours } from "./hooks/use-business-hours";
+import { useArtistRoster } from "./hooks/use-artist-roster";
+import { useStudioIntegrations } from "./hooks/use-studio-integrations";
+import { useStudioServices } from "./hooks/use-studio-services";
+import { useAutoSpecialties } from "./hooks/use-auto-specialties";
+import { useStudioStats } from "./hooks/use-studio-stats";
 
-export function useStudioDashboard() {
+function buildSubtitle(studio: StudioData | null): string {
+  if (!studio?.city || !studio?.state) return "";
+  const phoneSuffix = studio.phone ? ` · ${studio.phone}` : "";
+  return `${studio.city}, ${studio.state}${phoneSuffix}`;
+}
+
+export function useStudioDashboard(oauthReturn: { platform: string; status: string } | null = null) {
   const { user } = useAuth();
-  const { studio, update } = useStudio();
+  const { studio, update, applyLocal } = useStudio();
 
-  const mockData = getStudioDashboardData();
-  const data = {
-    ...mockData,
-    name: studio?.name ?? "",
-    subtitle: studio?.city && studio?.state
-      ? `${studio.city}, ${studio.state}${studio.phone ? ` · ${studio.phone}` : ""}`
-      : "",
-    tags: studio?.specialties ?? [],
-  };
+  const form = useStudioForm(studio, update);
+  const hours = useBusinessHours(studio, update);
+  const roster = useArtistRoster(studio);
+  const integrations = useStudioIntegrations(studio, update, oauthReturn);
+  const servicesHook = useStudioServices(studio, update);
+  const autoSpec = useAutoSpecialties(studio, update, roster.roster, form.setStudioForm);
+  const stats = useStudioStats(studio, roster.roster);
 
-  // Panel open/close
-  const [editStudioOpen, setEditStudioOpen] = useState(false);
-  const [hoursOpen, setHoursOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteTab, setInviteTab] = useState<"invite" | "roster">("invite");
-
-  // Studio form
-  const [studioForm, setStudioForm] = useState({
-    name: studio?.name ?? "",
-    city: studio?.city ?? "",
-    state: studio?.state ?? "",
-    phone: studio?.phone ?? "",
-    email: studio?.email ?? "",
-    address: studio?.address ?? "",
-    zipCode: studio?.zipCode ?? "",
-    bio: studio?.bio ?? "",
-    specialties: studio?.specialties ?? [] as string[],
-    instagram: studio?.instagram ?? "",
-    website: studio?.website ?? "",
-    tiktok: studio?.tiktok ?? "",
-  });
-
-  // Auto-specialties
-  const [autoSpecialties, setAutoSpecialties] = useState(studio?.autoSpecialties ?? false);
-
-  // Services (walk-ins, piercing)
-  const [services, setServices] = useState<StudioService[]>(studio?.services ?? []);
-
-  // Business hours
-  const [businessHours, setBusinessHours] = useState<Record<string, { open: string; close: string; closed: boolean }>>(
-    studio?.hours ?? {
-      Monday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Tuesday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Wednesday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Thursday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Friday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Saturday: { open: "10:00 AM", close: "6:00 PM", closed: false },
-      Sunday: { open: "10:00 AM", close: "6:00 PM", closed: true },
-    }
-  );
-  const [hoursSaved, setHoursSaved] = useState(false);
-
-  // Artist management
-  const [artistSearch, setArtistSearch] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [roster, setRoster] = useState<Affiliation[]>(getStudioRoster());
-
-  // ── Integration state ──────────────────────────────────────────────
-  const [integrationsOpen, setIntegrationsOpen] = useState(false);
-  const [linkFlowOpen, setLinkFlowOpen] = useState(false);
-  const [linkFlowPlatform, setLinkFlowPlatform] = useState<IntegrationPlatformMeta | null>(null);
-  const [linkFlowMode, setLinkFlowMode] = useState<IntegrationMode | null>(null);
-
-  const connectedCount = countActiveIntegrations(studio?.integrations);
-
-  const handleConnect = (platformId: IntegrationPlatform, mode: IntegrationMode) => {
-    const meta = getPlatformMeta(platformId);
-    if (!meta) return;
-    setLinkFlowPlatform(meta);
-    setLinkFlowMode(mode);
-    setLinkFlowOpen(true);
-  };
-
-  // Mock import summaries — when the backend ships, these come from real API responses
-  const MOCK_IMPORT_SUMMARIES: Partial<Record<IntegrationPlatform, { count: number; label: string }>> = {
-    google: { count: 47, label: "reviews" },
-    yelp: { count: 23, label: "reviews" },
-    trustpilot: { count: 12, label: "reviews" },
-    facebook: { count: 8, label: "recommendations" },
-    square: { count: 156, label: "appointments" },
-    acuity: { count: 89, label: "appointments" },
-  };
-
-  const handleSaveConnection = (url: string) => {
-    if (!linkFlowPlatform || !linkFlowMode) return;
-    const summary = linkFlowMode === "import" ? MOCK_IMPORT_SUMMARIES[linkFlowPlatform.id] : undefined;
-    update(connectIntegration(studio?.integrations, linkFlowPlatform.id, linkFlowMode, url, summary));
-    setLinkFlowOpen(false);
-    setLinkFlowPlatform(null);
-    setLinkFlowMode(null);
-  };
-
-  const handleDisconnect = (platformId: IntegrationPlatform) => {
-    update(disconnectIntegration(studio?.integrations, platformId));
-  };
-
-  const allArtists = getArtistSearchResults();
-  const filteredArtists = artistSearch
-    ? allArtists.filter(
-        (a) =>
-          a.name.toLowerCase().includes(artistSearch.toLowerCase()) ||
-          a.styles.some((s) => s.toLowerCase().includes(artistSearch.toLowerCase()))
-      )
-    : allArtists;
-
-  const handleToggleDay = (day: string) => {
-    setBusinessHours((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], closed: !prev[day].closed },
-    }));
-  };
-
-  const handleUpdateHour = (day: string, field: "open" | "close", value: string) => {
-    setBusinessHours((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], [field]: value },
-    }));
-  };
-
-  const handleSaveHours = () => {
-    update({ hours: businessHours });
-    setHoursSaved(true);
-    setHoursOpen(false);
-  };
-
-  const handleInviteArtist = (artist: { id: string; name: string; avatarUrl?: string; styles: string[] }) => {
-    if (!roster.find((r) => r.id === artist.id)) {
-      setRoster((prev) => [...prev, { id: artist.id, name: artist.name, avatarUrl: artist.avatarUrl, styles: artist.styles, status: "pending-invite" as const, role: "artist" as const }]);
+  // Share Listing quick action — copies the public page URL.
+  const [shareCopied, setShareCopied] = useState(false);
+  const handleShareListing = async () => {
+    const target = studio?.slug ?? studio?.id;
+    if (!target) return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/studios/${target}`);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      // Clipboard unavailable (permissions/insecure context) — silently skip.
     }
   };
 
-  const handleSendEmailInvite = () => {
-    if (inviteEmail.trim()) {
-      const id = `email-${Date.now()}`;
-      setRoster((prev) => [...prev, { id, name: inviteEmail.trim(), status: "pending-invite" as const, role: "artist" as const }]);
-      setInviteEmail("");
-    }
-  };
-
-  const handleAcceptRequest = (id: string) => {
-    setRoster((prev) => prev.map((r) => r.id === id ? { ...r, status: "active" as const } : r));
-  };
-
-  const handleDeclineOrRemove = (id: string) => {
-    setRoster((prev) => prev.filter((r) => r.id !== id));
-  };
-
-  // Sync form state once when studio data loads from the repository.
-  // `useState` initializers run before the async repo.get() resolves,
-  // so studio is null at mount. This effect runs exactly once when it arrives.
+  // Single-shot sync from async repository load. Each sub-hook is initialized
+  // lazily from a possibly-null studio; this fires exactly once when the data
+  // arrives and broadcasts to every sub-hook that needs to rehydrate.
   const initialized = useRef(false);
   useEffect(() => {
     if (!studio || initialized.current) return;
     initialized.current = true;
-    setStudioForm({
-      name: studio.name ?? "",
-      city: studio.city ?? "",
-      state: studio.state ?? "",
-      phone: studio.phone ?? "",
-      email: studio.email ?? "",
-      address: studio.address ?? "",
-      zipCode: studio.zipCode ?? "",
-      bio: studio.bio ?? "",
-      specialties: studio.specialties ?? [],
-      instagram: studio.instagram ?? "",
-      website: studio.website ?? "",
-      tiktok: studio.tiktok ?? "",
-    });
-    setAutoSpecialties(studio.autoSpecialties ?? false);
-    setServices(studio.services ?? []);
-    if (studio.hours) {
-      setBusinessHours(studio.hours);
-      setHoursSaved(true);
-    }
-  }, [studio]);
+    form.loadFromStudio(studio);
+    hours.loadFromStudio(studio);
+    servicesHook.loadFromStudio(studio);
+    autoSpec.loadFromStudio(studio);
+  }, [studio, form, hours, servicesHook, autoSpec]);
 
-  // Recompute specialties when roster changes and auto mode is on
-  useEffect(() => {
-    if (!autoSpecialties) return;
-    const computed = computeAutoSpecialties(roster);
-    setStudioForm((prev) => ({ ...prev, specialties: computed }));
-  }, [roster, autoSpecialties]);
-
-  const handleToggleAutoSpecialties = () => {
-    const next = !autoSpecialties;
-    setAutoSpecialties(next);
-    if (next) {
-      const computed = computeAutoSpecialties(roster);
-      setStudioForm((prev) => ({ ...prev, specialties: computed }));
-      update({ autoSpecialties: next, specialties: computed });
-    } else {
-      update({ autoSpecialties: next });
+  // ── Go live: draft studios 404 publicly until the required steps are done
+  // AND an active plan exists, then the owner flips the listing on. The
+  // builder is never gated on this — build first, go live when ready.
+  const { currentPlan } = usePlanBilling();
+  const hasActivePlan = currentPlan !== null;
+  const checklist = buildStudioChecklist(studio);
+  const missingSteps = missingRequiredSteps(checklist);
+  const live = studio?.isVisible === true;
+  const published = Boolean(studio?.publishedThemeConfig);
+  const stepsReady = studio !== null && missingSteps.length === 0;
+  // The client gate is UX only — setStudioVisibility re-checks the tier
+  // server-side, and the DB trigger blocks direct is_visible writes.
+  const [goingLive, setGoingLive] = useState(false);
+  const handleGoLive = async () => {
+    if (live || !stepsReady || !hasActivePlan || goingLive) return;
+    setGoingLive(true);
+    try {
+      const result = await setStudioVisibility(true);
+      if (result.ok) applyLocal({ isVisible: true });
+      else console.error("Go live failed:", result.error);
+    } finally {
+      setGoingLive(false);
     }
   };
-
-  const handleToggleService = (service: StudioService) => {
-    const next = services.includes(service)
-      ? services.filter((s) => s !== service)
-      : [...services, service];
-    setServices(next);
-    update({ services: next });
+  // Go-live paywall path: the strip's "Choose a Plan" opens the same dialog
+  // the builder uses at Publish — paying goes live via the checkout return
+  // route (intent=golive).
+  const goLiveWithPlan = async (slug: TierSlug) => {
+    if (live || !stepsReady || goingLive) return;
+    setGoingLive(true);
+    const result = await startCheckout({ tier: slug, cycle: "monthly", intent: "golive" });
+    if (result.url) {
+      window.location.assign(result.url);
+      return; // keep the spinner while the browser navigates to Stripe
+    }
+    console.error("Go-live checkout failed:", result.error);
+    setGoingLive(false);
   };
 
-  const handleSaveStudio = () => {
-    update({
-      name: studioForm.name,
-      city: studioForm.city,
-      state: studioForm.state,
-      phone: studioForm.phone,
-      email: studioForm.email,
-      address: studioForm.address,
-      zipCode: studioForm.zipCode,
-      bio: studioForm.bio,
-      specialties: studioForm.specialties,
-      instagram: studioForm.instagram,
-      website: studioForm.website,
-      tiktok: studioForm.tiktok,
-    });
-    setEditStudioOpen(false);
+  const completedSteps = checklist.filter((item) => item.completed).length;
+  const data: DashboardData = {
+    name: studio?.name ?? "",
+    subtitle: buildSubtitle(studio),
+    tags: studio?.specialties ?? [],
+    accentColor: "amber",
+    stats,
+    checklist,
+    onboardingTitle: "Finish setting up your studio",
+    onboardingSubtitle: live
+      ? `${completedSteps} of ${checklist.length} complete — you're live; customize your page free anytime`
+      : `${completedSteps} of ${checklist.length} complete — finish the essentials to go live, customize your page free anytime`,
   };
 
   return {
     data,
+    onboardingProgress: checklistProgress(checklist),
     user,
     studio,
-    // Panels
-    editStudioOpen,
-    setEditStudioOpen,
-    hoursOpen,
-    setHoursOpen,
-    inviteOpen,
-    setInviteOpen,
-    inviteTab,
-    setInviteTab,
-    // Studio form
-    studioForm,
-    setStudioForm,
-    handleSaveStudio,
-    // Auto-specialties
-    autoSpecialties,
-    handleToggleAutoSpecialties,
-    // Services
-    services,
-    handleToggleService,
-    // Business hours
-    businessHours,
-    hoursSaved,
-    handleToggleDay,
-    handleUpdateHour,
-    handleSaveHours,
-    // Artist management
-    artistSearch,
-    setArtistSearch,
-    inviteEmail,
-    setInviteEmail,
-    roster,
-    filteredArtists,
-    handleInviteArtist,
-    handleSendEmailInvite,
-    handleAcceptRequest,
-    handleDeclineOrRemove,
-    // Integrations
-    integrationsOpen,
-    setIntegrationsOpen,
-    linkFlowOpen,
-    setLinkFlowOpen,
-    linkFlowPlatform,
-    linkFlowMode,
-    connectedCount,
-    handleConnect,
-    handleSaveConnection,
-    handleDisconnect,
+    live,
+    published,
+    canGoLive: !live && stepsReady && hasActivePlan,
+    needsPlanForGoLive: !live && stepsReady && !hasActivePlan,
+    missingSteps,
+    goingLive,
+    handleGoLive,
+    goLiveWithPlan,
+    shareCopied,
+    handleShareListing,
+    ...form,
+    ...hours,
+    ...roster,
+    ...integrations,
+    ...servicesHook,
+    ...autoSpec,
   };
 }
