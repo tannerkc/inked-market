@@ -118,7 +118,7 @@ export async function latestSubscriptionForCustomer(customerId: string): Promise
   const subs = (res.data ?? []).map(mapSub).sort((a, b) => b.created - a.created);
   if (!subs.length) return null;
   const live = subs.find((s) => ["trialing", "active", "past_due"].includes(s.status));
-  return live ?? subs[0];
+  return live ?? subs[0] ?? null;
 }
 
 // ── Customer Portal ──────────────────────────────────────────────────────────
