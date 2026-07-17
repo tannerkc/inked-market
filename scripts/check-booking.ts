@@ -567,6 +567,8 @@ check("buildNotification renders human copy per kind", () => {
     }).message.length > 10
   );
   assert.ok(buildNotification("deposit_paid", { actorName: "Jess" }).message.includes("deposit"));
+  assert.equal(buildNotification("request_received", { actorName: "Jess" }).actorName, "Jess");
+  assert.equal(buildNotification("request_accepted", { otherName: "Mar" }).actorName, "Mar");
 });
 
 // ─── booking mode + CTA resolver ─────────────────────────────────────────

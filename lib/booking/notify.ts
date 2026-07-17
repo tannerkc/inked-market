@@ -20,26 +20,30 @@ function fmtWhen(iso?: string): string {
   return ` for ${new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
 }
 
-/** Pure copy builder so the wording is checkable. */
+/** Pure copy builder so the wording is checkable. actorName is whichever
+ * name appears in the copy — the bell bolds it in the rendered message. */
 export function buildNotification(
   kind: BookingNotificationKind,
   ctx: NotificationCtx
-): { message: string } {
+): { message: string; actorName: string } {
   const actor = ctx.actorName ?? "A client";
   const other = ctx.otherName ?? "The artist";
   switch (kind) {
     case "request_received":
-      return { message: `${actor} sent you a booking request` };
+      return { message: `${actor} sent you a booking request`, actorName: actor };
     case "request_accepted":
-      return { message: `${other} accepted your booking request — pick a time` };
+      return { message: `${other} accepted your booking request — pick a time`, actorName: other };
     case "request_declined":
-      return { message: `${other} declined your booking request` };
+      return { message: `${other} declined your booking request`, actorName: other };
     case "appointment_booked":
-      return { message: `${actor} booked a ${ctx.apptType ?? "session"}${fmtWhen(ctx.whenIso)}` };
+      return {
+        message: `${actor} booked a ${ctx.apptType ?? "session"}${fmtWhen(ctx.whenIso)}`,
+        actorName: actor,
+      };
     case "appointment_cancelled":
-      return { message: `${actor} cancelled an appointment${fmtWhen(ctx.whenIso)}` };
+      return { message: `${actor} cancelled an appointment${fmtWhen(ctx.whenIso)}`, actorName: actor };
     case "deposit_paid":
-      return { message: `${actor} paid their deposit — booking confirmed` };
+      return { message: `${actor} paid their deposit — booking confirmed`, actorName: actor };
   }
 }
 
