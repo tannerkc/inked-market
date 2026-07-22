@@ -562,6 +562,7 @@ const {
   isNotificationRecipientContext,
   notificationContextForTarget,
   notificationContextLabel,
+  notificationContextTone,
 } = notifications;
 
 check("notification context maps targets and labels", () => {
@@ -580,6 +581,12 @@ check("notification recipient context guard accepts only persisted roles", () =>
   assert.equal(isNotificationRecipientContext("personal"), false);
   assert.equal(isNotificationRecipientContext(null), false);
   assert.equal(isNotificationRecipientContext(undefined), false);
+});
+
+check("notification context tone separates business from personal bookings", () => {
+  assert.equal(notificationContextTone("studio"), "business");
+  assert.equal(notificationContextTone("artist"), "business");
+  assert.equal(notificationContextTone("customer"), "personal");
 });
 
 check("buildNotification preserves copy, actor, and explicit context for every kind", () => {

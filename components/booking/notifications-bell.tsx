@@ -13,7 +13,7 @@ import { GroupLabel } from "@/components/dashboard/group-label";
 import { Button } from "@/components/ui/button";
 import { MetaChip } from "@/components/ui/meta-chip";
 import { NavPill } from "@/components/ui/nav-pill";
-import { notificationContextLabel } from "@/lib/booking/notify";
+import { notificationContextLabel, notificationContextTone } from "@/lib/booking/notify";
 import { effectiveRequestStatus } from "@/lib/supabase/booking-types";
 import type { BookingRequestRecord } from "@/lib/types/booking";
 import { cn } from "@/lib/utils";
@@ -310,11 +310,27 @@ export function NotificationsBell() {
             <EmptyState message="Nothing here" variant="subtle" />
           ) : (
             <ul className="flex max-h-80 flex-col overflow-y-auto">
-              {visible.map((n) => (
-                <li
-                  key={n.id}
-                  className="flex items-start gap-2 border-b border-ink-black/[0.04] py-2 last:border-0 dark:border-ink-cream/[0.04]"
-                >
+              {visible.map((n) => {
+                const contextTone = n.recipientContext
+                  ? notificationContextTone(n.recipientContext)
+                  : null;
+                return (
+                  <li
+                    key={n.id}
+                    className={cn(
+                      "relative flex items-start gap-2 border-b border-ink-black/[0.04] py-2 last:border-0 dark:border-ink-cream/[0.04]",
+                      n.recipientContext && "pl-2"
+                    )}
+                  >
+                  {contextTone ? (
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "absolute inset-y-2 left-0 w-[3px] rounded-full",
+                        contextTone === "business" ? "bg-ink-rust" : "bg-ink-sage"
+                      )}
+                    />
+                  ) : null}
                   <span
                     className={cn(
                       "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
@@ -322,6 +338,18 @@ export function NotificationsBell() {
                     )}
                   />
                   <div className="min-w-0 flex-1">
+                    {n.recipientContext && contextTone ? (
+                      <p
+                        className={cn(
+                          "mb-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em]",
+                          contextTone === "business"
+                            ? "text-ink-rust dark:text-ink-cream"
+                            : "text-ink-sage [filter:brightness(.78)] dark:text-ink-cream dark:[filter:none]"
+                        )}
+                      >
+                        {notificationContextLabel(n.recipientContext)}
+                      </p>
+                    ) : null}
                     <p
                       className={cn(
                         "text-[12px] leading-snug",
@@ -332,14 +360,8 @@ export function NotificationsBell() {
                     >
                       <ItemMessage message={n.message} name={n.actorName} />
                     </p>
-                    <p className="mt-0.5 flex items-center gap-1.5 font-mono text-[9px] text-ink-black/30 dark:text-ink-cream/30">
-                      {n.recipientContext ? (
-                        <span className="font-semibold uppercase tracking-wide text-ink-black/60 dark:text-ink-cream/55">
-                          {notificationContextLabel(n.recipientContext)}
-                        </span>
-                      ) : null}
-                      {n.recipientContext ? <span aria-hidden="true">·</span> : null}
-                      <span>{timestamp(n.createdAt)}</span>
+                    <p className="mt-0.5 font-mono text-[9px] text-ink-black/30 dark:text-ink-cream/30">
+                      {timestamp(n.createdAt)}
                     </p>
 
                     <div className="mt-1 -ml-1.5 flex flex-wrap items-center">
@@ -526,8 +548,9 @@ export function NotificationsBell() {
                       </div>
                     ) : null}
                   </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

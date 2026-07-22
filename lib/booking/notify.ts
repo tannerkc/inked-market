@@ -41,6 +41,12 @@ export function notificationContextLabel(
   return "Your booking";
 }
 
+export function notificationContextTone(
+  context: NotificationRecipientContext
+): "business" | "personal" {
+  return context === "customer" ? "personal" : "business";
+}
+
 interface NotificationCtx {
   actorName?: string;
   otherName?: string;
