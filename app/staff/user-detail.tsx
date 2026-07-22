@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import {
   searchUsers,
   getUserDetail,
@@ -9,250 +14,415 @@ import {
   type StaffUserRow,
   type StaffUserDetail,
 } from "./actions";
+import { panelClass, microLabelClass, PanelTitle, FeedbackMessage, EmptyState, TierBadge } from "./ui";
 
-const inputClass =
-  "min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100";
+type Tier = "liner" | "shader" | "magnum";
+type Feedback = { text: string; ok: boolean } | null;
 
-interface GrantFormState {
-  tier: string;
+interface GrantDraft {
+  tier: Tier;
   expiresAt: string;
   note: string;
-  email: string;
 }
+
+const EMPTY_DRAFT: GrantDraft = { tier: "shader", expiresAt: "", note: "" };
+
+const TIER_OPTIONS = [
+  { value: "liner", label: "Liner" },
+  { value: "shader", label: "Shader" },
+  { value: "magnum", label: "Magnum" },
+];
+
+const EMAIL_RE = /\S+@\S+\.\S+/;
+
+// Mirrors the server-side zod rule so the button disables instead of round-tripping an error.
+const noteValid = (d: GrantDraft) => d.note.trim().length >= 3;
+
+const toIso = (date: string) => (date ? new Date(date).toISOString() : undefined);
 
 export function StaffUsersPanel() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<StaffUserRow[]>([]);
-  const [detail, setDetail] = useState<StaffUserDetail | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [listMessage, setListMessage] = useState<Feedback>(null);
   const [pending, startTransition] = useTransition();
+  const searchSeq = useRef(0);
+  const detailSeq = useRef(0);
 
-  const [grantForm, setGrantForm] = useState<GrantFormState>({
-    tier: "shader",
-    expiresAt: "",
-    note: "",
-    email: "",
-  });
+  // Manage-account slide-over
+  const [selected, setSelected] = useState<StaffUserRow | null>(null);
+  const [detail, setDetail] = useState<StaffUserDetail | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailMessage, setDetailMessage] = useState<Feedback>(null);
+  const [grantFormOpen, setGrantFormOpen] = useState(false);
+  const [draft, setDraft] = useState<GrantDraft>(EMPTY_DRAFT);
 
-  const runSearch = () =>
+  // Grant-by-email slide-over
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailAddr, setEmailAddr] = useState("");
+  const [emailDraft, setEmailDraft] = useState<GrantDraft>(EMPTY_DRAFT);
+  const [emailMessage, setEmailMessage] = useState<Feedback>(null);
+
+  const runSearch = useCallback((q: string) => {
+    const seq = ++searchSeq.current;
     startTransition(async () => {
-      const res = await searchUsers(query);
+      const res = await searchUsers(q);
+      if (searchSeq.current !== seq) return;
       setResults(res.users);
-      setDetail(null);
-      setMessage(res.error ?? null);
+      if (res.error) setListMessage({ text: res.error, ok: false });
     });
+  }, []);
 
-  const openDetail = (userId: string) =>
+  // Live search with a short debounce; empty query browses newest accounts.
+  useEffect(() => {
+    const timer = setTimeout(() => runSearch(query), query ? 250 : 0);
+    return () => clearTimeout(timer);
+  }, [query, runSearch]);
+
+  const reloadDetail = useCallback((userId: string) => {
+    const seq = ++detailSeq.current;
     startTransition(async () => {
       const res = await getUserDetail(userId);
-      if (res.ok && res.user) {
-        setDetail(res.user);
-        setMessage(null);
-      } else {
-        setMessage(res.error ?? "Failed to load user");
-      }
+      if (detailSeq.current !== seq) return;
+      if (res.ok && res.user) setDetail(res.user);
+      else setDetailMessage({ text: res.error ?? "Failed to load account", ok: false });
     });
+  }, []);
 
-  const submitGrant = (userId?: string) =>
+  // Panel opens instantly with the row's data; full detail streams in behind it.
+  const openUser = (row: StaffUserRow) => {
+    setSelected(row);
+    setDetail(null);
+    setDetailMessage(null);
+    setGrantFormOpen(false);
+    setDraft(EMPTY_DRAFT);
+    setDetailOpen(true);
+    reloadDetail(row.id);
+  };
+
+  const openEmailGrant = (prefill = "") => {
+    setEmailAddr(prefill);
+    setEmailDraft(EMPTY_DRAFT);
+    setEmailMessage(null);
+    setEmailOpen(true);
+  };
+
+  const submitDetailGrant = () => {
+    if (!selected) return;
     startTransition(async () => {
       const res = await grantTier({
-        userId,
-        email: userId ? undefined : grantForm.email || undefined,
-        tier: grantForm.tier as "liner" | "shader" | "magnum",
-        expiresAt: grantForm.expiresAt ? new Date(grantForm.expiresAt).toISOString() : undefined,
-        note: grantForm.note,
+        userId: selected.id,
+        tier: draft.tier,
+        expiresAt: toIso(draft.expiresAt),
+        note: draft.note,
       });
-      setMessage(res.ok ? "Granted." : res.error ?? "Grant failed");
-      if (res.ok && userId) void openDetail(userId);
+      if (res.ok) {
+        setDetailMessage({ text: `Granted ${draft.tier}`, ok: true });
+        setGrantFormOpen(false);
+        setDraft(EMPTY_DRAFT);
+        reloadDetail(selected.id);
+        runSearch(query); // keep list badges current
+      } else {
+        setDetailMessage({ text: res.error ?? "Grant failed", ok: false });
+      }
     });
+  };
 
-  const doRevoke = (grantId: string, userId: string) =>
+  const doRevoke = (grantId: string) => {
+    if (!selected) return;
     startTransition(async () => {
       const res = await revokeGrant(grantId);
-      setMessage(res.ok ? "Revoked." : res.error ?? "Revoke failed");
-      if (res.ok) void openDetail(userId);
+      setDetailMessage(res.ok ? { text: "Revoked", ok: true } : { text: res.error ?? "Revoke failed", ok: false });
+      if (res.ok) {
+        reloadDetail(selected.id);
+        runSearch(query);
+      }
     });
+  };
+
+  const submitEmailGrant = () => {
+    const email = emailAddr.trim();
+    startTransition(async () => {
+      const res = await grantTier({
+        email,
+        tier: emailDraft.tier,
+        expiresAt: toIso(emailDraft.expiresAt),
+        note: emailDraft.note,
+      });
+      if (res.ok) {
+        setEmailMessage({ text: `Granted ${emailDraft.tier} to ${email}`, ok: true });
+        setEmailAddr("");
+        setEmailDraft(EMPTY_DRAFT);
+        runSearch(query); // the email may belong to an existing account
+      } else {
+        setEmailMessage({ text: res.error ?? "Grant failed", ok: false });
+      }
+    });
+  };
+
+  const emailLike = EMAIL_RE.test(query.trim());
+  const view = detail ?? selected;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex gap-2">
-          <input
-            className={inputClass}
-            placeholder="Search by name or email"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-          />
-          <button
-            type="button"
-            onClick={runSearch}
-            disabled={pending}
-            className="min-h-11 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
-          >
-            Search
-          </button>
+    <section className={cn(panelClass, "p-5")}>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[15px] font-semibold text-ink-black/80 dark:text-ink-cream/80">Accounts</h2>
+          <p className="mt-0.5 text-[11px] text-ink-black/35 dark:text-ink-cream/35">
+            Newest first — type to filter by name or email.
+          </p>
         </div>
-        <ul className="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
-          {results.map((u) => (
+        <Button variant="ink-outline" size="sm" onClick={() => openEmailGrant()}>
+          Grant by email
+        </Button>
+      </div>
+
+      <Input
+        label="Search"
+        placeholder="Name or email…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
+      <ul className="mt-3 divide-y divide-ink-black/[0.04] dark:divide-ink-cream/[0.05]">
+        {results.map((u) => {
+          const isOpen = detailOpen && selected?.id === u.id;
+          return (
             <li key={u.id}>
               <button
                 type="button"
-                onClick={() => openDetail(u.id)}
-                className="flex min-h-11 w-full items-center justify-between gap-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => openUser(u)}
+                aria-haspopup="dialog"
+                aria-expanded={isOpen}
+                className={cn(
+                  "group flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors cursor-pointer",
+                  isOpen
+                    ? "bg-ink-black/[0.05] dark:bg-ink-cream/[0.07]"
+                    : "hover:bg-ink-black/[0.025] dark:hover:bg-ink-cream/[0.04]"
+                )}
               >
-                <span>
-                  <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-ink-black/80 dark:text-ink-cream/85">
                     {u.name ?? u.email}
                   </span>
-                  <span className="block text-xs text-gray-500">{u.email} · {u.role}</span>
+                  <span className="block truncate text-[11px] text-ink-black/35 dark:text-ink-cream/35">
+                    {u.email} · {u.role}
+                  </span>
                 </span>
-                <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
-                  {u.tier ?? "free"}{u.tierSource === "grant" ? " (comp)" : ""}
+                {u.createdAt ? (
+                  <span
+                    className="hidden font-mono text-[9px] tracking-[0.1em] uppercase text-ink-black/25 dark:text-ink-cream/25 sm:block"
+                    title={new Date(u.createdAt).toLocaleString()}
+                  >
+                    {new Date(u.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </span>
+                ) : null}
+                <TierBadge tier={u.tier} comp={u.tierSource === "grant"} />
+                <span
+                  aria-hidden="true"
+                  className="text-ink-black/20 transition-colors group-hover:text-ink-black/45 dark:text-ink-cream/20 dark:group-hover:text-ink-cream/45"
+                >
+                  ›
                 </span>
               </button>
             </li>
-          ))}
-          {!results.length ? (
-            <li className="py-6 text-center text-sm text-gray-400">No results yet — search above.</li>
-          ) : null}
-        </ul>
+          );
+        })}
+        {!results.length ? (
+          <li>
+            <EmptyState text={pending ? "Loading…" : query ? "No accounts match" : "No accounts yet"}>
+              {emailLike && !pending ? (
+                <Button variant="ink-outline" size="sm" onClick={() => openEmailGrant(query.trim())}>
+                  Grant a tier to {query.trim()}
+                </Button>
+              ) : null}
+            </EmptyState>
+          </li>
+        ) : null}
+      </ul>
+      <FeedbackMessage message={listMessage} />
 
-        <div className="mt-6 border-t border-gray-100 pt-4 dark:border-gray-800">
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Grant by email (pre-signup)</p>
-          <p className="mb-2 text-xs text-gray-500">Applies automatically when they register.</p>
-          <input
-            className={inputClass}
-            placeholder="person@example.com"
-            value={grantForm.email}
-            onChange={(e) => setGrantForm({ ...grantForm, email: e.target.value })}
-          />
-          <GrantFields form={grantForm} setForm={setGrantForm} />
-          <button
-            type="button"
-            onClick={() => submitGrant(undefined)}
-            disabled={pending || !grantForm.email}
-            className="mt-2 min-h-11 w-full rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
-          >
-            Grant to email
-          </button>
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        {!detail ? (
-          <p className="py-6 text-center text-sm text-gray-400">Select a user to manage.</p>
-        ) : (
+      {/* ── Manage account ── */}
+      <SlideOverPanel open={detailOpen} onClose={() => setDetailOpen(false)} title="Manage account">
+        {view ? (
           <div>
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-              {detail.name ?? detail.email}
-            </h2>
-            <p className="text-xs text-gray-500">{detail.email} · {detail.role}</p>
-            <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <dt className="text-xs text-gray-500">Tier</dt>
-                <dd className="font-medium text-gray-900 dark:text-gray-100">
-                  {detail.tier ?? "free"} {detail.tierSource ? `(${detail.tierSource})` : ""}
-                </dd>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="truncate text-[15px] font-semibold text-ink-black/80 dark:text-ink-cream/80">
+                  {view.name ?? view.email}
+                </h2>
+                <p className="truncate text-[11px] text-ink-black/35 dark:text-ink-cream/35">
+                  {view.email} · {view.role}
+                  {view.createdAt ? ` · joined ${new Date(view.createdAt).toLocaleDateString()}` : ""}
+                </p>
               </div>
-              <div>
-                <dt className="text-xs text-gray-500">Billing</dt>
-                <dd className="font-medium text-gray-900 dark:text-gray-100">
-                  {detail.billingStatus}{detail.subStatus ? ` / ${detail.subStatus}` : ""}
-                </dd>
-              </div>
-            </dl>
-            {detail.stripeCustomerId ? (
-              <a
-                className="mt-2 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500"
-                href={`https://dashboard.stripe.com/customers/${detail.stripeCustomerId}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open in Stripe
-              </a>
-            ) : null}
-
-            <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Grant a tier</p>
-              <GrantFields form={grantForm} setForm={setGrantForm} />
-              <button
-                type="button"
-                onClick={() => submitGrant(detail.id)}
-                disabled={pending}
-                className="mt-2 min-h-11 w-full rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
-              >
-                Grant to {detail.name ?? detail.email}
-              </button>
+              <TierBadge tier={view.tier} comp={view.tierSource === "grant"} />
             </div>
 
-            <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
-              <p className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Grant history</p>
-              <ul className="space-y-2">
-                {detail.grants.map((g) => (
-                  <li
-                    key={g.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2 dark:border-gray-800"
+            {!detail ? (
+              <p className="mt-6 font-mono text-[10px] tracking-[0.15em] uppercase text-ink-black/25 dark:text-ink-cream/25">
+                Loading details…
+              </p>
+            ) : (
+              <>
+                <dl className="mt-4 grid grid-cols-2 gap-3">
+                  <div className={cn(panelClass, "px-4 py-3")}>
+                    <dt className={microLabelClass}>Tier</dt>
+                    <dd className="mt-1 text-sm font-medium text-ink-black/80 dark:text-ink-cream/85">
+                      {detail.tier ?? "free"}
+                      {detail.tierSource ? ` · ${detail.tierSource}` : ""}
+                    </dd>
+                  </div>
+                  <div className={cn(panelClass, "px-4 py-3")}>
+                    <dt className={microLabelClass}>Billing</dt>
+                    <dd className="mt-1 text-sm font-medium text-ink-black/80 dark:text-ink-cream/85">
+                      {detail.billingStatus}
+                      {detail.subStatus ? ` / ${detail.subStatus}` : ""}
+                    </dd>
+                  </div>
+                </dl>
+                {detail.stripeCustomerId ? (
+                  <a
+                    className="mt-3 inline-block font-mono text-[10px] tracking-[0.15em] uppercase text-ink-rust hover:text-ink-rust/70 dark:text-ink-red dark:hover:text-ink-red/70"
+                    href={`https://dashboard.stripe.com/customers/${detail.stripeCustomerId}`}
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    <span className="text-xs text-gray-600 dark:text-gray-300">
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{g.tier}</span>
-                      {" — "}{g.note}
-                      {g.expiresAt ? ` · until ${new Date(g.expiresAt).toLocaleDateString()}` : " · forever"}
-                      {g.revokedAt ? " · revoked" : ""}
-                    </span>
-                    {!g.revokedAt ? (
-                      <button
-                        type="button"
-                        onClick={() => doRevoke(g.id, detail.id)}
-                        disabled={pending}
-                        className="min-h-11 rounded-lg border border-gray-200 px-3 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    Open in Stripe ↗
+                  </a>
+                ) : null}
+
+                <div className="mt-6 border-t border-ink-black/[0.06] pt-5 dark:border-ink-cream/[0.06]">
+                  {!grantFormOpen ? (
+                    <Button variant="ink" size="sm" className="w-full" onClick={() => setGrantFormOpen(true)}>
+                      Grant a tier
+                    </Button>
+                  ) : (
+                    <>
+                      <PanelTitle
+                        title="Grant a tier"
+                        hint="Overrides billing until it expires or is revoked."
+                      />
+                      <GrantFields draft={draft} setDraft={setDraft} />
+                      <div className="mt-3 flex gap-2">
+                        <Button
+                          variant="ink-outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setGrantFormOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="ink"
+                          size="sm"
+                          className="flex-1"
+                          onClick={submitDetailGrant}
+                          disabled={pending || !noteValid(draft)}
+                        >
+                          Grant {draft.tier}
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-6 border-t border-ink-black/[0.06] pt-5 dark:border-ink-cream/[0.06]">
+                  <PanelTitle title="Grant history" />
+                  <ul className="space-y-2">
+                    {detail.grants.map((g) => (
+                      <li
+                        key={g.id}
+                        className={cn(panelClass, "flex items-center justify-between gap-3 px-4 py-3")}
                       >
-                        Revoke
-                      </button>
+                        <span className="min-w-0 text-[12px] text-ink-black/55 dark:text-ink-cream/55">
+                          <TierBadge tier={g.tier} />
+                          <span className="ml-2">{g.note}</span>
+                          <span className="block font-mono text-[9px] tracking-[0.1em] uppercase text-ink-black/30 dark:text-ink-cream/30">
+                            {g.expiresAt ? `until ${new Date(g.expiresAt).toLocaleDateString()}` : "forever"}
+                            {g.revokedAt ? " · revoked" : ""}
+                          </span>
+                        </span>
+                        {!g.revokedAt ? (
+                          <Button
+                            variant="ink-outline"
+                            size="sm"
+                            onClick={() => doRevoke(g.id)}
+                            disabled={pending}
+                          >
+                            Revoke
+                          </Button>
+                        ) : null}
+                      </li>
+                    ))}
+                    {!detail.grants.length ? (
+                      <li className="text-[11px] text-ink-black/30 dark:text-ink-cream/30">No grants.</li>
                     ) : null}
-                  </li>
-                ))}
-                {!detail.grants.length ? <li className="text-xs text-gray-400">No grants.</li> : null}
-              </ul>
-            </div>
+                  </ul>
+                </div>
+              </>
+            )}
+            <FeedbackMessage message={detailMessage} />
           </div>
-        )}
-        {message ? <p className="mt-3 text-xs font-medium text-gray-600 dark:text-gray-300">{message}</p> : null}
-      </section>
-    </div>
+        ) : null}
+      </SlideOverPanel>
+
+      {/* ── Grant by email ── */}
+      <SlideOverPanel open={emailOpen} onClose={() => setEmailOpen(false)} title="Grant by email">
+        <PanelTitle
+          title="Pre-signup grant"
+          hint="For someone without an account yet — the tier attaches automatically when they register with this email."
+        />
+        <div className="space-y-2">
+          <Input
+            label="Email"
+            type="email"
+            placeholder="person@example.com"
+            value={emailAddr}
+            onChange={(e) => setEmailAddr(e.target.value)}
+          />
+          <GrantFields draft={emailDraft} setDraft={setEmailDraft} />
+        </div>
+        <Button
+          variant="ink"
+          size="sm"
+          className="mt-3 w-full"
+          onClick={submitEmailGrant}
+          disabled={pending || !EMAIL_RE.test(emailAddr.trim()) || !noteValid(emailDraft)}
+        >
+          Grant {emailDraft.tier}
+        </Button>
+        <FeedbackMessage message={emailMessage} />
+      </SlideOverPanel>
+    </section>
   );
 }
 
 function GrantFields({
-  form,
-  setForm,
+  draft,
+  setDraft,
 }: {
-  form: GrantFormState;
-  setForm: (f: GrantFormState) => void;
+  draft: GrantDraft;
+  setDraft: (d: GrantDraft) => void;
 }) {
   return (
-    <div className="mt-2 space-y-2">
-      <select
-        className={inputClass}
-        value={form.tier}
-        onChange={(e) => setForm({ ...form, tier: e.target.value })}
-      >
-        <option value="liner">Liner</option>
-        <option value="shader">Shader</option>
-        <option value="magnum">Magnum</option>
-      </select>
-      <input
-        type="date"
-        className={inputClass}
-        value={form.expiresAt}
-        onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-        aria-label="Expires (leave empty for forever)"
+    <div className="space-y-2">
+      <Select
+        label="Tier"
+        options={TIER_OPTIONS}
+        value={draft.tier}
+        onChange={(e) => setDraft({ ...draft, tier: e.target.value as Tier })}
       />
-      <input
-        className={inputClass}
-        placeholder="Why? (required, goes in the audit log)"
-        value={form.note}
-        onChange={(e) => setForm({ ...form, note: e.target.value })}
+      <Input
+        label="Expires (empty = forever)"
+        type="date"
+        value={draft.expiresAt}
+        onChange={(e) => setDraft({ ...draft, expiresAt: e.target.value })}
+      />
+      <Input
+        label="Note (required, goes in the audit log)"
+        placeholder="Why?"
+        value={draft.note}
+        onChange={(e) => setDraft({ ...draft, note: e.target.value })}
       />
     </div>
   );

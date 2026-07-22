@@ -6,7 +6,6 @@ import type { HelpCategory } from "@/lib/data/help-types";
 
 interface HelpCategoryCardProps {
   category: HelpCategory;
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -51,64 +50,49 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 const HelpCategoryCard = React.forwardRef<HTMLAnchorElement, HelpCategoryCardProps>(
-  ({ category, variant = "dark", className }, ref) => {
-    const isDark = variant === "dark";
+  ({ category, className }, ref) => (
+    <Link
+      ref={ref}
+      href={`/help/${category.slug}`}
+      className={cn(
+        "group relative block p-6 rounded-2xl border transition-all duration-300",
+        "border-ink-black/[0.06] bg-ink-black/[0.02] hover:bg-ink-black/[0.04] hover:border-ink-black/[0.1]",
+        "dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02] dark:hover:bg-ink-cream/[0.04] dark:hover:border-ink-cream/[0.1]",
+        className
+      )}
+    >
+      <IconBox color={category.accentColor} size="md" className="mb-4">
+        {iconMap[category.icon]}
+      </IconBox>
 
-    return (
-      <Link
-        ref={ref}
-        href={`/help/${category.slug}`}
-        className={cn(
-          "group relative block p-6 rounded-2xl border transition-all duration-300",
-          isDark
-            ? "border-ink-cream/[0.06] bg-ink-cream/[0.02] hover:bg-ink-cream/[0.04] hover:border-ink-cream/[0.1]"
-            : "border-ink-black/[0.06] bg-ink-black/[0.02] hover:bg-ink-black/[0.04] hover:border-ink-black/[0.1]",
-          className
-        )}
-      >
-        <IconBox color={category.accentColor} size="md" className="mb-4">
-          {iconMap[category.icon]}
-        </IconBox>
+      <h3 className="text-[15px] font-semibold mb-1.5 text-ink-black dark:text-ink-cream">
+        {category.title}
+      </h3>
+      <p className="text-xs leading-relaxed text-ink-black/35 dark:text-ink-cream/30">
+        {category.description}
+      </p>
 
-        <h3 className={cn(
-          "text-[15px] font-semibold mb-1.5",
-          isDark ? "text-ink-cream" : "text-ink-black"
-        )}>
-          {category.title}
-        </h3>
-        <p className={cn(
-          "text-xs leading-relaxed",
-          isDark ? "text-ink-cream/30" : "text-ink-black/35"
-        )}>
-          {category.description}
-        </p>
-
-        <div className="flex items-center gap-2.5 mt-4">
-          <span className={cn(
-            "font-mono text-[9px] tracking-[0.1em]",
-            isDark ? "text-ink-cream/18" : "text-ink-black/18"
-          )}>
-            {category.articleCount} articles
-          </span>
-          <div className="flex gap-1">
-            {category.formats.map((f) => (
-              <span
-                key={f}
-                className={cn(
-                  "font-mono text-[8px] tracking-[0.06em] uppercase px-1.5 py-px rounded border",
-                  isDark
-                    ? "border-ink-cream/[0.06] text-ink-cream/22"
-                    : "border-ink-black/[0.06] text-ink-black/22"
-                )}
-              >
-                {f}
-              </span>
-            ))}
-          </div>
+      <div className="flex items-center gap-2.5 mt-4">
+        <span className="font-mono text-[9px] tracking-[0.1em] text-ink-black/18 dark:text-ink-cream/18">
+          {category.articleCount} articles
+        </span>
+        <div className="flex gap-1">
+          {category.formats.map((f) => (
+            <span
+              key={f}
+              className={cn(
+                "font-mono text-[8px] tracking-[0.06em] uppercase px-1.5 py-px rounded border",
+                "border-ink-black/[0.06] text-ink-black/22",
+                "dark:border-ink-cream/[0.06] dark:text-ink-cream/22"
+              )}
+            >
+              {f}
+            </span>
+          ))}
         </div>
-      </Link>
-    );
-  }
+      </div>
+    </Link>
+  )
 );
 HelpCategoryCard.displayName = "HelpCategoryCard";
 

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { StarRating } from "@/components/ui/star-rating";
+import { PanelEmptyState } from "./panel-empty-state";
 import { cn, formatRating } from "@/lib/utils";
 import type { Review, ReviewSource } from "@/lib/types";
 
@@ -61,9 +63,12 @@ function ReviewItem({ review }: ReviewItemProps) {
           </div>
         </div>
       </div>
-      <div className="text-xs text-ink-red mb-1.5" aria-label={`${Math.min(5, Math.max(0, Math.round(review.rating) || 0))} out of 5 stars`}>
-        {"\u2605".repeat(Math.min(5, Math.max(0, Math.round(review.rating) || 0)))}
-      </div>
+      <StarRating
+        rating={review.rating}
+        variant="glyph"
+        showEmpty={false}
+        className="block text-xs text-ink-red mb-1.5"
+      />
       <p className="text-[13px] text-ink-cream/55 leading-[1.7]">
         {review.content}
       </p>
@@ -101,7 +106,7 @@ export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
         <div className="flex items-center gap-2 mb-4 relative z-10">
           <div className="w-4 h-px bg-ink-rust/40" />
           <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink-rust">
-            Reviews — {formatRating(average)} Average
+            {count > 0 ? `Reviews — ${formatRating(average)} Average` : "Reviews"}
           </span>
         </div>
 
@@ -122,11 +127,20 @@ export function ReviewPanel({ reviews, headingFont }: ReviewPanelProps) {
         )}
 
         {/* Preview reviews */}
-        <div className="space-y-0 relative z-10">
-          {preview.map((review) => (
-            <ReviewItem key={review.id} review={review} />
-          ))}
-        </div>
+        {count > 0 ? (
+          <div className="space-y-0 relative z-10">
+            {preview.map((review) => (
+              <ReviewItem key={review.id} review={review} />
+            ))}
+          </div>
+        ) : (
+          <PanelEmptyState
+            glyph={"★★★★★"}
+            title="No reviews yet"
+            message="Reviews come from verified bookings, so every one is from a real client."
+            className="mt-2"
+          />
+        )}
       </div>
 
       {/* See all link */}

@@ -22,7 +22,6 @@ const ThemeToggle = React.forwardRef<HTMLDivElement, ThemeToggleProps>(
         options={THEME_OPTIONS}
         value={mode}
         onChange={(v) => onToggle(v as "light" | "dark")}
-        isDark={mode === "dark"}
       />
     </div>
   )

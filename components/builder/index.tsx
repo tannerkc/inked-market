@@ -4,6 +4,8 @@ export { SplitScreenBuilder } from "./split-screen-builder";
 export { InlineOverlayBuilder } from "./inline-overlay-builder";
 export { StudioPagePreview } from "./studio-page-preview";
 export { DeviceToggle } from "./device-toggle";
+export { UrlBar } from "./url-bar";
 export { TemplatePreview } from "./template-preview";
 export { TemplatePreviewCard } from "./template-preview-card";
 export { TemplatePicker } from "./template-picker";
+export { BuilderTutorial } from "./tutorial-overlay";

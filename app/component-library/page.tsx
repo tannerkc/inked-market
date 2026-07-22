@@ -10,6 +10,7 @@ import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { Logo } from "@/components/ui/logo";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Divider } from "@/components/ui/divider";
+import { SampleBadge } from "@/components/ui/sample-badge";
 import { IconBox } from "@/components/ui/icon-box";
 import { NavPill } from "@/components/ui/nav-pill";
 import { FeatureCard } from "@/components/ui/feature-card";
@@ -97,9 +98,15 @@ import {
   ProfileHeader,
   TimeSlotBlock,
   AffiliationRow,
+  ListGroup,
+  ListRow,
+  InitialsAvatar,
 } from "@/components/dashboard";
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { StarRating } from "@/components/ui/star-rating";
+import { MetaChip } from "@/components/ui/meta-chip";
+import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
 import { type TimeSlot } from "@/lib/types";
 
 /* ─── Lineup ──────────────────────────────────────────────── */
@@ -309,7 +316,7 @@ export default function ComponentLibraryPage() {
             ))}
           </div>
 
-          <Divider variant="dark" className="my-6" />
+          <Divider className="my-6" />
           <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/15">
             {sections.length} component groups
           </p>
@@ -444,13 +451,11 @@ export default function ComponentLibraryPage() {
                 label="Studio Name"
                 type="text"
                 placeholder="Iron & Ink Collective"
-                variant="dark"
               />
               <Input
                 label="City"
                 type="text"
                 placeholder="Portland"
-                variant="dark"
               />
             </div>
             <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-cream/20 mt-4">
@@ -477,7 +482,6 @@ export default function ComponentLibraryPage() {
                 label="Bio"
                 placeholder="A few words about your style…"
                 rows={4}
-                variant="dark"
               />
             </div>
             <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-cream/20 mt-4">
@@ -513,7 +517,6 @@ export default function ComponentLibraryPage() {
                   { value: "realism", label: "Realism" },
                   { value: "blackwork", label: "Blackwork" },
                 ]}
-                variant="dark"
                 defaultValue=""
               />
             </div>
@@ -560,7 +563,7 @@ export default function ComponentLibraryPage() {
                 </div>
               </div>
 
-              <Divider variant="dark" />
+              <Divider />
 
               <div>
                 <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-2">
@@ -579,7 +582,7 @@ export default function ComponentLibraryPage() {
                 </div>
               </div>
 
-              <Divider variant="dark" />
+              <Divider />
 
               <div>
                 <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-2">
@@ -686,7 +689,7 @@ export default function ComponentLibraryPage() {
                 </div>
               </div>
 
-              <Divider variant="dark" />
+              <Divider />
 
               <div>
                 <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-3">
@@ -694,14 +697,27 @@ export default function ComponentLibraryPage() {
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <Divider variant="dark" />
+                    <Divider />
                     <p className="font-mono text-[9px] text-ink-cream/20 mt-1">Dark</p>
                   </div>
                   <div className="bg-ink-cream rounded-lg p-4">
-                    <Divider variant="light" />
+                    <Divider />
                     <p className="font-mono text-[9px] text-ink-black/30 mt-1">Light</p>
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-3">
+                  Sample Badge
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <SampleBadge />
+                  <SampleBadge label="Demo data" />
+                </div>
+                <p className="font-mono text-[9px] text-ink-cream/20 mt-2">
+                  Shown when a section or card renders mock fallback instead of live data
+                </p>
               </div>
             </div>
           </ShowcaseSection>
@@ -764,7 +780,6 @@ export default function ComponentLibraryPage() {
                     { text: "Discover presence", included: true },
                     { text: "Custom web page", included: false },
                   ]}
-                  variant="dark"
                 />
                 <PricingTierCard
                   name="Pro"
@@ -777,7 +792,6 @@ export default function ComponentLibraryPage() {
                     { text: "Customize colors & fonts", included: true },
                   ]}
                   recommended
-                  variant="dark"
                 />
               </div>
             </ComponentRow>
@@ -793,7 +807,6 @@ export default function ComponentLibraryPage() {
                       { text: "Public listing", included: false },
                     ]}
                     ctaLabel="Get Started Free"
-                    variant="light"
                   />
                 </div>
                 <div className="rounded-2xl bg-ink-cream p-4">
@@ -808,7 +821,6 @@ export default function ComponentLibraryPage() {
                       { text: "Public listing", included: true },
                     ]}
                     recommended
-                    variant="light"
                   />
                 </div>
               </div>
@@ -1073,7 +1085,6 @@ export default function ComponentLibraryPage() {
                 onAudienceChange={setPricingAudience}
                 isAnnual={isPricingAnnual}
                 onBillingChange={setIsPricingAnnual}
-                variant="dark"
               />
             </div>
 
@@ -1081,14 +1092,12 @@ export default function ComponentLibraryPage() {
               <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-cream/25">
                 SearchBoostCallout (dark)
               </p>
-              <SearchBoostCallout variant="dark" />
             </div>
 
             <div className="mb-6">
               <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-cream/25">
                 PricingCta (dark, artists)
               </p>
-              <PricingCta variant="dark" audience="artists" />
             </div>
           </ShowcaseSection>
 
@@ -1111,7 +1120,6 @@ export default function ComponentLibraryPage() {
                   subtitle="demo &middot; preview &middot; showcase"
                   eyebrow="Testing"
                   accentColor="rust"
-                  variant="dark"
                 />
               </div>
             </div>
@@ -1145,7 +1153,6 @@ export default function ComponentLibraryPage() {
                   number="01"
                   title="What We Collect"
                   accentColor="rust"
-                  variant="dark"
                 >
                   <p>We collect information you provide when creating an account, including your name, email, and portfolio images.</p>
                 </ContentSection>
@@ -1164,7 +1171,6 @@ export default function ComponentLibraryPage() {
                     { id: "s3", number: "03", title: "How We Use It" },
                   ]}
                   accentColor="rust"
-                  variant="dark"
                   hubHref="/legal"
                   hubLabel="Legal Hub"
                 />
@@ -1195,7 +1201,7 @@ export default function ComponentLibraryPage() {
                 HelpSearch
               </p>
               <Suspense fallback={null}>
-                <HelpSearch variant="dark" />
+                <HelpSearch />
               </Suspense>
             </div>
 
@@ -1204,7 +1210,7 @@ export default function ComponentLibraryPage() {
                 AudiencePills
               </p>
               <Suspense fallback={null}>
-                <AudiencePills variant="dark" />
+                <AudiencePills />
               </Suspense>
             </div>
 
@@ -1224,7 +1230,6 @@ export default function ComponentLibraryPage() {
                     articleCount: 5,
                     formats: ["guide", "faq"],
                   }}
-                  variant="dark"
                 />
               </div>
             </div>
@@ -1249,7 +1254,6 @@ export default function ComponentLibraryPage() {
                       audiences: ["artist", "studio-owner"],
                     },
                   ]}
-                  variant="dark"
                 />
               </div>
             </div>
@@ -1258,14 +1262,14 @@ export default function ComponentLibraryPage() {
               <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-cream/25">
                 ContactBanner
               </p>
-              <ContactBanner variant="dark" />
+              <ContactBanner />
             </div>
 
             <div className="mb-6">
               <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-cream/25">
                 PopularArticles (empty &mdash; renders nothing when no articles)
               </p>
-              <PopularArticles articles={[]} variant="dark" />
+              <PopularArticles articles={[]} />
               <p className="font-mono text-[9px] text-ink-cream/20 mt-1">
                 Pass an empty array &mdash; component returns null gracefully
               </p>
@@ -1323,7 +1327,6 @@ export default function ComponentLibraryPage() {
                   id="demo-legal-section"
                   number="01"
                   title="Acceptance of Terms"
-                  variant="dark"
                 >
                   <p>By accessing or using Inked Market, you agree to be bound by these Terms. If you do not agree, you may not use the platform.</p>
                 </LegalSection>
@@ -1495,7 +1498,6 @@ export default function ComponentLibraryPage() {
               <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-cream/25">
                 DiscoverSearch (dark)
               </p>
-              <DiscoverSearch variant="dark" />
             </div>
 
             <div className="mb-6">
@@ -1503,7 +1505,6 @@ export default function ComponentLibraryPage() {
                 DiscoverSearch (light)
               </p>
               <div className="bg-ink-cream rounded-xl p-6">
-                <DiscoverSearch variant="light" />
               </div>
             </div>
 
@@ -1514,7 +1515,6 @@ export default function ComponentLibraryPage() {
               <FilterPills
                 filters={["All", "Traditional", "Realism", "Fine Line", "Blackwork"]}
                 activeFilter={activeFilter}
-                variant="dark"
                 onFilterChange={setActiveFilter}
               />
             </div>
@@ -1524,7 +1524,6 @@ export default function ComponentLibraryPage() {
                 SearchTabs
               </p>
               <Suspense fallback={null}>
-                <SearchTabs variant="dark" />
               </Suspense>
             </div>
 
@@ -1533,7 +1532,6 @@ export default function ComponentLibraryPage() {
                 SortSelect
               </p>
               <Suspense fallback={null}>
-                <SortSelect variant="dark" />
               </Suspense>
             </div>
 
@@ -1542,7 +1540,6 @@ export default function ComponentLibraryPage() {
                 FilterBar (full)
               </p>
               <Suspense fallback={null}>
-                <FilterBar variant="dark" />
               </Suspense>
             </div>
 
@@ -1943,6 +1940,63 @@ export default function ComponentLibraryPage() {
             </div>
 
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Star Rating — svg &amp; glyph variants
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6 space-y-3">
+              <div className="flex items-center gap-3">
+                <StarRating rating={4} className="text-ink-rust" />
+                <span className="font-mono text-[10px] text-ink-black/40">svg · rating 4</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <StarRating rating={3} variant="glyph" className="text-ink-red" />
+                <span className="font-mono text-[10px] text-ink-black/40">glyph · faded remainder</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <StarRating rating={5} variant="glyph" showEmpty={false} className="text-ink-red" />
+                <span className="font-mono text-[10px] text-ink-black/40">glyph · filled only</span>
+              </div>
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              Meta Chips — sm &amp; md
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6 flex flex-wrap items-center gap-2">
+              <MetaChip>forearm</MetaChip>
+              <MetaChip>palm sized</MetaChip>
+              <MetaChip>$200&ndash;400</MetaChip>
+              <MetaChip size="md">45 min</MetaChip>
+              <MetaChip size="md">Virtual</MetaChip>
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
+              List Row — inside ListGroup with avatar, trailing badge
+            </p>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <ListGroup>
+                <ListRow onClick={() => {}}>
+                  <InitialsAvatar name="Sarah Chen" tone="accent" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12px] font-medium text-ink-black">Sarah Chen</p>
+                    <p className="mt-0.5 truncate text-[10px] text-ink-black/35">
+                      Fine-line floral piece, inner forearm
+                    </p>
+                  </div>
+                  <StatusBadge label="Pending" color={BADGE_COLORS.rust} />
+                </ListRow>
+                <ListRow onClick={() => {}}>
+                  <InitialsAvatar name="Marcus Rivera" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12px] font-medium text-ink-black">Marcus Rivera</p>
+                    <p className="mt-0.5 truncate text-[10px] text-ink-black/35">
+                      Consultation follow-up
+                    </p>
+                  </div>
+                  <StatusBadge label="Accepted" color={BADGE_COLORS.sage} />
+                </ListRow>
+              </ListGroup>
+            </div>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
               Dashboard Section
             </p>
             <div className="bg-white rounded-xl p-4">
@@ -2012,7 +2066,7 @@ export default function ComponentLibraryPage() {
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
               AffiliationRow — active, pending-invite, pending-request variants
             </p>
-            <div className="bg-ink-cream/[0.03] border border-ink-cream/[0.06] rounded-xl px-4 mb-6">
+            <ListGroup className="mb-6">
               <AffiliationRow name="Sarah Chen" subtitle="Fine Line · Minimalist" status="active" />
               <AffiliationRow name="Marcus Rivera" subtitle="Traditional · Neo-Traditional" status="pending-invite" />
               <AffiliationRow
@@ -2022,7 +2076,7 @@ export default function ComponentLibraryPage() {
                 onAccept={() => {}}
                 onDecline={() => {}}
               />
-            </div>
+            </ListGroup>
 
             {/* SlideOverPanel */}
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-cream/25 mb-4">
@@ -2066,7 +2120,7 @@ export default function ComponentLibraryPage() {
 
               <ComponentRow label="CoverStory" dark>
                 <div className="w-full">
-                  <CoverStory spotlight={getAllSpotlights()[0]} />
+                  <CoverStory spotlight={getAllSpotlights()[0]!} />
                 </div>
               </ComponentRow>
 
@@ -2115,7 +2169,7 @@ export default function ComponentLibraryPage() {
 
               <ComponentRow label="PickRow" dark>
                 <div className="w-full">
-                  {lineupIssues[0].editorsPicks.slice(0, 3).map((p, i) => (
+                  {lineupIssues[0]!.editorsPicks.slice(0, 3).map((p, i) => (
                     <PickRow key={p.id} profile={p} rank={i + 1} />
                   ))}
                 </div>
@@ -2127,7 +2181,7 @@ export default function ComponentLibraryPage() {
                     <IssueCard
                       key={issue.id}
                       issue={issue}
-                      isActive={issue.id === lineupIssues[0].id}
+                      isActive={issue.id === lineupIssues[0]!.id}
                       onSelect={() => {}}
                     />
                   ))}

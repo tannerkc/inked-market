@@ -3,23 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn, formatRating } from "@/lib/utils";
+import { cn, formatStarRating, profilePath } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/data/saved";
 import { UnsaveButton } from "./unsave-button";
-import type { CardBadge, BadgeColor } from "@/components/ui/profile-card";
-
-// ─── Badge styles (canonical source: profile-card.tsx) ──────────────────────
-
-const badgeStyles: Record<BadgeColor, string> = {
-  sage: "bg-ink-black/80 text-ink-sage border-ink-sage/30",
-  rust: "bg-ink-black/80 text-ink-rust border-ink-rust/30",
-  red: "bg-ink-black/80 text-ink-red border-ink-red/30",
-};
+import { OverlayBadge, withVerifiedBadge } from "@/components/ui/profile-card";
+import type { CardBadge } from "@/components/ui/profile-card";
 
 // ─── Props ──────────────────────────────────────────────────────────────────
 
 export interface SavedCardProps {
   id: string;
+  /** Pretty URL slug — used for the profile link when present. */
+  slug?: string;
   type: "artist" | "studio";
   name: string;
   image: string;
@@ -35,7 +30,6 @@ export interface SavedCardProps {
   onUnsave?: (id: string, type: "artist" | "studio") => void;
   /** Optional type badge overlay for the All tab */
   typeBadge?: { label: string; className: string };
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -45,13 +39,13 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
   (
     {
       id,
+      slug,
       type,
       name,
       image,
       avatar,
       location,
       rating,
-      reviewCount,
       specialties = [],
       verified = false,
       badges = [],
@@ -59,18 +53,12 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
       removing = false,
       onUnsave,
       typeBadge,
-      variant = "dark",
       className,
     },
     ref
   ) => {
-    const isLight = variant === "light";
-    const href = type === "studio" ? `/studios/${id}` : `/artists/${id}`;
-
-    const allBadges: CardBadge[] = [...badges];
-    if (verified && !badges.some((b) => b.label.toLowerCase() === "verified")) {
-      allBadges.unshift({ label: "Verified", color: "sage" });
-    }
+    const href = profilePath(type, { id, slug });
+    const allBadges: CardBadge[] = withVerifiedBadge(badges, verified);
 
     const handleUnsave = () => {
       onUnsave?.(id, type);
@@ -81,9 +69,8 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
         ref={ref}
         className={cn(
           "rounded-xl overflow-hidden border transition-all duration-300 group",
-          isLight
-            ? "bg-ink-parchment-dark border-ink-black/[0.06] hover:border-ink-black/[0.12] hover:shadow-md"
-            : "bg-[#161616] border-ink-cream/[0.06] hover:border-ink-cream/[0.12] hover:shadow-md",
+          "bg-ink-parchment-dark border-ink-black/[0.06] hover:border-ink-black/[0.12] hover:shadow-md",
+          "dark:bg-[#161616] dark:border-ink-cream/[0.06] dark:hover:border-ink-cream/[0.12] dark:hover:shadow-md",
           removing && "opacity-0 scale-95",
           className
         )}
@@ -102,14 +89,10 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
             {/* Type badge (All tab only) */}
             {typeBadge && (
               <div className="absolute top-2.5 left-2.5 z-20">
-                <span
-                  className={cn(
-                    "inline-flex items-center rounded-full px-2 py-[3px] font-mono text-[7px] tracking-[0.12em] uppercase leading-none backdrop-blur-md border border-white/10",
-                    typeBadge.className
-                  )}
-                >
-                  {typeBadge.label}
-                </span>
+                <OverlayBadge
+                  label={typeBadge.label}
+                  className={cn("border-white/10", typeBadge.className)}
+                />
               </div>
             )}
 
@@ -122,15 +105,7 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
                 )}
               >
                 {allBadges.map((badge) => (
-                  <span
-                    key={badge.label}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-2 py-[3px] font-mono text-[7px] tracking-[0.12em] uppercase leading-none backdrop-blur-md border",
-                      badgeStyles[badge.color]
-                    )}
-                  >
-                    {badge.label}
-                  </span>
+                  <OverlayBadge key={badge.label} label={badge.label} color={badge.color} />
                 ))}
               </div>
             )}
@@ -158,37 +133,22 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p
-                  className={cn(
-                    "font-bold text-[13px] leading-tight truncate",
-                    isLight ? "text-ink-black" : "text-ink-cream"
-                  )}
-                >
+                <p className="font-bold text-[13px] leading-tight truncate text-ink-black dark:text-ink-cream">
                   {name}
                 </p>
                 <div className="flex items-center gap-1.5">
                   {location && (
-                    <span
-                      className={cn(
-                        "font-mono text-[8px] tracking-wide",
-                        isLight ? "text-ink-black/40" : "text-ink-cream/40"
-                      )}
-                    >
+                    <span className="font-mono text-[8px] tracking-wide text-ink-black/40 dark:text-ink-cream/40">
                       {location}
                     </span>
                   )}
                   {rating !== undefined && (
                     <>
-                      <span
-                        className={cn(
-                          "text-[8px]",
-                          isLight ? "text-ink-black/20" : "text-ink-cream/20"
-                        )}
-                      >
+                      <span className="text-[8px] text-ink-black/20 dark:text-ink-cream/20">
                         &middot;
                       </span>
                       <span className="font-mono text-[8px] text-ink-red">
-                        &#9733; {formatRating(rating)}
+                        {formatStarRating(rating)}
                       </span>
                     </>
                   )}
@@ -202,12 +162,7 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
                 {specialties.slice(0, 3).map((s) => (
                   <span
                     key={s}
-                    className={cn(
-                      "px-2 py-0.5 rounded-full font-mono text-[7px] tracking-wide uppercase",
-                      isLight
-                        ? "bg-ink-black/5 text-ink-black/50"
-                        : "bg-ink-cream/[0.06] text-ink-cream/50"
-                    )}
+                    className="px-2 py-0.5 rounded-full font-mono text-[7px] tracking-wide uppercase bg-ink-black/5 text-ink-black/50 dark:bg-ink-cream/[0.06] dark:text-ink-cream/50"
                   >
                     {s}
                   </span>
@@ -216,20 +171,8 @@ const SavedCard = React.forwardRef<HTMLDivElement, SavedCardProps>(
             )}
 
             {/* Footer: save date + CTA */}
-            <div
-              className={cn(
-                "flex justify-between items-center pt-2.5 border-t",
-                isLight
-                  ? "border-ink-black/[0.06]"
-                  : "border-ink-cream/[0.05]"
-              )}
-            >
-              <span
-                className={cn(
-                  "font-mono text-[8px] tracking-wide",
-                  isLight ? "text-ink-black/25" : "text-ink-cream/25"
-                )}
-              >
+            <div className="flex justify-between items-center pt-2.5 border-t border-ink-black/[0.06] dark:border-ink-cream/[0.05]">
+              <span className="font-mono text-[8px] tracking-wide text-ink-black/25 dark:text-ink-cream/25">
                 Saved {formatTimeAgo(savedAt)}
               </span>
               <span className="font-mono text-[8px] tracking-wide text-ink-red">

@@ -1,5 +1,3 @@
-"use client";
-
 import { DensityPicker } from "./density-picker";
 import { BorderShapePicker } from "./border-shape-picker";
 import { DividerStylePicker } from "./divider-style-picker";

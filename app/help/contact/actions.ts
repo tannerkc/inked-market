@@ -1,5 +1,7 @@
 "use server";
 
+import { ContactFormSchema } from "@/lib/validation/schemas";
+
 interface ContactFormResult {
   success: boolean;
   error?: string;
@@ -7,20 +9,24 @@ interface ContactFormResult {
 
 export async function submitContactForm(
   _prevState: ContactFormResult | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<ContactFormResult> {
-  const name = formData.get("name") as string | null;
-  const email = formData.get("email") as string | null;
-  const topic = formData.get("topic") as string | null;
-  const message = formData.get("message") as string | null;
+  const parsed = ContactFormSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    topic: formData.get("topic"),
+    message: formData.get("message"),
+  });
 
-  if (!name?.trim() || !email?.trim() || !topic?.trim() || !message?.trim()) {
-    return { success: false, error: "All fields are required." };
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return { success: false, error: "Please enter a valid email address." };
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const firstError =
+      fieldErrors.email?.[0] ??
+      fieldErrors.name?.[0] ??
+      fieldErrors.topic?.[0] ??
+      fieldErrors.message?.[0] ??
+      "All fields are required.";
+    return { success: false, error: firstError };
   }
 
   // Stub: simulate processing delay

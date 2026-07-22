@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { bebasNeue } from "@/lib/fonts";
-import { FilmGrainOverlay } from "@/components/ui/film-grain";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { useTheme } from "@/components/providers/theme-provider";
+import { ThemedPageWrapper } from "@/components/layout/themed-page-wrapper";
+import { useAuth } from "@/components/providers/auth-provider";
+import { createClient } from "@/lib/supabase/client";
+import { getSaved, unsaveItem } from "@/lib/data/supabase-saved";
+import { SampleBadge } from "@/components/ui/sample-badge";
 import {
   SavedTabs,
   SavedCardGrid,
@@ -14,23 +15,59 @@ import {
   SavedAllGrid,
 } from "@/components/saved";
 import type { SavedTabValue, SavedAllItem } from "@/components/saved";
+import type {
+  SavedStudio,
+  SavedArtist,
+  SavedPortfolioPiece,
+} from "@/lib/data/saved";
 import {
-  savedStudios as initialStudios,
-  savedArtists as initialArtists,
-  savedPortfolio as initialPortfolio,
+  savedStudios as sampleStudios,
+  savedArtists as sampleArtists,
+  savedPortfolio as samplePortfolio,
 } from "@/lib/data/saved";
 
 export default function SavedPage() {
-  const { mode, setMode } = useTheme();
-  const isLight = mode === "light";
+  const { isAuthenticated, hydrated } = useAuth();
+  const [supabase] = useState(() => createClient());
 
   const [activeTab, setActiveTab] = useState<SavedTabValue>("all");
-  const [studios, setStudios] = useState(initialStudios);
-  const [artists, setArtists] = useState(initialArtists);
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
+  const [studios, setStudios] = useState<SavedStudio[]>([]);
+  const [artists, setArtists] = useState<SavedArtist[]>([]);
+  const [portfolio, setPortfolio] = useState<SavedPortfolioPiece[]>([]);
+  const [isSample, setIsSample] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
-  // ─── Counts ───────────────────────────────────────────────────────────
+  // Load saved items once auth has hydrated. Logged-out visitors see a sample
+  // collection (badged); signed-in users see their real saves (empty if none).
+  useEffect(() => {
+    if (!hydrated) return;
+    let cancelled = false;
+
+    void (async () => {
+      // Logged out → sample collection (badged). Signed in → real saves.
+      if (!isAuthenticated) {
+        if (cancelled) return;
+        setStudios(sampleStudios);
+        setArtists(sampleArtists);
+        setPortfolio(samplePortfolio);
+        setIsSample(true);
+        setLoaded(true);
+        return;
+      }
+      const res = await getSaved(supabase);
+      if (cancelled) return;
+      setStudios(res.studios);
+      setArtists(res.artists);
+      setPortfolio(res.portfolio);
+      setIsSample(false);
+      setLoaded(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, isAuthenticated, supabase]);
 
   const counts = useMemo(
     () => ({
@@ -39,10 +76,8 @@ export default function SavedPage() {
       artists: artists.length,
       portfolio: portfolio.length,
     }),
-    [studios.length, artists.length, portfolio.length]
+    [studios.length, artists.length, portfolio.length],
   );
-
-  // ─── All items (sorted by savedAt desc) ───────────────────────────────
 
   const allItems: SavedAllItem[] = useMemo(() => {
     const items: SavedAllItem[] = [
@@ -52,53 +87,50 @@ export default function SavedPage() {
     ];
     return items.sort(
       (a, b) =>
-        new Date(b.data.savedAt).getTime() -
-        new Date(a.data.savedAt).getTime()
+        new Date(b.data.savedAt).getTime() - new Date(a.data.savedAt).getTime(),
     );
   }, [studios, artists, portfolio]);
 
-  // ─── Unsave handlers ──────────────────────────────────────────────────
-
-  const animateAndRemove = useCallback(
-    (id: string, removeFn: () => void) => {
-      setRemovingIds((prev) => new Set(prev).add(id));
-      setTimeout(() => {
-        removeFn();
-        setRemovingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          return next;
-        });
-      }, 300);
-    },
-    []
-  );
+  const animateAndRemove = useCallback((id: string, removeFn: () => void) => {
+    setRemovingIds((prev) => new Set(prev).add(id));
+    setTimeout(() => {
+      removeFn();
+      setRemovingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 300);
+  }, []);
 
   const handleUnsaveStudio = useCallback(
     (id: string) => {
       animateAndRemove(`studio-${id}`, () =>
-        setStudios((prev) => prev.filter((s) => s.id !== id))
+        setStudios((prev) => prev.filter((s) => s.id !== id)),
       );
+      if (!isSample) void unsaveItem(supabase, "studio", id);
     },
-    [animateAndRemove]
+    [animateAndRemove, isSample, supabase],
   );
 
   const handleUnsaveArtist = useCallback(
     (id: string) => {
       animateAndRemove(`artist-${id}`, () =>
-        setArtists((prev) => prev.filter((a) => a.id !== id))
+        setArtists((prev) => prev.filter((a) => a.id !== id)),
       );
+      if (!isSample) void unsaveItem(supabase, "artist", id);
     },
-    [animateAndRemove]
+    [animateAndRemove, isSample, supabase],
   );
 
   const handleUnsavePortfolio = useCallback(
     (id: string) => {
       animateAndRemove(id, () =>
-        setPortfolio((prev) => prev.filter((p) => p.id !== id))
+        setPortfolio((prev) => prev.filter((p) => p.id !== id)),
       );
+      if (!isSample) void unsaveItem(supabase, "design", id);
     },
-    [animateAndRemove]
+    [animateAndRemove, isSample, supabase],
   );
 
   const handleUnsaveAll = useCallback(
@@ -107,142 +139,93 @@ export default function SavedPage() {
       else if (type === "artist") handleUnsaveArtist(id);
       else handleUnsavePortfolio(id);
     },
-    [handleUnsaveStudio, handleUnsaveArtist, handleUnsavePortfolio]
+    [handleUnsaveStudio, handleUnsaveArtist, handleUnsavePortfolio],
   );
-
-  // ─── Tab change ───────────────────────────────────────────────────────
 
   const handleTabChange = useCallback((tab: SavedTabValue) => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // ─── Render ───────────────────────────────────────────────────────────
-
   return (
-    <div
-      className={cn(
-        "min-h-screen relative transition-colors duration-500",
-        isLight
-          ? "bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark text-ink-black"
-          : "bg-ink-black text-ink-cream"
-      )}
-    >
-      <FilmGrainOverlay
-        className={isLight ? "opacity-[0.03]" : "opacity-[0.035]"}
-      />
-
-      {/* Red glow (dark mode only) */}
-      <div
-        className={cn(
-          "absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[250px] bg-ink-red-glow-top pointer-events-none z-[1] transition-opacity duration-500",
-          isLight ? "opacity-0" : "opacity-100"
-        )}
-      />
-
-      {/* Theme toggle */}
-      <ThemeToggle mode={mode} onToggle={setMode} className="pt-24" />
-
-      {/* ─── Header ─── */}
+    <ThemedPageWrapper withTextColor>
+      {/* Header */}
       <div className="relative text-center pt-6 pb-8 px-4 z-[5]">
-        <p
-          className={cn(
-            "font-mono text-[10px] tracking-[0.25em] uppercase transition-colors duration-500",
-            isLight ? "text-ink-black/40" : "text-ink-cream/30"
-          )}
-        >
+        <p className="font-mono text-[10px] tracking-[0.25em] uppercase transition-colors duration-500 text-ink-black/40 dark:text-ink-cream/30">
           Your Collection
         </p>
-        <h1
-          className={cn(
-            bebasNeue.className,
-            "text-5xl sm:text-6xl tracking-[0.08em] leading-none mt-2 transition-colors duration-500",
-            isLight ? "text-ink-black" : "text-ink-cream"
-          )}
-        >
+        <h1 className={`${bebasNeue.className} text-5xl sm:text-6xl tracking-[0.08em] leading-none mt-2 transition-colors duration-500 text-ink-black dark:text-ink-cream`}>
           SAVED
         </h1>
-        <p
-          className={cn(
-            "font-mono text-[10px] tracking-[0.15em] mt-2 transition-colors duration-500",
-            isLight ? "text-ink-black/30" : "text-ink-cream/25"
-          )}
-        >
+        <p className="font-mono text-[10px] tracking-[0.15em] mt-2 transition-colors duration-500 text-ink-black/30 dark:text-ink-cream/25">
           {counts.all} {counts.all === 1 ? "item" : "items"} saved
         </p>
+        {isSample && (
+          <div className="mt-3 flex justify-center">
+            <SampleBadge label="Sample — sign in to save your own" />
+          </div>
+        )}
       </div>
 
-      {/* ─── Tabs ─── */}
+      {/* Tabs */}
       <div className="relative z-[5] max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SavedTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          counts={counts}
-          variant={mode}
-        />
+        <SavedTabs activeTab={activeTab} onTabChange={handleTabChange} counts={counts} />
 
-        {/* ─── Tab Content ─── */}
         <div className="py-8">
-          {/* All tab */}
-          {activeTab === "all" && (
-            allItems.length > 0 ? (
-              <SavedAllGrid
-                items={allItems}
-                removingIds={removingIds}
-                onUnsave={handleUnsaveAll}
-                onNavigateTab={handleTabChange}
-                variant={mode}
-              />
-            ) : (
-              <SavedEmptyState tab="all" variant={mode} />
-            )
-          )}
+          {!loaded ? (
+            <div className="min-h-[40vh]" aria-hidden />
+          ) : (
+            <>
+              {activeTab === "all" &&
+                (allItems.length > 0 ? (
+                  <SavedAllGrid
+                    items={allItems}
+                    removingIds={removingIds}
+                    onUnsave={handleUnsaveAll}
+                    onNavigateTab={handleTabChange}
+                  />
+                ) : (
+                  <SavedEmptyState tab="all" />
+                ))}
 
-          {/* Studios tab */}
-          {activeTab === "studios" && (
-            studios.length > 0 ? (
-              <SavedCardGrid
-                items={studios}
-                type="studio"
-                removingIds={removingIds}
-                onUnsave={handleUnsaveStudio}
-                variant={mode}
-              />
-            ) : (
-              <SavedEmptyState tab="studios" variant={mode} />
-            )
-          )}
+              {activeTab === "studios" &&
+                (studios.length > 0 ? (
+                  <SavedCardGrid
+                    items={studios}
+                    type="studio"
+                    removingIds={removingIds}
+                    onUnsave={handleUnsaveStudio}
+                  />
+                ) : (
+                  <SavedEmptyState tab="studios" />
+                ))}
 
-          {/* Artists tab */}
-          {activeTab === "artists" && (
-            artists.length > 0 ? (
-              <SavedCardGrid
-                items={artists}
-                type="artist"
-                removingIds={removingIds}
-                onUnsave={handleUnsaveArtist}
-                variant={mode}
-              />
-            ) : (
-              <SavedEmptyState tab="artists" variant={mode} />
-            )
-          )}
+              {activeTab === "artists" &&
+                (artists.length > 0 ? (
+                  <SavedCardGrid
+                    items={artists}
+                    type="artist"
+                    removingIds={removingIds}
+                    onUnsave={handleUnsaveArtist}
+                  />
+                ) : (
+                  <SavedEmptyState tab="artists" />
+                ))}
 
-          {/* Portfolio tab */}
-          {activeTab === "portfolio" && (
-            portfolio.length > 0 ? (
-              <SavedMasonryGrid
-                pieces={portfolio}
-                removingIds={removingIds}
-                onUnsave={handleUnsavePortfolio}
-                variant={mode}
-              />
-            ) : (
-              <SavedEmptyState tab="portfolio" variant={mode} />
-            )
+              {activeTab === "portfolio" &&
+                (portfolio.length > 0 ? (
+                  <SavedMasonryGrid
+                    pieces={portfolio}
+                    removingIds={removingIds}
+                    onUnsave={handleUnsavePortfolio}
+                  />
+                ) : (
+                  <SavedEmptyState tab="portfolio" />
+                ))}
+            </>
           )}
         </div>
       </div>
-    </div>
+    </ThemedPageWrapper>
   );
 }

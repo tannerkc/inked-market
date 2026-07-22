@@ -1,3 +1,5 @@
+import type { BookingMode } from "@/lib/types/booking";
+
 /** Which booking flows an entity currently offers — drives the /book chooser. */
 export type BookingFlowKind = "custom" | "consultation" | "flash";
 
@@ -9,7 +11,7 @@ export type BookingCta =
 /** The one CTA resolver: what a customer-facing surface should show. */
 export function bookingCtaFor(
   s: {
-    bookingMode: "inbuilt" | "external" | "off" | null;
+    bookingMode: BookingMode | null;
     acceptingBookings: boolean;
     customRequestsEnabled: boolean;
     consultationsEnabled: boolean;

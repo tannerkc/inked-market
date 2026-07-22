@@ -16,6 +16,13 @@ export function formatRating(rating: number): string {
 }
 
 /**
+ * Canonical star-glyph rating label: "★ 4.8"
+ */
+export function formatStarRating(rating: number): string {
+  return `★ ${formatRating(rating)}`;
+}
+
+/**
  * Format a large number with K/M suffix
  */
 export function formatCount(count: number): string {
@@ -26,6 +33,38 @@ export function formatCount(count: number): string {
     return `${(count / 1000).toFixed(1)}K`;
   }
   return count.toString();
+}
+
+/**
+ * Copy fields from a (possibly null) source onto a target, but only when the
+ * source's value is not `undefined`. Used to derive form state from a partial
+ * domain object without writing one ?? chain per field.
+ *
+ * Returns the target for fluent use.
+ */
+export function copyDefinedFields<S extends object, K extends keyof S & string>(
+  target: Record<string, unknown>,
+  source: S | null | undefined,
+  keys: readonly K[]
+): typeof target {
+  if (!source) return target;
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined) target[key] = value;
+  }
+  return target;
+}
+
+/**
+ * Split a full name into first and last components.
+ * "Tanner Cottle" → { first: "Tanner", last: "Cottle" }
+ * "Cher" → { first: "Cher", last: "" }
+ * Empty/undefined input → { first: "", last: "" }
+ */
+export function splitFullName(name: string | undefined | null): { first: string; last: string } {
+  if (!name) return { first: "", last: "" };
+  const [first = "", ...rest] = name.split(" ");
+  return { first, last: rest.join(" ") };
 }
 
 /**
@@ -64,6 +103,26 @@ export function titleCase(str: string): string {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+/**
+ * Public profile URL for an artist or studio — pretty slug when present,
+ * id fallback (mock/sample rows have no slug). The profile routes resolve
+ * both and canonicalize id URLs to the slug.
+ */
+export function profilePath(
+  type: "artist" | "studio",
+  ref: { id: string; slug?: string | null }
+): string {
+  return `/${type}s/${ref.slug ?? ref.id}`;
+}
+
+/**
+ * Booking entry URL (/book/[target]) — same slug-first convention as
+ * profilePath. The /book route resolves artists first, then studios.
+ */
+export function bookPath(ref: { id: string; slug?: string | null }): string {
+  return `/book/${ref.slug ?? ref.id}`;
 }
 
 /**

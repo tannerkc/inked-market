@@ -6,32 +6,64 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Headline } from "@/components/ui/headline";
 import { Subtitle } from "@/components/ui/subtitle";
-import { ProgressBar, StylePicker } from "@/components/signup";
+import { ProgressBar, StylePicker, ConfirmEmailNotice, useSignupCompletion } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { studioSpecialtyOptions } from "@/lib/data/signup-styles";
+import { US_STATES, citiesForState, isValidCityForState } from "@/lib/data/us-locations";
+import { sanitizeText, formatPhone, validateName, validatePhone } from "@/lib/utils/validation";
+
+const STATE_OPTIONS = US_STATES.map((s) => ({ value: s.code, label: s.name }));
 
 export default function StudioSetupPage() {
-  const { updateSignupProgress, completeSignup, signupProgress } = useAuth();
+  const { updateSignupProgress, signupProgress } = useAuth();
+  const { complete, error, confirmEmail, pending } = useSignupCompletion("/dashboard");
   const [studioName, setStudioName] = useState(signupProgress.studioName || "");
   const [city, setCity] = useState(signupProgress.city || "");
   const [state, setState] = useState(signupProgress.state || "");
   const [phone, setPhone] = useState(signupProgress.phone || "");
   const [specialties, setSpecialties] = useState<string[]>(signupProgress.specialties || []);
 
-  const isValid = studioName.trim() && city.trim() && state.trim() && specialties.length > 0;
+  const cityOptions = citiesForState(state).map((c) => ({ value: c, label: c }));
+
+  const isValid =
+    !validateName(studioName, "Studio name") &&
+    isValidCityForState(city, state) &&
+    !validatePhone(phone) &&
+    specialties.length > 0;
+
+  const currentFields = () => ({
+    studioName: sanitizeText(studioName),
+    city,
+    state,
+    phone,
+    specialties,
+  });
 
   const handleComplete = () => {
-    updateSignupProgress({
-      studioName,
-      city,
-      state,
-      phone,
-      specialties,
-    });
-    completeSignup();
-    window.location.href = "/dashboard";
+    void complete(currentFields());
   };
+
+  if (confirmEmail) {
+    return (
+      <div className="text-center">
+        <ProgressBar currentStep={3} totalSteps={3} />
+        <Eyebrow text="One Last Thing" color="rust" />
+        <Headline
+          variant="mixed"
+          size="sm"
+          words={[
+            { text: "Confirm", font: "pirata" },
+            { text: "Your", font: "rye" },
+            { text: "Email", font: "cook", color: "text-ink-rust" },
+          ]}
+        />
+        <Subtitle text="Your studio account is created — verify your email to unlock the dashboard." className="mb-6" />
+        <ConfirmEmailNotice email={confirmEmail} />
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
@@ -81,24 +113,32 @@ export default function StudioSetupPage() {
           placeholder="Ink Paradise Studio"
           value={studioName}
           onChange={(e) => setStudioName(e.target.value)}
+          maxLength={80}
+          required
         />
         <div className="flex gap-2.5">
-          <div className="flex-[2]">
-            <Input
-              label="City"
-              type="text"
-              placeholder="Los Angeles"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
+          <div className="flex-1">
+            <Select
+              label="State"
+              options={STATE_OPTIONS}
+              placeholder="Select…"
+              value={state}
+              onChange={(e) => {
+                setState(e.target.value);
+                setCity("");
+              }}
+              required
             />
           </div>
-          <div className="flex-1">
-            <Input
-              label="State"
-              type="text"
-              placeholder="CA"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
+          <div className="flex-[2]">
+            <Select
+              label="City"
+              options={cityOptions}
+              placeholder={state ? "Select city…" : "Pick a state first"}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              disabled={!state}
+              required
             />
           </div>
         </div>
@@ -107,7 +147,9 @@ export default function StudioSetupPage() {
           type="tel"
           placeholder="(555) 123-4567"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          autoComplete="tel-national"
+          inputMode="numeric"
         />
       </div>
 
@@ -123,6 +165,10 @@ export default function StudioSetupPage() {
         />
       </div>
 
+      {error ? (
+        <p className="text-ink-red text-[11px] font-mono tracking-[0.1em] text-left mb-3">{error}</p>
+      ) : null}
+
       <Button
         type="button"
         variant="ink"
@@ -130,14 +176,14 @@ export default function StudioSetupPage() {
         statusDot
         className="w-full"
         onClick={handleComplete}
-        disabled={!isValid}
+        disabled={!isValid || pending}
       >
-        Complete Setup
+        {pending ? "Creating Account…" : "Complete Setup"}
       </Button>
 
       <Link
         href="/signup/studio"
-        onClick={() => updateSignupProgress({ studioName, city, state, phone, specialties })}
+        onClick={() => updateSignupProgress(currentFields())}
         className="block text-center font-mono text-[10px] tracking-[0.15em] uppercase text-ink-black/25 hover:text-ink-black/45 transition-colors pt-3"
       >
         &larr; Back

@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { useAuth, type UserRole } from "./auth-provider";
+import { AccountPausedWall, ConfirmEmailBanner } from "@/components/account";
+import { accountAccess } from "@/lib/utils/email-confirmation";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,30 +12,36 @@ interface AuthGuardProps {
 
 /**
  * Protects pages behind authentication.
- * On localhost: redirects to /login if not authenticated.
- * Off localhost: renders children directly (auth disabled).
+ * Redirects to /login if not authenticated or wrong role.
+ * Enforces the email-confirmation grace period: paused accounts get a
+ * blocking wall; pending ones a floating reminder banner.
  */
 export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
-  const { isAuthenticated, isLocalhost, user } = useAuth();
+  const { isAuthenticated, user, hydrated } = useAuth();
 
   useEffect(() => {
-    if (!isLocalhost) return;
+    // ponytail: wait for the session to load before deciding — otherwise the
+    // pre-hydration isAuthenticated=false bounces to /login on every mount,
+    // and /login bounces back once hydrated → infinite full-page reload loop.
+    if (!hydrated) return;
     if (!isAuthenticated) {
       window.location.href = "/login";
     } else if (requiredRole && user?.role !== requiredRole) {
-      // Wrong role — redirect to their correct dashboard
-      if (user?.role === "artist") window.location.href = "/dashboard";
-      else if (user?.role === "studio") window.location.href = "/dashboard";
-      else window.location.href = "/";
+      window.location.href = "/dashboard";
     }
-  }, [isAuthenticated, isLocalhost, user, requiredRole]);
+  }, [hydrated, isAuthenticated, user, requiredRole]);
 
-  // Off localhost: always render (auth disabled)
-  if (!isLocalhost) return <>{children}</>;
-
-  // On localhost: only render when authenticated with correct role
+  if (!hydrated) return null;
   if (!isAuthenticated) return null;
   if (requiredRole && user?.role !== requiredRole) return null;
 
-  return <>{children}</>;
+  const access = accountAccess(user?.emailConfirmation, user?.paused === true);
+  if (access === "paused") return <AccountPausedWall />;
+
+  return (
+    <>
+      {children}
+      {access === "pending" ? <ConfirmEmailBanner /> : null}
+    </>
+  );
 }

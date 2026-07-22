@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { GroupSection } from "./group-section";
 
 export function ArtistsGroup({ highlighted }: { highlighted?: boolean }) {
-  const { liveContent } = useBuilder();
+  const { liveContent, requestLeave } = useBuilder();
 
   return (
     <GroupSection id="artists" title="Artists" highlighted={highlighted}>
@@ -21,12 +20,13 @@ export function ArtistsGroup({ highlighted }: { highlighted?: boolean }) {
         <p className="text-[11px] text-chrome-text-faint">No artists on your roster yet.</p>
       )}
       <div className="flex items-center gap-2">
-        <Link
-          href="/dashboard"
+        <button
+          type="button"
+          onClick={() => requestLeave("/dashboard")}
           className="rounded-lg border border-chrome-border-hover px-3 py-2 text-[11px] font-semibold text-chrome-text-secondary transition-colors hover:border-chrome-text-dim hover:text-white"
         >
           Manage roster
-        </Link>
+        </button>
         <button
           type="button"
           onClick={liveContent.refresh}

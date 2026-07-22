@@ -4,9 +4,13 @@ import { usePathname } from "next/navigation";
 
 export function MainWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isBuilder = pathname.startsWith("/dashboard/builder");
+  // Standalone, chrome-free routes: the builder and public studio sites render
+  // their own nav/footer, so the app shell is suppressed.
+  const isStandalone =
+    pathname.startsWith("/dashboard/builder") ||
+    pathname.startsWith("/studios/");
 
-  if (isBuilder) {
+  if (isStandalone) {
     return <main>{children}</main>;
   }
 

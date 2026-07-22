@@ -14,6 +14,8 @@ import type {
 } from "@/lib/types/booking";
 import type { WeeklyAvailability } from "@/lib/types";
 import { bookingCtaFor } from "@/lib/booking/flows";
+import { getRosterArtistRows } from "@/lib/data/supabase-artists";
+import { bookPath } from "@/lib/utils";
 import {
   type DbAppointment,
   type DbAvailabilityOverride,
@@ -76,6 +78,59 @@ export async function fetchBookingSettings(
     .maybeSingle();
   if (error || !data) return null;
   return mapDbBookingSettings(data as DbBookingSettings);
+}
+
+export interface BookableRosterArtist {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  styles: string[];
+  /** True when a pick submits an artist-direct request; false routes to the front desk. */
+  direct: boolean;
+}
+
+/**
+ * Roster artists pickable on the studio book page. Every artist is pickable
+ * unless they turned booking off; no settings row means the artist default,
+ * "through studio page". Artists taking inbuilt custom requests get the
+ * request directly; everyone else stays a studio request with the pick
+ * recorded as preferred_artist_id for the front desk.
+ */
+export async function fetchBookableRoster(
+  supabase: SupabaseClient,
+  studioId: string
+): Promise<BookableRosterArtist[]> {
+  const roster = await getRosterArtistRows(supabase, studioId);
+  if (roster.length === 0) return [];
+  const { data } = await supabase
+    .from("booking_settings")
+    .select("artist_id, booking_mode, accepting_bookings, custom_requests_enabled")
+    .in(
+      "artist_id",
+      roster.map((a) => a.id)
+    );
+  const settingsByArtist = new Map(
+    (
+      (data ?? []) as Pick<
+        DbBookingSettings,
+        "artist_id" | "booking_mode" | "accepting_bookings" | "custom_requests_enabled"
+      >[]
+    ).map((s) => [s.artist_id, s])
+  );
+  return roster
+    .filter((a) => settingsByArtist.get(a.id)?.booking_mode !== "off")
+    .map((a) => {
+      const s = settingsByArtist.get(a.id);
+      return {
+        id: a.id,
+        name: a.name,
+        avatarUrl: a.profile_image ?? null,
+        styles: a.styles ?? [],
+        direct: Boolean(
+          s && s.booking_mode === "inbuilt" && s.accepting_bookings && s.custom_requests_enabled
+        ),
+      };
+    });
 }
 
 export async function saveBookingSettings(
@@ -153,7 +208,11 @@ export async function removeOverride(supabase: SupabaseClient, id: string): Prom
 
 // ─── Phase 2: requests + appointments ─────────────────────────────────────
 
-export const REQUEST_SELECT = "*, artists(name), studios(name)";
+// booking_requests has two FKs to artists (artist_id + preferred_artist_id),
+// so its embeds must be disambiguated by column hint. Appointments have one.
+export const REQUEST_SELECT =
+  "*, artists!artist_id(name), studios(name), preferred_artist:artists!preferred_artist_id(name)";
+export const APPOINTMENT_SELECT = "*, artists(name), studios(name)";
 
 export async function fetchCustomerRequests(
   supabase: SupabaseClient,
@@ -211,7 +270,7 @@ export async function fetchCustomerAppointments(
 ): Promise<AppointmentRecord[]> {
   const { data } = await supabase
     .from("appointments")
-    .select(REQUEST_SELECT)
+    .select(APPOINTMENT_SELECT)
     .eq("customer_id", customerId)
     .order("start_at", { ascending: true });
   return ((data ?? []) as DbAppointment[]).map(mapDbAppointment);
@@ -294,7 +353,7 @@ export async function fetchArtistUpcomingAppointments(
 ): Promise<AppointmentRecord[]> {
   const { data } = await supabase
     .from("appointments")
-    .select(REQUEST_SELECT)
+    .select(APPOINTMENT_SELECT)
     .eq("artist_id", artistId)
     .in("status", ["pending_deposit", "confirmed"])
     .gte("end_at", new Date().toISOString())
@@ -305,8 +364,8 @@ export async function fetchArtistUpcomingAppointments(
 
 /**
  * Booking hrefs for a set of artists, resolved through bookingCtaFor:
- * inbuilt -> /book/{id}, external -> their https URL, message -> absent.
- * One query; used by the studio-site roster mappers.
+ * inbuilt -> /book/{slug ?? id}, external -> their https URL, message -> absent.
+ * One query (settings + artist slug join); used by the studio-site roster mappers.
  */
 export async function fetchBookHrefs(
   supabase: SupabaseClient,
@@ -316,13 +375,17 @@ export async function fetchBookHrefs(
   if (artistIds.length === 0) return map;
   const { data } = await supabase
     .from("booking_settings")
-    .select("*")
+    .select("*, artist:artists(slug)")
     .in("artist_id", artistIds);
-  for (const row of (data ?? []) as DbBookingSettings[]) {
+  type SettingsWithSlug = DbBookingSettings & { artist: { slug: string | null } | null };
+  for (const row of (data ?? []) as SettingsWithSlug[]) {
     if (!row.artist_id) continue;
     const cta = bookingCtaFor(mapDbBookingSettings(row));
-    if (cta.kind === "inbuilt") map.set(row.artist_id, `/book/${row.artist_id}`);
-    else if (cta.kind === "external") map.set(row.artist_id, cta.url);
+    if (cta.kind === "inbuilt") {
+      map.set(row.artist_id, bookPath({ id: row.artist_id, slug: row.artist?.slug }));
+    } else if (cta.kind === "external") {
+      map.set(row.artist_id, cta.url);
+    }
   }
   return map;
 }
@@ -337,7 +400,7 @@ export async function fetchRosterAppointments(
 ): Promise<AppointmentRecord[]> {
   let query = supabase
     .from("appointments")
-    .select(REQUEST_SELECT)
+    .select(APPOINTMENT_SELECT)
     .in("status", ["pending_deposit", "confirmed"])
     .gte("end_at", new Date().toISOString())
     .order("start_at", { ascending: true })

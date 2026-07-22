@@ -362,6 +362,7 @@ import {
 
 const DB_REQUEST: DbBookingRequest = {
   id: "r1", customer_id: "u1", customer_name: "Jess", artist_id: "a1", studio_id: null,
+  preferred_artist_id: null,
   type: "custom", description: "Fine-line floral piece on the right shoulder blade",
   placement: "shoulder", size_category: "medium", budget_range: "600-1200", is_color: false,
   reference_image_urls: ["https://x/1.webp"], preferred_timing: "weekends", flexible_dates: true,
@@ -554,21 +555,116 @@ check("project maps db->domain", () => {
 });
 
 // ─── phase 6: notifications ──────────────────────────────────────────────
-import { buildNotification } from "../lib/booking/notify";
+import * as notifications from "../lib/booking/notify";
 
-check("buildNotification renders human copy per kind", () => {
-  assert.ok(buildNotification("request_received", { actorName: "Jess" }).message.includes("Jess"));
-  assert.ok(buildNotification("request_accepted", { otherName: "Mar" }).message.includes("Mar"));
-  assert.ok(
-    buildNotification("appointment_booked", {
-      actorName: "Jess",
-      apptType: "flash",
-      whenIso: "2026-08-01T17:00:00Z",
-    }).message.length > 10
-  );
-  assert.ok(buildNotification("deposit_paid", { actorName: "Jess" }).message.includes("deposit"));
-  assert.equal(buildNotification("request_received", { actorName: "Jess" }).actorName, "Jess");
-  assert.equal(buildNotification("request_accepted", { otherName: "Mar" }).actorName, "Mar");
+const {
+  buildNotification,
+  isNotificationRecipientContext,
+  notificationContextForTarget,
+  notificationContextLabel,
+} = notifications;
+
+check("notification context maps targets and labels", () => {
+  assert.equal(notificationContextForTarget({}), undefined);
+  assert.equal(notificationContextForTarget({ studioId: "studio-1" }), "studio");
+  assert.equal(notificationContextForTarget({ artistId: "artist-1" }), "artist");
+  assert.equal(notificationContextLabel("studio"), "Studio");
+  assert.equal(notificationContextLabel("artist"), "Artist");
+  assert.equal(notificationContextLabel("customer"), "Your booking");
+});
+
+check("notification recipient context guard accepts only persisted roles", () => {
+  assert.equal(isNotificationRecipientContext("studio"), true);
+  assert.equal(isNotificationRecipientContext("artist"), true);
+  assert.equal(isNotificationRecipientContext("customer"), true);
+  assert.equal(isNotificationRecipientContext("personal"), false);
+  assert.equal(isNotificationRecipientContext(null), false);
+  assert.equal(isNotificationRecipientContext(undefined), false);
+});
+
+check("buildNotification preserves copy, actor, and explicit context for every kind", () => {
+  const cases = [
+    [
+      "request_received",
+      { actorName: "Jess", recipientContext: "studio" },
+      { message: "Jess requested a booking", actorName: "Jess", recipientContext: "studio" },
+    ],
+    [
+      "request_accepted",
+      { otherName: "Mar", recipientContext: "customer" },
+      { message: "Mar approved your booking request", actorName: "Mar", recipientContext: "customer" },
+    ],
+    [
+      "request_declined",
+      { otherName: "Mar", recipientContext: "customer" },
+      { message: "Mar declined your booking request", actorName: "Mar", recipientContext: "customer" },
+    ],
+    [
+      "appointment_booked",
+      {
+        actorName: "Jess",
+        apptType: "flash",
+        whenIso: "2026-08-01T17:00:00Z",
+        recipientContext: "artist",
+      },
+      {
+        message: "Jess booked a flash for Aug 1",
+        actorName: "Jess",
+        recipientContext: "artist",
+      },
+    ],
+    [
+      "appointment_cancelled",
+      {
+        actorName: "Jess",
+        whenIso: "2026-08-01T17:00:00Z",
+        recipientContext: "studio",
+      },
+      {
+        message: "Jess cancelled an appointment for Aug 1",
+        actorName: "Jess",
+        recipientContext: "studio",
+      },
+    ],
+    [
+      "deposit_paid",
+      { actorName: "Jess", recipientContext: "artist" },
+      {
+        message: "Jess paid their deposit — booking confirmed",
+        actorName: "Jess",
+        recipientContext: "artist",
+      },
+    ],
+    [
+      "message_received",
+      { actorName: "Jess", recipientContext: "customer" },
+      { message: "Jess sent you a message", actorName: "Jess", recipientContext: "customer" },
+    ],
+  ] as const;
+
+  for (const [kind, ctx, expected] of cases) {
+    assert.deepEqual(buildNotification(kind, ctx), expected);
+  }
+});
+
+check("notificationContextFromPayload accepts only persisted recipient contexts", () => {
+  const notificationContextFromPayload = (
+    notifications as unknown as {
+      notificationContextFromPayload?: (payload: unknown) => unknown;
+    }
+  ).notificationContextFromPayload;
+  assert.equal(typeof notificationContextFromPayload, "function");
+  if (!notificationContextFromPayload) return;
+
+  assert.equal(notificationContextFromPayload({ recipientContext: "studio" }), "studio");
+  assert.equal(notificationContextFromPayload({ recipientContext: "artist" }), "artist");
+  assert.equal(notificationContextFromPayload({ recipientContext: "customer" }), "customer");
+  assert.equal(notificationContextFromPayload({}), undefined);
+  assert.equal(notificationContextFromPayload(null), undefined);
+  assert.equal(notificationContextFromPayload([]), undefined);
+  assert.equal(notificationContextFromPayload("not an object"), undefined);
+  assert.equal(notificationContextFromPayload({ recipientContext: "personal" }), undefined);
+  assert.equal(notificationContextFromPayload({ recipientContext: null }), undefined);
 });
 
 // ─── booking mode + CTA resolver ─────────────────────────────────────────

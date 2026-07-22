@@ -10,7 +10,6 @@ export interface SavedTabsProps {
   activeTab: SavedTabValue;
   onTabChange: (tab: SavedTabValue) => void;
   counts: Record<SavedTabValue, number>;
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -22,7 +21,7 @@ const tabDefs: { label: string; value: SavedTabValue }[] = [
 ];
 
 const SavedTabs = React.forwardRef<HTMLDivElement, SavedTabsProps>(
-  ({ activeTab, onTabChange, counts, variant = "dark", className }, ref) => {
+  ({ activeTab, onTabChange, counts, className }, ref) => {
     const tabs: TabItem<SavedTabValue>[] = tabDefs.map((t) => ({
       ...t,
       count: counts[t.value],
@@ -35,7 +34,6 @@ const SavedTabs = React.forwardRef<HTMLDivElement, SavedTabsProps>(
         activeTab={activeTab}
         onTabChange={onTabChange}
         showZeroCounts
-        variant={variant}
         className={className}
       />
     );

@@ -3,8 +3,8 @@
 import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import { PromptChip } from "@/components/studio-site/empty-states";
 import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
+import { resolveSocialLinks, socialUrl, telHref, mailtoHref } from "@/lib/utils/external-links";
 import type { FooterLayout } from "@/lib/types/builder";
-import type { StudioSiteData } from "@/components/studio-site/studio-site-data";
 import {
   standardPolicies,
   standardPolicyOrder,
@@ -96,27 +96,13 @@ const SOCIAL_ICON_PATHS: Record<string, React.ReactNode> = {
       <path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z" />
     </>
   ),
+  x: <path d="M5 5l14 14M19 5L5 19" />,
 };
-
-interface SocialLink {
-  key: string;
-  href: string;
-  label: string;
-}
-
-function buildSocialLinks(d: StudioSiteData): SocialLink[] {
-  const links: SocialLink[] = [];
-  if (d.instagram) links.push({ key: "instagram", href: `https://instagram.com/${d.instagram.replace(/^@/, "")}`, label: "Instagram" });
-  if (d.tiktok) links.push({ key: "tiktok", href: `https://tiktok.com/@${d.tiktok.replace(/^@/, "")}`, label: "TikTok" });
-  if (d.facebook) links.push({ key: "facebook", href: d.facebook.startsWith("http") ? d.facebook : `https://facebook.com/${d.facebook}`, label: "Facebook" });
-  if (d.website) links.push({ key: "website", href: d.website.startsWith("http") ? d.website : `https://${d.website}`, label: "Website" });
-  return links;
-}
 
 /** Real social links only. Empty → builder shows an add-prompt; public shows nothing. */
 function SocialIcons({ className }: { className?: string }) {
   const { data } = useStudioSite();
-  const links = buildSocialLinks(data);
+  const links = resolveSocialLinks(data);
   if (links.length === 0) {
     return (
       <span className={className}>
@@ -268,10 +254,12 @@ function PoliciesBottomBarLink() {
 function useConnectLinks(): { label: string; href: string; external: boolean }[] {
   const { data } = useStudioSite();
   const connect: { label: string; href: string; external: boolean }[] = [];
-  if (data.instagram) connect.push({ label: "Instagram", href: `https://instagram.com/${data.instagram.replace(/^@/, "")}`, external: true });
-  if (data.facebook) connect.push({ label: "Facebook", href: data.facebook.startsWith("http") ? data.facebook : `https://facebook.com/${data.facebook}`, external: true });
-  if (data.email) connect.push({ label: "Email", href: `mailto:${data.email}`, external: false });
-  if (data.phone) connect.push({ label: "Phone", href: `tel:${data.phone.replace(/[^+\d]/g, "")}`, external: false });
+  const instagram = socialUrl("instagram", data.instagram);
+  const facebook = socialUrl("facebook", data.facebook);
+  if (instagram) connect.push({ label: "Instagram", href: instagram, external: true });
+  if (facebook) connect.push({ label: "Facebook", href: facebook, external: true });
+  if (data.email) connect.push({ label: "Email", href: mailtoHref(data.email), external: false });
+  if (data.phone) connect.push({ label: "Phone", href: telHref(data.phone), external: false });
   return connect;
 }
 

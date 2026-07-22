@@ -88,12 +88,12 @@ function pickTagline() {
     roll -= t.weight;
     if (roll <= 0) return t.text;
   }
-  return heroTaglines[0].text;
+  return heroTaglines[0]!.text;
 }
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
-  const [tagline, setTagline] = useState(heroTaglines[0].text);
+  const [tagline, setTagline] = useState(heroTaglines[0]!.text);
 
   useEffect(() => {
     setTagline(pickTagline());

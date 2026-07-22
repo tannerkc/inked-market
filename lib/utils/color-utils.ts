@@ -1,9 +1,6 @@
 export function contrastText(hex: string): "#ffffff" | "#0a0a0a" {
   const clean = hex.replace("#", "");
-  const full =
-    clean.length === 3
-      ? clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2]
-      : clean;
+  const full = clean.length === 3 ? clean.replace(/(.)/g, "$1$1") : clean;
   const r = parseInt(full.substring(0, 2), 16) / 255;
   const g = parseInt(full.substring(2, 4), 16) / 255;
   const b = parseInt(full.substring(4, 6), 16) / 255;
@@ -15,10 +12,7 @@ export function contrastText(hex: string): "#ffffff" | "#0a0a0a" {
 
 export function hexToRgba(hex: string, alpha: number): string {
   const clean = hex.replace("#", "");
-  const full =
-    clean.length === 3
-      ? clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2]
-      : clean;
+  const full = clean.length === 3 ? clean.replace(/(.)/g, "$1$1") : clean;
   const r = parseInt(full.substring(0, 2), 16);
   const g = parseInt(full.substring(2, 4), 16);
   const b = parseInt(full.substring(4, 6), 16);

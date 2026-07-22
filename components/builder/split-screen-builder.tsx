@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { EditorPanel } from "@/components/builder/editor-panel";
 import { PreviewPane } from "@/components/builder/preview-pane";

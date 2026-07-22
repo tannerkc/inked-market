@@ -17,38 +17,52 @@ export interface StaffUserRow {
   tier: string | null;
   tierSource: string | null;
   billingStatus: string;
+  createdAt: string;
 }
 
 export async function searchUsers(query: string): Promise<{ ok: boolean; users: StaffUserRow[]; error?: string }> {
   const staff = await requireStaff();
   if (!staff) return { ok: false, users: [], error: "Forbidden" };
-  const q = query.trim();
-  if (q.length < 2) return { ok: true, users: [] };
+  const q = query.trim().toLowerCase();
   const admin = createAdminClient();
 
   // Email lives in auth.users; name/role/tier in profiles. Two lookups, merged.
-  const { data: byName } = await admin
-    .from("profiles")
-    .select("id, name, role, tier, tier_source, billing_status")
-    .ilike("name", `%${q}%`)
-    .limit(20);
   const { data: authList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const emailMatches = (authList?.users ?? []).filter((u) =>
-    u.email?.toLowerCase().includes(q.toLowerCase())
+  const allUsers = (authList?.users ?? []).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
-  const ids = new Set([...(byName ?? []).map((p) => p.id), ...emailMatches.map((u) => u.id)]);
-  if (!ids.size) return { ok: true, users: [] };
+
+  let ids: string[];
+  if (!q) {
+    // Empty query = browse mode: newest accounts first so real accounts are
+    // visible the moment the page opens instead of hiding behind a search box.
+    ids = allUsers.slice(0, 50).map((u) => u.id);
+  } else {
+    const { data: byName } = await admin.from("profiles").select("id").ilike("name", `%${q}%`).limit(20);
+    const emailMatches = allUsers.filter((u) => u.email?.toLowerCase().includes(q));
+    ids = [...new Set([...emailMatches.map((u) => u.id), ...(byName ?? []).map((p) => p.id)])];
+  }
+  if (!ids.length) return { ok: true, users: [] };
+
   const { data: profiles } = await admin
     .from("profiles")
     .select("id, name, role, tier, tier_source, billing_status")
-    .in("id", [...ids]);
-  const emailById = new Map((authList?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+    .in("id", ids);
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const authById = new Map(allUsers.map((u) => [u.id, u]));
   return {
     ok: true,
-    users: (profiles ?? []).map((p) => ({
-      id: p.id, email: emailById.get(p.id) ?? "", name: p.name, role: p.role,
-      tier: p.tier, tierSource: p.tier_source, billingStatus: p.billing_status,
-    })),
+    // Map over ids (not profiles) so an auth account missing its profiles row
+    // still shows up instead of silently disappearing from results.
+    users: ids.map((id) => {
+      const p = profileById.get(id);
+      const au = authById.get(id);
+      return {
+        id, email: au?.email ?? "", name: p?.name ?? null, role: p?.role ?? "customer",
+        tier: p?.tier ?? null, tierSource: p?.tier_source ?? null, billingStatus: p?.billing_status ?? "none",
+        createdAt: au?.created_at ?? "",
+      };
+    }),
   };
 }
 // ponytail: listUsers page-1000 scan is fine pre-launch; swap for an email
@@ -81,12 +95,13 @@ export async function getUserDetail(userId: string): Promise<{ ok: boolean; erro
       .eq("user_id", userId).order("created_at", { ascending: false }),
     admin.auth.admin.getUserById(userId),
   ]);
-  if (!p) return { ok: false, error: "User not found" };
+  if (!p && !au?.user) return { ok: false, error: "User not found" };
   return {
     ok: true,
     user: {
-      id: p.id, email: au?.user?.email ?? "", name: p.name, role: p.role,
-      tier: p.tier, tierSource: p.tier_source, billingStatus: p.billing_status,
+      id: userId, email: au?.user?.email ?? "", name: p?.name ?? null, role: p?.role ?? "customer",
+      tier: p?.tier ?? null, tierSource: p?.tier_source ?? null, billingStatus: p?.billing_status ?? "none",
+      createdAt: au?.user?.created_at ?? "",
       stripeCustomerId: bc?.stripe_customer_id ?? null, subStatus: bc?.sub_status ?? null,
       grants: (grants ?? []).map((g) => ({
         id: g.id, tier: g.tier, note: g.note, email: g.email,

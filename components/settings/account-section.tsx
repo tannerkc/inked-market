@@ -1,15 +1,10 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { SettingsSection } from "./settings-section";
 import { useAccountSection } from "./use-account-section";
 
 export function AccountSection() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-  const variant = isDark ? "dark" : "light";
   const {
     email,
     expanded,
@@ -32,24 +27,14 @@ export function AccountSection() {
     handlePasswordSave,
   } = useAccountSection();
 
-  const inputClass = cn(
-    "w-full rounded-xl px-5 py-4 text-[15px] outline-none transition-colors",
-    isDark
-      ? "bg-ink-cream/[0.04] border border-ink-cream/[0.08] text-ink-cream placeholder:text-ink-cream/20 focus:border-ink-cream/20"
-      : "bg-white border border-ink-black/[0.06] text-ink-black placeholder:text-ink-black/20 focus:border-ink-black/20"
-  );
+  const inputClass =
+    "w-full rounded-xl px-5 py-4 text-[15px] outline-none transition-colors bg-white border border-ink-black/[0.06] text-ink-black placeholder:text-ink-black/20 focus:border-ink-black/20 dark:bg-ink-cream/[0.04] dark:border-ink-cream/[0.08] dark:text-ink-cream dark:placeholder:text-ink-cream/20 dark:focus:border-ink-cream/20";
 
-  const labelClass = cn(
-    "block font-mono text-[9px] tracking-[0.15em] uppercase mb-2",
-    isDark ? "text-ink-cream/30" : "text-ink-black/30"
-  );
+  const labelClass =
+    "block font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/30 dark:text-ink-cream/30";
 
-  const cardClass = cn(
-    "rounded-[16px] border p-5 mb-4",
-    isDark
-      ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]"
-      : "border-ink-black/[0.06] bg-ink-black/[0.02]"
-  );
+  const cardClass =
+    "rounded-[16px] border p-5 mb-4 border-ink-black/[0.06] bg-ink-black/[0.02] dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]";
 
   return (
     <SettingsSection title="Account" description="Manage your email address and password">
@@ -65,7 +50,7 @@ export function AccountSection() {
             {expanded === "email" ? "Cancel" : "Change"}
           </button>
         </div>
-        <p className={cn("text-[13px]", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+        <p className="text-[13px] text-ink-black/60 dark:text-ink-cream/60">
           {email}
         </p>
 
@@ -98,7 +83,7 @@ export function AccountSection() {
               <p className="text-[11px] text-ink-sage">Email updated successfully</p>
             )}
             <div className="flex gap-2 pt-1">
-              <Button variant={isDark ? "ink-light-outline" : "ink-outline"} size="sm" onClick={() => toggleExpanded(null)}>
+              <Button variant="ink-outline" size="sm" onClick={() => toggleExpanded(null)}>
                 Cancel
               </Button>
               <Button variant="ink" size="sm" onClick={handleEmailSave}>
@@ -121,7 +106,7 @@ export function AccountSection() {
             {expanded === "password" ? "Cancel" : "Change"}
           </button>
         </div>
-        <p className={cn("text-[13px]", isDark ? "text-ink-cream/30" : "text-ink-black/30")}>
+        <p className="text-[13px] text-ink-black/30 dark:text-ink-cream/30">
           ••••••••••
         </p>
 
@@ -164,7 +149,7 @@ export function AccountSection() {
               <p className="text-[11px] text-ink-sage">Password updated successfully</p>
             )}
             <div className="flex gap-2 pt-1">
-              <Button variant={isDark ? "ink-light-outline" : "ink-outline"} size="sm" onClick={() => toggleExpanded(null)}>
+              <Button variant="ink-outline" size="sm" onClick={() => toggleExpanded(null)}>
                 Cancel
               </Button>
               <Button variant="ink" size="sm" onClick={handlePasswordSave}>
@@ -176,27 +161,17 @@ export function AccountSection() {
       </div>
 
       {/* Two-Factor Auth */}
-      <div
-        className={cn(
-          "rounded-[16px] border border-dashed p-5",
-          isDark ? "border-ink-cream/[0.06]" : "border-ink-black/[0.06]"
-        )}
-      >
+      <div className="rounded-[16px] border border-dashed p-5 border-ink-black/[0.06] dark:border-ink-cream/[0.06]">
         <div className="flex items-center justify-between">
           <div>
-            <p className={cn("text-[12px] font-medium", isDark ? "text-ink-cream/50" : "text-ink-black/50")}>
+            <p className="text-[12px] font-medium text-ink-black/50 dark:text-ink-cream/50">
               Two-Factor Authentication
             </p>
-            <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/20" : "text-ink-black/20")}>
+            <p className="text-[10px] mt-0.5 text-ink-black/20 dark:text-ink-cream/20">
               Not enabled — Add an extra layer of security
             </p>
           </div>
-          <span
-            className={cn(
-              "font-mono text-[8px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-md",
-              isDark ? "bg-ink-cream/[0.04] text-ink-cream/25" : "bg-ink-black/[0.04] text-ink-black/25"
-            )}
-          >
+          <span className="font-mono text-[8px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-md bg-ink-black/[0.04] text-ink-black/25 dark:bg-ink-cream/[0.04] dark:text-ink-cream/25">
             Coming Soon
           </span>
         </div>

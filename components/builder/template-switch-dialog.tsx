@@ -63,9 +63,9 @@ export function TemplateSwitchDialog({
         {/* Body */}
         <p className="mt-3 text-[13px] leading-relaxed text-chrome-text-secondary">
           Switching to{" "}
-          <span className="font-semibold text-chrome-text-primary">{tmpl.name}</span> will
-          reset your layout choices to the new template&apos;s defaults. Your
-          color and font customizations will be preserved.
+          <span className="font-semibold text-chrome-text-primary">{tmpl.name}</span> loads
+          its layout. Your work on the current template is saved automatically —
+          switch back anytime to pick up right where you left off.
         </p>
 
         {/* Color preview dots */}

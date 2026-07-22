@@ -7,7 +7,6 @@ import { searchSuggestions } from "@/lib/data/help-articles";
 import type { HelpSearchSuggestion } from "@/lib/data/help-types";
 
 interface HelpSearchProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -47,8 +46,7 @@ const formatIconMap: Record<string, React.ReactNode> = {
   ),
 };
 
-function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
-  const isDark = variant === "dark";
+function HelpSearch({ className }: HelpSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -124,7 +122,7 @@ function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
     <div ref={wrapRef} className={cn("relative max-w-xl mx-auto mt-6", className)}>
       <div className="relative">
         <svg
-          className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-ink-cream/20" : "text-ink-black/20")}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-black/20 dark:text-ink-cream/20"
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <circle cx="11" cy="11" r="8" />
@@ -141,9 +139,8 @@ function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
           placeholder="Search help articles..."
           className={cn(
             "w-full pl-11 pr-24 py-3 rounded-full border text-sm font-sans outline-none transition-all",
-            isDark
-              ? "border-ink-cream/8 bg-ink-cream/[0.03] text-ink-cream placeholder:text-ink-cream/20 focus:border-ink-cream/15 focus:shadow-[0_0_0_3px_rgba(245,240,232,0.03)]"
-              : "border-ink-black/8 bg-white text-ink-black placeholder:text-ink-black/25 focus:border-ink-black/15 focus:shadow-[0_0_0_3px_rgba(10,10,10,0.03)]"
+            "border-ink-black/8 bg-white text-ink-black placeholder:text-ink-black/25 focus:border-ink-black/15 focus:shadow-[0_0_0_3px_rgba(10,10,10,0.03)]",
+            "dark:border-ink-cream/8 dark:bg-ink-cream/[0.03] dark:text-ink-cream dark:placeholder:text-ink-cream/20 dark:focus:border-ink-cream/15 dark:focus:shadow-[0_0_0_3px_rgba(245,240,232,0.03)]"
           )}
         />
 
@@ -155,23 +152,21 @@ function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
       {isOpen && hasSuggestions && (
         <div className={cn(
           "absolute top-full mt-2 left-0 right-0 border rounded-2xl p-1.5 shadow-[0_25px_60px_rgba(0,0,0,0.5)] z-50",
-          isDark
-            ? "bg-ink-black/[0.98] border-ink-cream/8"
-            : "bg-white/[0.98] border-ink-black/8"
+          "bg-white/[0.98] border-ink-black/8",
+          "dark:bg-ink-black/[0.98] dark:border-ink-cream/8"
         )}>
           {Object.entries(grouped).map(([audience, items]) => (
             <div key={audience} className={cn(
               "py-1 [&+&]:border-t",
-              isDark ? "[&+&]:border-ink-cream/[0.04]" : "[&+&]:border-ink-black/[0.04]"
+              "[&+&]:border-ink-black/[0.04]",
+              "dark:[&+&]:border-ink-cream/[0.04]"
             )}>
-              <p className={cn(
-                "font-mono text-[9px] tracking-[0.25em] uppercase px-3 py-1",
-                isDark ? "text-ink-cream/18" : "text-ink-black/25"
-              )}>
+              <p className="font-mono text-[9px] tracking-[0.25em] uppercase px-3 py-1 text-ink-black/25 dark:text-ink-cream/18">
                 {audienceLabelMap[audience] ?? audience}
               </p>
               {items.map((item) => {
                 const flatIndex = suggestions.indexOf(item);
+                const isActive = flatIndex === activeIndex;
                 return (
                   <button
                     key={item.href}
@@ -179,14 +174,10 @@ function HelpSearch({ variant = "dark", className }: HelpSearchProps) {
                     onMouseEnter={() => setActiveIndex(flatIndex)}
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-[13px] transition-colors",
-                      isDark ? "text-ink-cream/50" : "text-ink-black/50",
-                      flatIndex === activeIndex
-                        ? isDark
-                          ? "bg-ink-cream/[0.04] text-ink-cream/80"
-                          : "bg-ink-black/[0.04] text-ink-black/80"
-                        : isDark
-                          ? "hover:bg-ink-cream/[0.04]"
-                          : "hover:bg-ink-black/[0.04]"
+                      "text-ink-black/50 dark:text-ink-cream/50",
+                      isActive
+                        ? "bg-ink-black/[0.04] text-ink-black/80 dark:bg-ink-cream/[0.04] dark:text-ink-cream/80"
+                        : "hover:bg-ink-black/[0.04] dark:hover:bg-ink-cream/[0.04]"
                     )}
                   >
                     {formatIconMap[item.format]}

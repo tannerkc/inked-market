@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
+import { StatusBadge, type StatusBadgeColor } from "@/components/ui/status-badge";
 import { AffiliationStatus } from "@/lib/types";
 
 interface AffiliationRowProps {
@@ -18,17 +18,28 @@ interface AffiliationRowProps {
   className?: string;
 }
 
-const statusBadgeStyles: Record<AffiliationStatus, { className: string; label: string }> = {
+// Status color lives in the border/tint; text stays neutral so the 8px caps
+// hold WCAG AA contrast in both modes.
+const statusBadgeStyles: Record<AffiliationStatus, { color: StatusBadgeColor; label: string }> = {
   "pending-invite": {
-    className: "border-ink-rust/20 text-ink-rust/60",
+    color: {
+      light: "border-ink-rust/25 bg-ink-rust/[0.06] text-ink-black/70",
+      dark: "border-ink-red/30 bg-ink-red/[0.08] text-ink-cream/70",
+    },
     label: "Pending",
   },
   "pending-request": {
-    className: "border-ink-red/20 text-ink-red/60",
+    color: {
+      light: "border-ink-red/25 bg-ink-red/[0.06] text-ink-black/70",
+      dark: "border-ink-red/30 bg-ink-red/[0.08] text-ink-cream/70",
+    },
     label: "Wants to join",
   },
   active: {
-    className: "border-ink-sage/20 text-ink-sage/60",
+    color: {
+      light: "border-ink-sage/30 bg-ink-sage/[0.08] text-ink-black/70",
+      dark: "border-ink-sage/40 bg-ink-sage/[0.14] text-ink-cream/70",
+    },
     label: "Active",
   },
 };
@@ -50,17 +61,14 @@ const AffiliationRow = React.forwardRef<HTMLDivElement, AffiliationRowProps>(
     },
     ref
   ) => {
-    const { mode } = useTheme();
-    const isDark = mode === "dark";
-
     const badge = statusBadgeStyles[status];
 
     return (
       <div
         ref={ref}
         className={cn(
-          "flex items-center gap-3 py-3 border-b",
-          isDark ? "border-ink-cream/[0.04]" : "border-ink-black/[0.04]",
+          "flex items-center gap-3 px-3 py-2.5 transition-colors",
+          "hover:bg-ink-black/[0.03] dark:hover:bg-ink-cream/[0.03]",
           className
         )}
         {...props}
@@ -70,11 +78,7 @@ const AffiliationRow = React.forwardRef<HTMLDivElement, AffiliationRowProps>(
           className={cn(
             "w-9 h-9 flex-shrink-0 flex items-center justify-center overflow-hidden",
             avatarShape === "circle" ? "rounded-full" : "rounded-lg",
-            !avatarUrl &&
-              cn(
-                "border border-dashed",
-                isDark ? "border-ink-cream/[0.15]" : "border-ink-black/[0.15]"
-              )
+            !avatarUrl && "border border-dashed border-ink-black/[0.15] dark:border-ink-cream/[0.15]"
           )}
         >
           {avatarUrl ? (
@@ -84,12 +88,7 @@ const AffiliationRow = React.forwardRef<HTMLDivElement, AffiliationRowProps>(
               className="w-full h-full object-cover"
             />
           ) : (
-            <span
-              className={cn(
-                "text-[14px] leading-none select-none",
-                isDark ? "text-ink-cream/30" : "text-ink-black/30"
-              )}
-            >
+            <span className="text-[14px] leading-none select-none text-ink-black/30 dark:text-ink-cream/30">
               +
             </span>
           )}
@@ -97,35 +96,18 @@ const AffiliationRow = React.forwardRef<HTMLDivElement, AffiliationRowProps>(
 
         {/* Name area */}
         <div className="flex-1 min-w-0">
-          <p
-            className={cn(
-              "text-[13px] font-medium truncate",
-              isDark ? "text-ink-cream" : "text-ink-black"
-            )}
-          >
+          <p className="text-[13px] font-medium truncate text-ink-black dark:text-ink-cream">
             {name}
           </p>
           {subtitle && (
-            <p
-              className={cn(
-                "text-[10px] truncate",
-                isDark ? "text-ink-cream/40" : "text-ink-black/40"
-              )}
-            >
+            <p className="text-[10px] truncate text-ink-black/60 dark:text-ink-cream/60">
               {subtitle}
             </p>
           )}
         </div>
 
         {/* Status badge */}
-        <span
-          className={cn(
-            "font-mono text-[8px] tracking-[0.1em] uppercase px-2.5 py-0.5 rounded-full border flex-shrink-0",
-            badge.className
-          )}
-        >
-          {badge.label}
-        </span>
+        <StatusBadge label={badge.label} color={badge.color} className="px-2.5 flex-shrink-0" />
 
         {/* Right side actions */}
         {status === "pending-request" && (onAccept || onDecline) ? (
@@ -143,10 +125,7 @@ const AffiliationRow = React.forwardRef<HTMLDivElement, AffiliationRowProps>(
               <button
                 type="button"
                 onClick={onDecline}
-                className={cn(
-                  "font-mono text-[9px] tracking-[0.12em] uppercase cursor-pointer",
-                  isDark ? "text-ink-cream/30" : "text-ink-black/30"
-                )}
+                className="font-mono text-[9px] tracking-[0.12em] uppercase cursor-pointer text-ink-black/60 hover:text-ink-black dark:text-ink-cream/60 dark:hover:text-ink-cream"
               >
                 Decline
               </button>

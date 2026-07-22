@@ -16,6 +16,13 @@ export interface BottomSheetProps {
 const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
   ({ open, onClose, title, children, className }, ref) => {
     const overlayEl = useOverlayContainer();
+    // SSR guard: only mount portal after client hydration — the server renders
+    // nothing, so the first client render must match (same as SlideOverPanel).
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
     // When context provides an overlay layer, portal into it (absolute positioning).
     // Fall back to document.body with fixed positioning for non-builder contexts.
     const container = overlayEl ?? (typeof document !== "undefined" ? document.body : null);
@@ -31,7 +38,7 @@ const BottomSheet = React.forwardRef<HTMLDivElement, BottomSheetProps>(
       return () => document.removeEventListener("keydown", handler);
     }, [open, onClose]);
 
-    if (!container) return null;
+    if (!mounted || !container) return null;
 
     return createPortal(
       <>

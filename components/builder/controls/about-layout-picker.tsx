@@ -4,7 +4,7 @@ import { useBuilder } from "@/components/builder/builder-provider";
 import { aboutOptions } from "@/lib/data/builder-options";
 import type { AboutLayout } from "@/lib/types/builder";
 import { cn } from "@/lib/utils";
-import { PickerCheckmark } from "./picker-checkmark";
+import { ThumbnailPicker } from "./thumbnail-picker";
 
 function AboutThumbnail({ layout }: { layout: AboutLayout }) {
   switch (layout) {
@@ -51,48 +51,13 @@ export function AboutLayoutPicker() {
 
   return (
     <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        About Layout
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {aboutOptions.map((opt) => {
-          const selected = config.aboutLayout === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ aboutLayout: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              <div className="aspect-[4/3] w-full p-1.5">
-                <AboutThumbnail layout={opt.value} />
-              </div>
-
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <ThumbnailPicker<AboutLayout>
+        title="About Layout"
+        options={aboutOptions}
+        selectedValue={config.aboutLayout}
+        onSelect={(value) => applyChange({ aboutLayout: value })}
+        renderThumbnail={(value) => <AboutThumbnail layout={value} />}
+      />
 
       {/* Content Block Toggles */}
       <div className="mt-5 space-y-3">

@@ -12,12 +12,10 @@ const audiences = [
 ] as const;
 
 interface AudiencePillsProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
-function AudiencePillsInner({ variant = "dark", className }: AudiencePillsProps) {
-  const isDark = variant === "dark";
+function AudiencePillsInner({ className }: AudiencePillsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -43,10 +41,13 @@ function AudiencePillsInner({ variant = "dark", className }: AudiencePillsProps)
             onClick={() => handleChange(a.value)}
             className={cn(
               "px-4 py-1.5 rounded-full font-mono text-[10px] tracking-[0.1em] uppercase whitespace-nowrap transition-all duration-300 border cursor-pointer",
-              isActive && isDark && "bg-ink-cream text-ink-black border-ink-cream",
-              isActive && !isDark && "bg-ink-black text-ink-cream border-ink-black",
-              !isActive && isDark && "bg-transparent text-ink-cream/30 border-ink-cream/8 hover:border-ink-cream/15 hover:text-ink-cream/50",
-              !isActive && !isDark && "bg-transparent text-ink-black/35 border-ink-black/8 hover:border-ink-black/15 hover:text-ink-black/50"
+              isActive
+                ? "bg-ink-black text-ink-cream border-ink-black dark:bg-ink-cream dark:text-ink-black dark:border-ink-cream"
+                : cn(
+                    "bg-transparent",
+                    "text-ink-black/35 border-ink-black/8 hover:border-ink-black/15 hover:text-ink-black/50",
+                    "dark:text-ink-cream/30 dark:border-ink-cream/8 dark:hover:border-ink-cream/15 dark:hover:text-ink-cream/50"
+                  )
             )}
           >
             {a.label}

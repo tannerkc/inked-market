@@ -3,11 +3,13 @@
 import { useMemo, useState } from "react";
 import { AuthGuard } from "@/components/providers/auth-guard";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { GroupLabel } from "@/components/dashboard/group-label";
 import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
+import { MessagesCard } from "@/components/dashboard/messages-card";
 import { TabBar } from "@/components/ui/tab-bar";
-import { CustomerMessagesSection } from "./customer-messages-section";
 import { CustomerAppointmentsSection } from "./customer-appointments-section";
 import { CustomerBookingRequestsSection } from "./customer-booking-requests-section";
 import { CustomerInvoicesSection } from "./customer-invoices-section";
@@ -133,7 +135,7 @@ export function CustomerDashboard() {
   ];
 
   return (
-    <AuthGuard requiredRole="customer">
+    <AuthGuard>
       <DashboardShell
         eyebrowText="Your Account"
         onboardingTitle={dashboard.data.onboardingTitle}
@@ -151,9 +153,7 @@ export function CustomerDashboard() {
             />
             <StatsPanel stats={dashboard.data.stats} />
             <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
-              <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">
-                Next Appointment
-              </p>
+              <GroupLabel className="mb-3">Next Appointment</GroupLabel>
               {dashboard.nextAppointment ? (
                 <div>
                   <p className="text-[12px] font-medium text-ink-black/70 dark:text-ink-cream/70">
@@ -185,14 +185,10 @@ export function CustomerDashboard() {
                   )}
                 </div>
               ) : (
-                <div className="text-center py-4">
-                  <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">
-                    No upcoming appointments
-                  </p>
-                  <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
-                    Browse artists to get started
-                  </p>
-                </div>
+                <EmptyState
+                  message="No upcoming appointments"
+                  description="Browse artists to get started"
+                />
               )}
             </div>
           </>
@@ -208,10 +204,9 @@ export function CustomerDashboard() {
 
             {dashboard.activeTab === "activity" && (
               <>
-                <CustomerMessagesSection
+                <MessagesCard
                   conversations={dashboard.sortedConversations}
-                  participants={dashboard.participants}
-                  currentUserId={dashboard.user?.id ?? ""}
+                  emptyDescription="Start by reaching out to an artist"
                 />
                 <PendingDepositBanner records={dashboard.appointmentRecords} />
                 <CustomerAppointmentsSection

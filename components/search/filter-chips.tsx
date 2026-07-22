@@ -6,18 +6,13 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface FilterChipsProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
-function FilterChipsInner({
-  variant = "dark",
-  className,
-}: FilterChipsProps) {
+function FilterChipsInner({ className }: FilterChipsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const isDark = variant === "dark";
 
   function updateParams(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -42,7 +37,6 @@ function FilterChipsInner({
 
   const chips: { label: string; key: string; value?: string; onRemove: () => void; color: "red" | "sage" | "muted" }[] = [];
 
-  // Style chips
   const stylesParam = searchParams.get("styles");
   if (stylesParam) {
     stylesParam.split(",").filter(Boolean).forEach((style) => {
@@ -58,7 +52,6 @@ function FilterChipsInner({
     });
   }
 
-  // Verified chip
   if (searchParams.get("verified") === "true") {
     chips.push({
       label: "Verified",
@@ -68,7 +61,6 @@ function FilterChipsInner({
     });
   }
 
-  // Booking / Walk-ins chip
   const bookingParam = searchParams.get("booking");
   if (bookingParam === "true") {
     const tab = searchParams.get("tab");
@@ -80,7 +72,6 @@ function FilterChipsInner({
     });
   }
 
-  // Location chip
   const location = searchParams.get("location");
   if (location) {
     chips.push({
@@ -91,7 +82,6 @@ function FilterChipsInner({
     });
   }
 
-  // Rating chip
   const rating = searchParams.get("rating");
   if (rating) {
     chips.push({
@@ -102,7 +92,6 @@ function FilterChipsInner({
     });
   }
 
-  // Experience / Team size chip
   const experience = searchParams.get("experience");
   if (experience) {
     chips.push({
@@ -116,24 +105,13 @@ function FilterChipsInner({
   if (chips.length === 0) return null;
 
   const colorStyles = {
-    red: isDark
-      ? "bg-ink-red/[0.08] text-ink-red/70 border-ink-red/20"
-      : "bg-ink-red/[0.06] text-ink-red/80 border-ink-red/15",
-    sage: isDark
-      ? "bg-ink-sage/[0.1] text-ink-sage/70 border-ink-sage/20"
-      : "bg-ink-sage/[0.08] text-ink-sage/80 border-ink-sage/15",
-    muted: isDark
-      ? "bg-ink-cream/[0.06] text-ink-cream/50 border-ink-cream/10"
-      : "bg-ink-black/[0.04] text-ink-black/50 border-ink-black/08",
+    red: "bg-ink-red/[0.06] text-ink-red/80 border-ink-red/15 dark:bg-ink-red/[0.08] dark:text-ink-red/70 dark:border-ink-red/20",
+    sage: "bg-ink-sage/[0.08] text-ink-sage/80 border-ink-sage/15 dark:bg-ink-sage/[0.1] dark:text-ink-sage/70 dark:border-ink-sage/20",
+    muted: "bg-ink-black/[0.04] text-ink-black/50 border-ink-black/08 dark:bg-ink-cream/[0.06] dark:text-ink-cream/50 dark:border-ink-cream/10",
   };
 
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center justify-center gap-1.5",
-        className
-      )}
-    >
+    <div className={cn("flex flex-wrap items-center justify-center gap-1.5", className)}>
       {chips.map((chip) => (
         <button
           key={chip.key}
@@ -149,12 +127,7 @@ function FilterChipsInner({
       ))}
       <button
         onClick={clearAll}
-        className={cn(
-          "rounded-full px-2.5 py-1 font-mono text-[9px] tracking-wide transition-colors",
-          isDark
-            ? "text-ink-cream/30 hover:text-ink-cream/50"
-            : "text-ink-black/30 hover:text-ink-black/50"
-        )}
+        className="rounded-full px-2.5 py-1 font-mono text-[9px] tracking-wide transition-colors text-ink-black/30 hover:text-ink-black/50 dark:text-ink-cream/30 dark:hover:text-ink-cream/50"
       >
         Clear all
       </button>
@@ -163,15 +136,13 @@ function FilterChipsInner({
 }
 
 const FilterChips = React.forwardRef<HTMLDivElement, FilterChipsProps>(
-  ({ variant = "dark", className, ...props }, ref) => {
-    return (
-      <div ref={ref} {...props}>
-        <Suspense fallback={null}>
-          <FilterChipsInner variant={variant} className={className} />
-        </Suspense>
-      </div>
-    );
-  }
+  ({ className, ...props }, ref) => (
+    <div ref={ref} {...props}>
+      <Suspense fallback={null}>
+        <FilterChipsInner className={className} />
+      </Suspense>
+    </div>
+  )
 );
 
 FilterChips.displayName = "FilterChips";

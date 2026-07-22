@@ -14,7 +14,7 @@ export type ConsultLocation = "in_person" | "virtual";
 export type PaymentProvider = "stripe" | "square";
 export type SlotGranularity = 15 | 30 | 60;
 /** How an entity takes bookings; null = not yet chosen (drives the prompt). */
-export type BookingMode = "inbuilt" | "external" | "off";
+export type BookingMode = "inbuilt" | "external" | "studio" | "off";
 
 export interface BookingSettings {
   id: string;
@@ -117,6 +117,9 @@ export interface BookingRequestRecord {
   studioId?: string;
   artistName?: string;
   studioName?: string;
+  /** Studio requests only: the roster artist the customer asked for. */
+  preferredArtistId?: string;
+  preferredArtistName?: string;
   description: string;
   placement: string | null;
   sizeCategory: string | null;
@@ -133,6 +136,8 @@ export interface BookingRequestRecord {
   quoteMinCents: number | null;
   quoteMaxCents: number | null;
   depositCents: number | null;
+  /** Linked customer↔responder thread; set once the request is responded to. */
+  conversationId: string | null;
   schedulingMode: SchedulingMode | null;
   sessionDurationMin: number | null;
   proposedTimes: ProposedTime[];

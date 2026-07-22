@@ -34,6 +34,83 @@ export function ToggleRow({
   );
 }
 
+/** Tap-to-select chip set; tapping the active chip clears it (optional fields). */
+export function ChipGroup({
+  label,
+  hint,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <FieldLabel>{label}</FieldLabel>
+        {hint ? (
+          <p className="font-mono text-[10px] text-ink-black/25 dark:text-ink-cream/25">{hint}</p>
+        ) : null}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const active = o.value === value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(active ? "" : o.value)}
+              className={`min-h-[44px] rounded-full border px-4 font-mono text-[11px] transition-colors ${
+                active
+                  ? "border-ink-black bg-ink-black text-ink-cream dark:border-ink-cream dark:bg-ink-cream dark:text-ink-black"
+                  : "border-ink-black/[0.08] text-ink-black/60 hover:border-ink-black/30 dark:border-ink-cream/[0.08] dark:text-ink-cream/60 dark:hover:border-ink-cream/30"
+              }`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Single-line text input in the same boxed shell as the Textarea primitive. */
+export function BoxedInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  maxLength,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  maxLength?: number;
+}) {
+  return (
+    <label className="block cursor-text rounded-xl border border-ink-black/[0.06] bg-white px-5 py-4 transition-colors focus-within:border-ink-black/20 dark:border-ink-cream/[0.08] dark:bg-ink-cream/[0.04] dark:focus-within:border-ink-cream/20">
+      <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-ink-black/30 dark:text-ink-cream/30">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className="mt-1 w-full bg-transparent text-[15px] text-ink-black outline-none placeholder:text-ink-black placeholder:opacity-20 dark:text-ink-cream dark:placeholder:text-ink-cream"
+      />
+    </label>
+  );
+}
+
 export function SelectRow({
   label,
   value,

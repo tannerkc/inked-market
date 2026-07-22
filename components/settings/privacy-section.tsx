@@ -1,28 +1,18 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { SettingsSection } from "./settings-section";
 import { SettingsToggleRow as ToggleRow, SettingsGroupLabel as GroupLabel } from "./settings-toggle-row";
 import { usePrivacy } from "./use-privacy";
+import { ListGroup } from "@/components/dashboard";
 
 export function PrivacySection() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const { prefs, toggle, setPortfolioVisibility, role, isFreeTier } = usePrivacy();
-
-  const cardClass = cn(
-    "rounded-[16px] border divide-y",
-    isDark
-      ? "border-ink-cream/[0.06] bg-ink-cream/[0.02] divide-ink-cream/[0.04]"
-      : "border-ink-black/[0.06] bg-ink-black/[0.02] divide-ink-black/[0.04]"
-  );
 
   return (
     <SettingsSection title="Privacy" description="Control your visibility and data preferences">
       {/* Visibility */}
       <GroupLabel label="Visibility" />
-      <div className={cardClass}>
+      <ListGroup>
         <div className="px-5">
           <ToggleRow
             label="Show profile in search results"
@@ -50,7 +40,7 @@ export function PrivacySection() {
               />
               {/* Portfolio visibility radio */}
               <div className="py-3">
-                <p className={cn("text-[12px] font-medium mb-2", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+                <p className="text-[12px] font-medium mb-2 text-ink-black/60 dark:text-ink-cream/60">
                   Portfolio visibility
                 </p>
                 <div className="flex gap-4">
@@ -63,7 +53,7 @@ export function PrivacySection() {
                         onChange={() => setPortfolioVisibility(opt)}
                         className="accent-ink-rust"
                       />
-                      <span className={cn("text-[11px] capitalize", isDark ? "text-ink-cream/50" : "text-ink-black/50")}>
+                      <span className="text-[11px] capitalize text-ink-black/50 dark:text-ink-cream/50">
                         {opt === "followers" ? "Followers only" : "Public"}
                       </span>
                     </label>
@@ -107,11 +97,11 @@ export function PrivacySection() {
             </>
           )}
         </div>
-      </div>
+      </ListGroup>
 
       {/* Communications */}
       <GroupLabel label="Communications" />
-      <div className={cardClass}>
+      <ListGroup>
         <div className="px-5">
           <ToggleRow
             label="Allow messages from non-connections"
@@ -120,7 +110,7 @@ export function PrivacySection() {
             onChange={() => toggle("allowMessages")}
           />
         </div>
-      </div>
+      </ListGroup>
     </SettingsSection>
   );
 }

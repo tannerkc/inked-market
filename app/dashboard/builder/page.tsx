@@ -8,8 +8,11 @@ import { useStudio } from "@/lib/providers/studio-provider";
 import { BuilderTopBar } from "@/components/builder/builder-top-bar";
 import { SplitScreenBuilder } from "@/components/builder/split-screen-builder";
 import { InlineOverlayBuilder } from "@/components/builder/inline-overlay-builder";
+import { UrlBar } from "@/components/builder/url-bar";
+import { AuthGuard } from "@/components/providers/auth-guard";
 import { MobileBuilder } from "@/components/builder/mobile";
 import { TemplatePicker } from "@/components/builder/template-picker";
+import { BuilderTutorial } from "@/components/builder/tutorial-overlay";
 import { TierSelector } from "@/components/builder/tier-selector";
 import { templates } from "@/lib/data/templates";
 import type { BuilderMode, BuilderTier, TemplateSlug, StudioThemeConfig } from "@/lib/types/builder";
@@ -103,6 +106,16 @@ function getExistingDraft(): StudioThemeConfig | null {
 }
 
 export default function BuilderPage() {
+  // The builder is owner-only tooling — never reachable signed-out (or by
+  // customers/artists); AuthGuard bounces to /login (or /dashboard on role).
+  return (
+    <AuthGuard requiredRole="studio">
+      <BuilderPageInner />
+    </AuthGuard>
+  );
+}
+
+function BuilderPageInner() {
   const isMobile = useSyncExternalStore(subscribeMobile, getIsMobile, serverSnapshot);
   const [mode, setMode] = useState<BuilderMode>("inline");
   const [mounted, setMounted] = useState(false);
@@ -257,6 +270,10 @@ export default function BuilderPage() {
                 <div className="absolute inset-0 overflow-y-auto">
                   <InlineOverlayBuilder />
                 </div>
+                {/* Floating URL pill — inline mode has no browser chrome */}
+                <div className="absolute top-3 left-1/2 z-[60] w-[480px] max-w-[calc(100%-2rem)] -translate-x-1/2">
+                  <UrlBar className="shadow-2xl backdrop-blur-xl" />
+                </div>
                 <div
                   ref={setOverlayEl}
                   className="absolute inset-0 pointer-events-none z-50"
@@ -268,6 +285,8 @@ export default function BuilderPage() {
       </div>
       {/* Overlay drawer for inline mode; split mode docks Content in the editor panel */}
       {mode !== "split" ? <BuilderContentPanel /> : null}
+      {/* Keyed by mode so first entry into each editor gets its own tour */}
+      <BuilderTutorial key={mode} mode={mode} />
       <PreviewOverlay />
     </BuilderProvider>
   );

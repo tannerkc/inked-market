@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import { PromptChip } from "@/components/studio-site/empty-states";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { StarRating } from "@/components/ui/star-rating";
+import { telHref, mailtoHref } from "@/lib/utils/external-links";
+import type { ReviewProfileLink } from "@/lib/utils/studio-content";
 import type { StudioSiteData, StudioSiteReview } from "@/components/studio-site/studio-site-data";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -35,14 +38,43 @@ const CAL_DAYS      = 30;
 const CAL_TODAY     = 9;
 
 
+/** Outbound links to the studio's profiles on connected review platforms. */
+function ReviewPlatformLinks({
+  links,
+  centered,
+}: {
+  links: ReviewProfileLink[];
+  centered?: boolean;
+}) {
+  if (links.length === 0) return null;
+  return (
+    <div className={cn("flex flex-wrap items-center gap-1.5", centered && "justify-center")}>
+      {links.map((link) => (
+        <a
+          key={link.platform}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border px-2.5 py-1 text-[10px] font-medium transition-opacity hover:opacity-75"
+          style={{ borderColor: "var(--widget-border)", color: "var(--text-secondary)" }}
+        >
+          Reviews on {link.name}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function ReviewsWidget({
   reviews,
   ratingAverage,
   reviewCount,
+  reviewLinks,
 }: {
   reviews: StudioSiteReview[];
   ratingAverage: string;
   reviewCount: number;
+  reviewLinks: ReviewProfileLink[];
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const VISIBLE_COUNT = 3;
@@ -73,6 +105,7 @@ function ReviewsWidget({
           <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
             No reviews yet &mdash; verified client reviews appear here.
           </p>
+          <ReviewPlatformLinks links={reviewLinks} centered />
         </div>
       </div>
     );
@@ -101,9 +134,7 @@ function ReviewsWidget({
             {ratingAverage}
           </span>
           <div>
-            <div className="text-xs text-amber-500">
-              {"★".repeat(5)}
-            </div>
+            <StarRating rating={5} variant="glyph" className="block text-xs text-amber-500" />
             <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
               {totalCount} verified reviews
             </div>
@@ -127,12 +158,7 @@ function ReviewsWidget({
               >
                 {review.author}
               </span>
-              <span className="text-[10px] text-amber-500">
-                {"★".repeat(review.stars)}
-                <span style={{ opacity: 0.25 }}>
-                  {"★".repeat(5 - review.stars)}
-                </span>
-              </span>
+              <StarRating rating={review.stars} variant="glyph" className="text-[10px] text-amber-500" />
             </div>
             <p
               className="text-[11px] leading-relaxed line-clamp-2"
@@ -143,6 +169,31 @@ function ReviewsWidget({
           </div>
         ))}
       </div>
+      {reviewLinks.length > 0 ? (
+        <div
+          className="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 pb-3 shrink-0"
+          style={{ background: "var(--widget-1)" }}
+        >
+          <span
+            className="text-[9px] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: "var(--widget-label)" }}
+          >
+            Also on
+          </span>
+          {reviewLinks.map((link) => (
+            <a
+              key={link.platform}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-medium hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
+              {link.name}
+            </a>
+          ))}
+        </div>
+      ) : null}
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
@@ -164,6 +215,23 @@ function ReviewsWidget({
         title={`${totalCount} Verified Reviews · ${ratingAverage} avg`}
         className="[--bg-raised:transparent] [--bg-sunken:rgba(255,255,255,0.1)] [--text-muted:#ffffff] [--text-secondary:#ffffff] [--border:rgba(255,255,255,0.1)]"
       >
+        {reviewLinks.some((link) => link.writeReviewUrl) ? (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {reviewLinks
+              .filter((link) => link.writeReviewUrl)
+              .map((link) => (
+                <a
+                  key={link.platform}
+                  href={link.writeReviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full border border-white/20 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:border-white/50"
+                >
+                  Write a review on {link.name}
+                </a>
+              ))}
+          </div>
+        ) : null}
         <div className="flex flex-col">
           {reviews.map((review, i) => (
             <div
@@ -178,10 +246,7 @@ function ReviewsWidget({
                 >
                   {review.author}
                 </span>
-                <span className="text-xs text-amber-500">
-                  {"★".repeat(review.stars)}
-                  <span className="opacity-25">{"★".repeat(5 - review.stars)}</span>
-                </span>
+                <StarRating rating={review.stars} variant="glyph" className="text-xs text-amber-500" />
               </div>
               <p
                 className="text-sm leading-relaxed"
@@ -269,10 +334,13 @@ function HoursWidget({
   );
 }
 
-/** Live-mode booking: a real link to the studio's booking platform, or an
+/** Live-mode booking: an embedded scheduler when the platform officially
+ * supports iframing (Calendly/Acuity), a real link-out otherwise, or an
  * honest contact-to-book card assembled from real contact methods. */
 function BookingCard({ data }: { data: StudioSiteData }) {
   const link = data.bookingLink;
+  const embed = data.bookingEmbed;
+  const [embedOpen, setEmbedOpen] = useState(false);
 
   return (
     <div
@@ -300,7 +368,40 @@ function BookingCard({ data }: { data: StudioSiteData }) {
         </p>
       </div>
 
-      {link ? (
+      {link && embed ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setEmbedOpen(true)}
+            className="w-full rounded-lg py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] transition-opacity hover:opacity-90"
+            style={{ background: "var(--accent)", color: "var(--accent-text)" }}
+          >
+            Book on {link.platformName}
+          </button>
+          <BottomSheet
+            open={embedOpen}
+            onClose={() => setEmbedOpen(false)}
+            title={`Book a Session · ${embed.platformName}`}
+          >
+            <iframe
+              src={embed.src}
+              title={`${embed.platformName} booking`}
+              loading="lazy"
+              className="w-full rounded-lg"
+              style={{ height: "min(680px, 72vh)", border: 0, background: "var(--bg-raised)" }}
+            />
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 block text-center text-xs hover:underline"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Open {embed.platformName} in a new tab
+            </a>
+          </BottomSheet>
+        </>
+      ) : link ? (
         <a
           href={link.url}
           target="_blank"
@@ -314,7 +415,7 @@ function BookingCard({ data }: { data: StudioSiteData }) {
         <div className="flex flex-col gap-2">
           {data.phone ? (
             <a
-              href={`tel:${data.phone.replace(/[^+\d]/g, "")}`}
+              href={telHref(data.phone)}
               className="text-sm hover:underline"
               style={{ color: "var(--text-primary)" }}
             >
@@ -323,7 +424,7 @@ function BookingCard({ data }: { data: StudioSiteData }) {
           ) : null}
           {data.email ? (
             <a
-              href={`mailto:${data.email}`}
+              href={mailtoHref(data.email)}
               className="text-sm hover:underline"
               style={{ color: "var(--text-primary)" }}
             >
@@ -606,6 +707,7 @@ export function DetailsSection({ className }: { className?: string }) {
             reviews={reviews}
             ratingAverage={data.ratingAverage ?? ""}
             reviewCount={data.reviewCount ?? reviews.length}
+            reviewLinks={data.reviewLinks}
           />
           <HoursWidget hoursData={data.hours} contact={{ phone: data.phone, email: data.email }} />
           {data.isSample ? (

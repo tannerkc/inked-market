@@ -8,6 +8,7 @@ import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, InviteArtistIcon, LinkShareIcon, BookingSettingsIcon, CalendarIcon } from "@/components/dashboard/dashboard-icons";
+import { MessagesCard } from "@/components/dashboard/messages-card";
 import {
   ArtistRequestsSection,
   BookingModePrompt,
@@ -17,6 +18,8 @@ import {
   RosterScheduleCard,
   useArtistRequests,
 } from "@/components/booking";
+import { PublishPaywallDialog } from "@/components/builder/publish-paywall-dialog";
+import { studioTiers } from "@/lib/data/signup-tiers";
 import { StudioPageCard } from "./studio-page-card";
 import { StudioArtistsSection } from "./studio-artists-section";
 import { StudioBusinessHours } from "./studio-business-hours";
@@ -40,6 +43,7 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
   const router = useRouter();
   const dashboard = useStudioDashboard(oauthReturn);
   const [photosOpen, setPhotosOpen] = useState(false);
+  const [goLivePaywallOpen, setGoLivePaywallOpen] = useState(false);
   const [bookingSettingsOpen, setBookingSettingsOpen] = useState(false);
   const [frontDeskOpen, setFrontDeskOpen] = useState(false);
   const studioRequests = useArtistRequests();
@@ -145,7 +149,18 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
               loading={studioRequests.loading}
               onSelect={studioRequests.setSelected}
             />
-            <StudioPageCard />
+            <MessagesCard emptyDescription="Client messages land here" />
+            <StudioPageCard
+              live={dashboard.live}
+              published={dashboard.published}
+              canGoLive={dashboard.canGoLive}
+              needsPlan={dashboard.needsPlanForGoLive}
+              missingSteps={dashboard.missingSteps}
+              goingLive={dashboard.goingLive}
+              onGoLive={dashboard.handleGoLive}
+              onChoosePlan={() => setGoLivePaywallOpen(true)}
+              onStepClick={handleOnboardingStep}
+            />
             <StudioArtistsSection
               roster={dashboard.roster}
               onInvite={() => dashboard.setInviteOpen(true)}
@@ -220,6 +235,18 @@ export function StudioDashboard({ oauthReturn = null }: { oauthReturn?: OAuthRet
               onSave={dashboard.handleSaveConnection}
             />
             <StudioPhotosPanel open={photosOpen} onClose={() => setPhotosOpen(false)} />
+            <PublishPaywallDialog
+              isOpen={goLivePaywallOpen}
+              tiers={studioTiers}
+              eyebrow="Going live needs a plan"
+              body="Your essentials are done. Pick a plan and your studio goes live on Inked Market the moment you do."
+              cancelLabel="Not yet — keep setting up"
+              onSelectPlan={(slug) => {
+                setGoLivePaywallOpen(false);
+                void dashboard.goLiveWithPlan(slug);
+              }}
+              onCancel={() => setGoLivePaywallOpen(false)}
+            />
           </>
         }
       />

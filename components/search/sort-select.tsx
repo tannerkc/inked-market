@@ -6,7 +6,6 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface SortSelectProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -18,12 +17,11 @@ const sortOptions = [
 ] as const;
 
 const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
-  ({ variant = "dark", className, ...props }, ref) => {
+  ({ className, ...props }, ref) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
 
-    const isDark = variant === "dark";
     const currentSort = searchParams.get("sort") || "relevance";
     const currentLabel =
       sortOptions.find((o) => o.value === currentSort)?.label ?? "Relevance";
@@ -31,10 +29,8 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
     const [open, setOpen] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
-    // Close on click outside
     React.useEffect(() => {
       if (!open) return;
-
       const handleClickOutside = (e: MouseEvent) => {
         if (
           containerRef.current &&
@@ -43,19 +39,15 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
           setOpen(false);
         }
       };
-
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [open]);
 
-    // Close on Escape
     React.useEffect(() => {
       if (!open) return;
-
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") setOpen(false);
       };
-
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [open]);
@@ -71,7 +63,6 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
     return (
       <div
         ref={(node) => {
-          // Merge refs
           (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
           if (typeof ref === "function") ref(node);
           else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
@@ -83,12 +74,7 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 font-mono text-[9px] tracking-wide uppercase rounded-lg border transition-colors duration-200",
-            isDark
-              ? "text-ink-cream/35 border-ink-cream/8 hover:border-ink-cream/15"
-              : "text-ink-black/65 border-ink-black/15 hover:border-ink-black/25"
-          )}
+          className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[9px] tracking-wide uppercase rounded-lg border transition-colors duration-200 text-ink-black/65 border-ink-black/15 hover:border-ink-black/25 dark:text-ink-cream/35 dark:border-ink-cream/8 dark:hover:border-ink-cream/15"
         >
           {currentLabel}
           <span
@@ -103,17 +89,9 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
 
         {/* Dropdown */}
         {open && (
-          <div
-            className={cn(
-              "absolute top-full left-0 mt-1.5 min-w-[160px] rounded-lg border py-1 z-50",
-              isDark
-                ? "bg-ink-black border-ink-cream/[0.08]"
-                : "bg-white border-ink-black/[0.06]"
-            )}
-          >
+          <div className="absolute top-full left-0 mt-1.5 min-w-[160px] rounded-lg border py-1 z-50 bg-white border-ink-black/[0.06] dark:bg-ink-black dark:border-ink-cream/[0.08]">
             {sortOptions.map(({ label, value }) => {
               const isActive = currentSort === value;
-
               return (
                 <button
                   key={value}
@@ -123,9 +101,7 @@ const SortSelectInner = React.forwardRef<HTMLDivElement, SortSelectProps>(
                     "w-full text-left px-3.5 py-2 font-mono text-[9px] tracking-wide uppercase transition-colors duration-150",
                     isActive
                       ? "text-ink-red"
-                      : isDark
-                        ? "text-ink-cream/50 hover:bg-ink-cream/[0.04] hover:text-ink-cream/70"
-                        : "text-ink-black/50 hover:bg-ink-black/[0.03] hover:text-ink-black/70"
+                      : "text-ink-black/50 hover:bg-ink-black/[0.03] hover:text-ink-black/70 dark:text-ink-cream/50 dark:hover:bg-ink-cream/[0.04] dark:hover:text-ink-cream/70"
                   )}
                 >
                   {label}

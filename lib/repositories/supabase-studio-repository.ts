@@ -6,7 +6,7 @@ import {
   mapDbStudioToStudioData,
   mapStudioDataToDbStudio,
 } from "@/lib/supabase/types";
-import { slugify } from "@/lib/utils";
+import { buildStudioSlug, ensureUniqueSlug } from "@/lib/utils/studio-slug";
 
 /**
  * Supabase-backed studio repository.
@@ -51,13 +51,15 @@ export class SupabaseStudioRepository implements StudioRepository {
 
     // First save — create the organic studio row, filling NOT NULL columns.
     const name = (dbPartial.name as string | undefined) || "Untitled Studio";
+    const city = (dbPartial.city as string | undefined) ?? "";
+    const state = (dbPartial.state as string | undefined) ?? "";
     const { error } = await this.supabase.from("studios").insert({
       ...dbPartial,
       name,
-      city: dbPartial.city ?? "",
-      state: dbPartial.state ?? "",
-      // ponytail: name-slug + owner-id prefix is unique enough (one row per owner)
-      slug: `${slugify(name)}-${this.ownerId.slice(0, 8)}`,
+      city,
+      state,
+      // Pretty URL: name-city-state; numbers only appended on conflict.
+      slug: await ensureUniqueSlug(this.supabase, buildStudioSlug(name, city, state)),
       source: "organic",
       claimed_by: this.ownerId,
       claimed_at: new Date().toISOString(),

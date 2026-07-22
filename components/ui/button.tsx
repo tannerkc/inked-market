@@ -86,7 +86,7 @@ const variants = {
   // Curated Chaos variants
   ink: "rounded-full bg-ink-black text-ink-cream hover:bg-ink-black/90 font-mono tracking-[0.15em] uppercase focus-visible:ring-ink-black",
   "ink-outline":
-    "rounded-full border border-ink-black/10 text-ink-black/45 hover:bg-ink-black/[0.04] hover:border-ink-black/20 font-mono tracking-[0.15em] uppercase focus-visible:ring-ink-black",
+    "rounded-full border border-ink-black/10 text-ink-black/45 hover:bg-ink-black/[0.04] hover:border-ink-black/20 dark:border-ink-cream/15 dark:text-ink-cream/60 dark:hover:bg-ink-cream/[0.05] dark:hover:border-ink-cream/25 dark:hover:text-ink-cream/80 font-mono tracking-[0.15em] uppercase focus-visible:ring-ink-black dark:focus-visible:ring-ink-cream",
   "ink-ghost":
     "rounded-full text-ink-black/45 hover:text-ink-black/70 hover:bg-ink-black/[0.04] focus-visible:ring-ink-black",
   "ink-red":

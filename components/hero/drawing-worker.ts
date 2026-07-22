@@ -28,8 +28,8 @@ function drawStroke(
   targetCtx.lineJoin = "round";
 
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     targetCtx.lineWidth = curr.width;
     targetCtx.beginPath();
     targetCtx.moveTo(prev.x, prev.y);

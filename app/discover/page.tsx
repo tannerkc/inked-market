@@ -1,182 +1,43 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import { getDiscoverStudios } from "@/lib/data/supabase-studios";
+import { getDiscoverArtists } from "@/lib/data/supabase-artists";
+import { mockStudios, mockArtists } from "@/lib/data/discover";
+import { DiscoverPageContent } from "@/components/discover/discover-page-content";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FlashCard } from "@/components/ui/flash-card";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { FilmGrainOverlay } from "@/components/ui/film-grain";
-import { SectionLabel } from "@/components/ui/section-label";
-import { Eyebrow } from "@/components/ui/eyebrow";
-import { DiscoverSearch } from "@/components/discover/search-bar";
-import { FilterPills } from "@/components/discover/filter-pills";
-import { useTheme } from "@/components/providers/theme-provider";
-import {
-  mockStudios,
-  mockArtists,
-  discoverFilters,
-} from "@/lib/data/discover";
-import { bebasNeue, permanentMarker, unifrakturCook } from "@/lib/fonts";
+export const revalidate = 60; // ISR: revalidate every 60 seconds
 
-export default function DiscoverPage() {
-  const router = useRouter();
-  const { mode, setMode } = useTheme();
-  const [activeFilter, setActiveFilter] = useState("All Styles");
-  const isLight = mode === "light";
+export default async function DiscoverPage() {
+  let studios = mockStudios; // Fallback to mock data if Supabase isn't configured
+  let artists = mockArtists;
+  let studiosAreSample = true;
+  let artistsAreSample = true;
 
-  const handleFilterChange = (filter: string) => {
-    setActiveFilter(filter);
-    if (filter !== "All Styles") {
-      const slug = filter.toLowerCase().replace(/\s+/g, "-");
-      router.push(`/discover/search?tab=artists&styles=${slug}`);
+  try {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      const supabase = await createClient();
+      const [dbStudios, dbArtists] = await Promise.all([
+        getDiscoverStudios(supabase),
+        getDiscoverArtists(supabase),
+      ]);
+      if (dbStudios.length > 0) {
+        studios = dbStudios;
+        studiosAreSample = false;
+      }
+      if (dbArtists.length > 0) {
+        artists = dbArtists;
+        artistsAreSample = false;
+      }
     }
-  };
+  } catch {
+    // Supabase not configured yet — gracefully fall back to mock data
+  }
 
   return (
-    <div
-      className={`min-h-screen relative transition-colors duration-500 ${
-        isLight
-          ? "bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark"
-          : "bg-ink-black"
-      }`}
-    >
-      {/* Film grain */}
-      <FilmGrainOverlay
-        className={isLight ? "opacity-[0.03]" : "opacity-[0.035]"}
-      />
-
-      {/* Red glow (dark mode only) */}
-      <div
-        className={`absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[250px] bg-ink-red-glow-top pointer-events-none z-[1] transition-opacity duration-500 ${
-          isLight ? "opacity-0" : "opacity-100"
-        }`}
-      />
-
-      {/* Theme toggle */}
-      <ThemeToggle mode={mode} onToggle={setMode} className="pt-24" />
-
-      {/* Hero */}
-      <div className="text-center px-4 sm:px-10 pt-5 relative z-[5]">
-        <Eyebrow text="The Lineup" color="rust" />
-        <h1>
-          <span
-            className={`${bebasNeue.className} text-4xl sm:text-5xl lg:text-[52px] leading-none tracking-wide transition-colors duration-500 ${
-              isLight ? "text-ink-black" : "text-ink-cream"
-            }`}
-          >
-            FIND YOUR{" "}
-          </span>
-          <span
-            className={`${unifrakturCook.className} text-4xl sm:text-5xl lg:text-[52px] leading-none transition-colors duration-500 ${
-              isLight ? "text-ink-black" : "text-ink-cream"
-            }`}
-          >
-            Artist
-          </span>
-        </h1>
-        <p
-          className={`font-mono text-[11px] tracking-[0.06em] mt-2 transition-colors duration-500 ${
-            isLight ? "text-ink-black/40" : "text-ink-cream/35"
-          }`}
-        >
-          curated talent&ensp;/&ensp;verified portfolios&ensp;/&ensp;walk-ins
-          welcome
-        </p>
-      </div>
-
-      {/* Search */}
-      <div className="px-4 sm:px-10 mt-5 relative z-[5]">
-        <DiscoverSearch
-          variant={mode}
-          onSearch={(q) => router.push(`/discover/search?q=${encodeURIComponent(q)}`)}
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="px-4 sm:px-10 mt-4 relative z-[5]">
-        <FilterPills
-          filters={discoverFilters}
-          activeFilter={activeFilter}
-          variant={mode}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
-
-      {/* Featured Studios */}
-      <div className="px-4 sm:px-10 mt-8 relative z-[5]">
-        <SectionLabel
-          label="Featured Studios"
-          variant={isLight ? "parchment" : "dark-muted"}
-          stretch
-          className="mb-6"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[3px]">
-          {mockStudios.map((studio) => (
-            <FlashCard
-              key={studio.id}
-              id={studio.id}
-              type="studio"
-              name={studio.name}
-              image={studio.image}
-              location={studio.location}
-              rating={studio.rating}
-              reviewCount={studio.reviewCount}
-              specialties={studio.specialties}
-              badges={studio.badges}
-              artistCount={studio.artistCount}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Featured Artists */}
-      <div className="px-4 sm:px-10 mt-8 relative z-[5]">
-        <SectionLabel
-          label="Featured Artists"
-          variant={isLight ? "parchment" : "dark-muted"}
-          stretch
-          className="mb-6"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[3px]">
-          {mockArtists.map((artist) => (
-            <FlashCard
-              key={artist.id}
-              id={artist.id}
-              type="artist"
-              name={artist.name}
-              image={artist.image}
-              location={artist.location}
-              rating={artist.rating}
-              reviewCount={artist.reviewCount}
-              specialties={artist.specialties}
-              badges={artist.badges}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom */}
-      <div className="text-center px-4 sm:px-10 py-10 relative z-[5]">
-        <Link
-          href={`/discover/search`}
-          className={`font-mono text-[10px] tracking-[0.15em] uppercase transition-colors ${
-            isLight
-              ? "text-ink-black/30 hover:text-ink-black/50"
-              : "text-ink-cream/25 hover:text-ink-cream/40"
-          }`}
-        >
-          VIEW ALL ARTISTS & STUDIOS &rarr;
-        </Link>
-        <p
-          className={`${permanentMarker.className} text-sm mt-4 transition-colors duration-500 tracking-wide ${
-            isLight ? "text-ink-black/[0.08]" : "text-ink-cream/[0.08]"
-          }`}
-        >
-          tattoos or it didn&apos;t happen
-        </p>
-      </div>
-    </div>
+    <DiscoverPageContent
+      studios={studios}
+      artists={artists}
+      studiosAreSample={studiosAreSample}
+      artistsAreSample={artistsAreSample}
+    />
   );
 }

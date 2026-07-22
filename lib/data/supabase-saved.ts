@@ -29,6 +29,7 @@ const EMPTY: SavedCollections = { studios: [], artists: [], portfolio: [] };
 function profileToSavedEntity(p: DiscoverProfile, savedAt: string): SavedEntity {
   return {
     id: p.id,
+    slug: p.slug,
     name: p.name,
     image: p.image,
     location: p.location,
@@ -88,7 +89,7 @@ async function resolvePortfolio(
   if (!ids.length) return [];
   const { data } = await supabase
     .from("portfolio_images")
-    .select("id, url, title, tags, artist_id, artists(name)")
+    .select("id, url, title, tags, artist_id, artists(name, slug)")
     .in("id", ids);
   if (!data) return [];
   return (data as unknown as Array<{
@@ -97,13 +98,14 @@ async function resolvePortfolio(
     title: string | null;
     tags: string[] | null;
     artist_id: string;
-    artists: { name: string } | null;
+    artists: { name: string; slug?: string } | null;
   }>).map((row) => ({
     id: row.id,
     url: row.url,
     title: row.title ?? "",
     artistName: row.artists?.name ?? "",
     artistId: row.artist_id,
+    artistSlug: row.artists?.slug,
     tags: row.tags ?? [],
     aspectRatio: "2:3" as const,
     savedAt: savedAt.get(`design:${row.id}`) ?? "",

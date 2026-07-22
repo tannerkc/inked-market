@@ -449,7 +449,7 @@ export interface ConversationParticipant {
   id: string;
   name: string;
   avatarUrl?: string;
-  role: "artist" | "studio";
+  role: "artist" | "studio" | "customer";
 }
 
 export type InkAccentColor = "sage" | "rust" | "red";

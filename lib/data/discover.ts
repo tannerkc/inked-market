@@ -13,6 +13,8 @@ export const badgeColorMap: Record<Badge["color"], string> = {
 
 export interface DiscoverProfile {
   id: string;
+  /** Pretty URL slug — present on DB rows; links fall back to id without it. */
+  slug?: string;
   name: string;
   image: string;
   location: string;

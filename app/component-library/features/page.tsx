@@ -1,8 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
-const features = [
+type AccentKey = "indigo" | "violet" | "purple" | "blue" | "fuchsia" | "cyan";
+
+type AccentColor = {
+  bg: string;
+  border: string;
+  glow: string;
+  icon: string;
+  text: string;
+};
+
+type Feature = {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  accent: AccentKey;
+};
+
+const features: readonly Feature[] = [
   {
     title: "Discover Artists",
     description:
@@ -71,7 +88,7 @@ const features = [
   },
 ];
 
-const accentColors: Record<string, { bg: string; border: string; glow: string; icon: string; text: string }> = {
+const accentColors: Record<AccentKey, AccentColor> = {
   indigo: {
     bg: "bg-indigo-500/10",
     border: "border-indigo-500/20",
@@ -116,6 +133,8 @@ const accentColors: Record<string, { bg: string; border: string; glow: string; i
   },
 };
 
+const accentFor = (key: AccentKey): AccentColor => accentColors[key]!;
+
 /* ─────────────────────────────────────────────
    Variant A — Bento Grid
    ───────────────────────────────────────────── */
@@ -148,8 +167,8 @@ function BentoGrid() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 max-w-6xl mx-auto">
           {/* Hero feature — spans 2 cols */}
           {(() => {
-            const f = features[0];
-            const c = accentColors[f.accent];
+            const f = features[0]!;
+            const c = accentFor(f.accent);
             return (
               <div
                 className={`group relative md:col-span-2 p-8 lg:p-10 rounded-2xl border ${c.border} ${c.bg} backdrop-blur-sm ${c.glow} hover:shadow-[0_0_40px_rgba(99,102,241,0.25)] transition-all duration-500`}
@@ -172,8 +191,8 @@ function BentoGrid() {
 
           {/* Single tall card */}
           {(() => {
-            const f = features[1];
-            const c = accentColors[f.accent];
+            const f = features[1]!;
+            const c = accentFor(f.accent);
             return (
               <div
                 className={`group relative p-7 rounded-2xl border ${c.border} ${c.bg} backdrop-blur-sm hover:${c.glow} transition-all duration-500 lg:row-span-2`}
@@ -192,7 +211,7 @@ function BentoGrid() {
 
           {/* Remaining 4 cards in 2-col grid */}
           {features.slice(2).map((f) => {
-            const c = accentColors[f.accent];
+            const c = accentFor(f.accent);
             return (
               <div
                 key={f.title}
@@ -246,7 +265,7 @@ function StaggeredRows() {
         {/* Staggered rows */}
         <div className="max-w-4xl mx-auto space-y-4">
           {features.map((f, i) => {
-            const c = accentColors[f.accent];
+            const c = accentFor(f.accent);
             const isOdd = i % 2 !== 0;
             return (
               <div
@@ -279,8 +298,8 @@ function StaggeredRows() {
    ───────────────────────────────────────────── */
 function IconStripExpandable() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const active = features[activeIndex];
-  const activeColor = accentColors[active.accent];
+  const active = features[activeIndex] ?? features[0]!;
+  const activeColor = accentFor(active.accent);
 
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden">
@@ -309,7 +328,7 @@ function IconStripExpandable() {
           {/* Icon strip */}
           <div className="flex justify-center gap-3 sm:gap-4 mb-8">
             {features.map((f, i) => {
-              const c = accentColors[f.accent];
+              const c = accentFor(f.accent);
               const isActive = i === activeIndex;
               return (
                 <button

@@ -2,7 +2,6 @@
 
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { PageHeader } from "@/components/ui/page-header";
-import { useTheme } from "@/components/providers/theme-provider";
 import { useSettingsNav } from "./use-settings-nav";
 import { SettingsSidebar } from "./settings-sidebar";
 import { SettingsTabs } from "./settings-tabs";
@@ -25,8 +24,6 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
 };
 
 export function SettingsShell() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const { activeSection, setActiveSection, sections } = useSettingsNav();
 
   const ActiveComponent = SECTION_COMPONENTS[activeSection];
@@ -40,7 +37,7 @@ export function SettingsShell() {
           size: "sm",
           words: [
             { text: "Your", font: "pirata" },
-            { text: "Settings", font: "cook", color: isDark ? "text-ink-red" : "text-ink-rust" },
+            { text: "Settings", font: "cook", color: "text-ink-rust dark:text-ink-red" },
           ],
         }}
         className="mb-6"

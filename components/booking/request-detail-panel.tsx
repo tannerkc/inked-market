@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Button } from "@/components/ui/button";
+import { MetaChip } from "@/components/ui/meta-chip";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldLabel, SelectRow } from "./form-rows";
 import { effectiveRequestStatus } from "@/lib/supabase/booking-types";
@@ -42,6 +44,8 @@ interface RequestDetailPanelProps {
   onRespond: (input: RespondToRequestInput) => Promise<boolean>;
   responding: boolean;
   error: string | null;
+  /** Opening form state — the bell's peek jumps straight to accept/decline. */
+  initialMode?: "view" | "accept" | "decline";
 }
 
 export function RequestDetailPanel({
@@ -50,8 +54,9 @@ export function RequestDetailPanel({
   onRespond,
   responding,
   error,
+  initialMode = "view",
 }: RequestDetailPanelProps) {
-  const [mode, setMode] = useState<"view" | "accept" | "decline">("view");
+  const [mode, setMode] = useState<"view" | "accept" | "decline">(initialMode);
   const [message, setMessage] = useState("");
   const [quoteMin, setQuoteMin] = useState(-1);
   const [quoteMax, setQuoteMax] = useState(-1);
@@ -121,18 +126,31 @@ export function RequestDetailPanel({
           <p className="font-mono text-[10px] text-ink-black/30 dark:text-ink-cream/30">
             {new Date(request.createdAt).toLocaleDateString()}
           </p>
+          {request.preferredArtistName ? (
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-rust">
+              Requested: {request.preferredArtistName}
+            </p>
+          ) : null}
+          {/* Always the current user's own thread with the customer — a front-desk
+              operator gets their own conversation, not the artist's. */}
+          <Link
+            href={`/messages?to=${request.customerId}`}
+            className="mt-2 inline-block font-mono text-[9px] uppercase tracking-[0.15em] text-ink-rust transition-colors hover:text-ink-rust/70"
+          >
+            Message {request.customerName ?? "client"} →
+          </Link>
         </div>
 
         <p className="text-[13px] leading-relaxed text-ink-black/80 dark:text-ink-cream/80">
           {request.description}
         </p>
 
-        <div className="flex flex-wrap gap-2 font-mono text-[10px] text-ink-black/40 dark:text-ink-cream/40">
-          {request.placement ? <span className="rounded-full border border-ink-black/[0.08] px-2 py-1 dark:border-ink-cream/[0.08]">{request.placement}</span> : null}
-          {fmtChip(request.sizeCategory) ? <span className="rounded-full border border-ink-black/[0.08] px-2 py-1 dark:border-ink-cream/[0.08]">{fmtChip(request.sizeCategory)}</span> : null}
-          {fmtChip(request.budgetRange) ? <span className="rounded-full border border-ink-black/[0.08] px-2 py-1 dark:border-ink-cream/[0.08]">{fmtChip(request.budgetRange)}</span> : null}
-          {request.isColor !== null ? <span className="rounded-full border border-ink-black/[0.08] px-2 py-1 dark:border-ink-cream/[0.08]">{request.isColor ? "color" : "black & grey"}</span> : null}
-          {request.isMultiSession ? <span className="rounded-full border border-ink-black/[0.08] px-2 py-1 dark:border-ink-cream/[0.08]">multi-session</span> : null}
+        <div className="flex flex-wrap gap-2">
+          {request.placement ? <MetaChip size="md">{request.placement}</MetaChip> : null}
+          {fmtChip(request.sizeCategory) ? <MetaChip size="md">{fmtChip(request.sizeCategory)}</MetaChip> : null}
+          {fmtChip(request.budgetRange) ? <MetaChip size="md">{fmtChip(request.budgetRange)}</MetaChip> : null}
+          {request.isColor !== null ? <MetaChip size="md">{request.isColor ? "color" : "black & grey"}</MetaChip> : null}
+          {request.isMultiSession ? <MetaChip size="md">multi-session</MetaChip> : null}
         </div>
 
         {request.referenceImageUrls.length > 0 ? (

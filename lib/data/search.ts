@@ -25,6 +25,8 @@ export interface SearchFilters {
 
 export interface SearchResultItem {
   id: string;
+  /** Pretty URL slug — present on DB rows; links fall back to id without it. */
+  slug?: string;
   type: "artist" | "studio";
   name: string;
   avatar: string;

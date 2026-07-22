@@ -3,6 +3,9 @@
 import * as React from "react";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { GroupLabel } from "@/components/dashboard/group-label";
+import { ListGroup } from "@/components/dashboard/list-group";
+import { ListRow } from "@/components/dashboard/list-row";
 import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
 import type { StatusBadgeColor } from "@/components/ui/status-badge";
 import type { Appointment, AppointmentStatus } from "@/lib/types";
@@ -47,11 +50,7 @@ function AppointmentRow({
   const config = appointmentStatusConfig[appointment.status];
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect?.(appointment.id)}
-      className="flex w-full items-center gap-3 py-3 text-left border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]"
-    >
+    <ListRow onClick={() => onSelect?.(appointment.id)}>
       <div className="w-10 flex-shrink-0 text-center text-ink-black/50 dark:text-ink-cream/50">
         <p className="font-mono text-[9px] tracking-[0.1em] uppercase leading-none">
           {month}
@@ -83,7 +82,7 @@ function AppointmentRow({
           {formatDuration(appointment.duration)}
         </p>
       </div>
-    </button>
+    </ListRow>
   );
 }
 
@@ -105,23 +104,23 @@ const CustomerAppointmentsSection = React.forwardRef<
           <div>
             {upcoming.length > 0 ? (
               <div>
-                <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
-                  Upcoming
-                </p>
-                {upcoming.map((appt) => (
-                  <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
-                ))}
+                <GroupLabel>Upcoming</GroupLabel>
+                <ListGroup>
+                  {upcoming.map((appt) => (
+                    <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
+                  ))}
+                </ListGroup>
               </div>
             ) : null}
 
             {past.length > 0 ? (
               <div className={upcoming.length > 0 ? "mt-4" : ""}>
-                <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1 mt-1 text-ink-black/25 dark:text-ink-cream/25">
-                  Past
-                </p>
-                {past.map((appt) => (
-                  <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
-                ))}
+                <GroupLabel>Past</GroupLabel>
+                <ListGroup>
+                  {past.map((appt) => (
+                    <AppointmentRow key={appt.id} appointment={appt} onSelect={onSelect} />
+                  ))}
+                </ListGroup>
               </div>
             ) : null}
           </div>

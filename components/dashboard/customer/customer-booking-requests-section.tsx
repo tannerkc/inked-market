@@ -3,23 +3,19 @@
 import * as React from "react";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { InitialsAvatar } from "@/components/dashboard/initials-avatar";
+import { ListGroup } from "@/components/dashboard/list-group";
+import { ListRow } from "@/components/dashboard/list-row";
+import { REQUEST_STATUS_CONFIG } from "@/components/booking/request-status";
 import { formatDate } from "@/lib/utils";
-import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
-import type { BookingRequest, BookingRequestStatus } from "@/lib/types";
+import { StatusBadge } from "@/components/ui/status-badge";
+import type { BookingRequest } from "@/lib/types";
 
 interface CustomerBookingRequestsSectionProps {
   requests: BookingRequest[];
   onSelect?: (id: string) => void;
   className?: string;
 }
-
-const requestStatusConfig: Record<BookingRequestStatus, { color: typeof BADGE_COLORS[keyof typeof BADGE_COLORS]; label: string }> = {
-  pending: { color: BADGE_COLORS.rust, label: "Pending" },
-  accepted: { color: BADGE_COLORS.sage, label: "Accepted" },
-  declined: { color: BADGE_COLORS.red, label: "Declined" },
-  expired: { color: BADGE_COLORS.muted, label: "Expired" },
-  withdrawn: { color: BADGE_COLORS.muted, label: "Withdrawn" },
-};
 
 const CustomerBookingRequestsSection = React.forwardRef<
   HTMLDivElement,
@@ -33,50 +29,59 @@ const CustomerBookingRequestsSection = React.forwardRef<
           description="Find an artist and submit a consultation"
         />
       ) : (
-        <div>
+        <ListGroup>
           {requests.map((request) => {
-            const config = requestStatusConfig[request.status];
+            const config = REQUEST_STATUS_CONFIG[request.status];
 
             return (
-              <button
-                type="button"
+              <ListRow
                 key={request.id}
+                align="start"
                 onClick={() => onSelect?.(request.id)}
-                className="flex w-full items-start gap-3 py-3 text-left border-b transition-colors border-ink-black/[0.04] hover:bg-ink-black/[0.04] dark:border-ink-cream/[0.04] dark:hover:bg-ink-cream/[0.04]"
               >
+                <InitialsAvatar
+                  name={request.artistName}
+                  tone={request.status === "pending" ? "accent" : "muted"}
+                />
+
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
-                    {request.artistName}
-                  </p>
-                  {request.studioName ? (
-                    <p className="text-[11px] truncate text-ink-black/40 dark:text-ink-cream/40">
-                      {request.studioName}
-                    </p>
-                  ) : null}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
+                        {request.artistName}
+                      </p>
+                      {request.studioName ? (
+                        <p className="text-[11px] truncate text-ink-black/40 dark:text-ink-cream/40">
+                          {request.studioName}
+                        </p>
+                      ) : null}
+                    </div>
+                    <StatusBadge
+                      label={config.label}
+                      color={config.color}
+                      className="shrink-0"
+                    />
+                  </div>
 
                   <p className="text-[11px] mt-1 line-clamp-2 text-ink-black/35 dark:text-ink-cream/35">
                     {request.summary}
                   </p>
 
                   {request.requestedDate ? (
-                    <p className="font-mono text-[10px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
+                    <p className="font-mono text-[9px] mt-1.5 text-ink-black/25 dark:text-ink-cream/25">
                       Requested: {formatDate(request.requestedDate)}
                     </p>
                   ) : null}
                   {request.flexibleDates && !request.requestedDate ? (
-                    <p className="font-mono text-[10px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
+                    <p className="font-mono text-[9px] mt-1.5 text-ink-black/25 dark:text-ink-cream/25">
                       Flexible dates
                     </p>
                   ) : null}
                 </div>
-
-                <div className="flex-shrink-0 pt-0.5">
-                  <StatusBadge label={config.label} color={config.color} />
-                </div>
-              </button>
+              </ListRow>
             );
           })}
-        </div>
+        </ListGroup>
       )}
     </DashboardSection>
   </div>

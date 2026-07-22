@@ -26,11 +26,12 @@ export function dilate(
           if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 
           const nIdx = (ny * width + nx) * 4;
-          if (data[nIdx + 3] > maxAlpha) {
-            maxAlpha = data[nIdx + 3];
-            bestR = data[nIdx];
-            bestG = data[nIdx + 1];
-            bestB = data[nIdx + 2];
+          const alpha = data[nIdx + 3]!;
+          if (alpha > maxAlpha) {
+            maxAlpha = alpha;
+            bestR = data[nIdx]!;
+            bestG = data[nIdx + 1]!;
+            bestB = data[nIdx + 2]!;
           }
         }
       }
@@ -69,12 +70,13 @@ function buildGaussianKernel(size: number, sigma: number): Float32Array {
 
   for (let i = 0; i < size; i++) {
     const x = i - half;
-    kernel[i] = Math.exp(-(x * x) / (2 * sigma * sigma));
-    sum += kernel[i];
+    const value = Math.exp(-(x * x) / (2 * sigma * sigma));
+    kernel[i] = value;
+    sum += value;
   }
 
   for (let i = 0; i < size; i++) {
-    kernel[i] /= sum;
+    kernel[i] = kernel[i]! / sum;
   }
 
   return kernel;
@@ -107,11 +109,11 @@ function applyKernel1D(
         }
 
         const idx = (sy * width + sx) * 4;
-        const w = kernel[k];
-        r += data[idx] * w;
-        g += data[idx + 1] * w;
-        b += data[idx + 2] * w;
-        a += data[idx + 3] * w;
+        const w = kernel[k]!;
+        r += data[idx]! * w;
+        g += data[idx + 1]! * w;
+        b += data[idx + 2]! * w;
+        a += data[idx + 3]! * w;
       }
 
       const outIdx = (y * width + x) * 4;
@@ -146,24 +148,23 @@ export function applyInkBleed(
   const result = new Uint8ClampedArray(imageData.data.length);
 
   for (let i = 0; i < result.length; i += 4) {
-    const origAlpha = imageData.data[i + 3] / 255;
-    const bleedAlpha = blurred.data[i + 3] / 255;
+    const origAlpha = imageData.data[i + 3]! / 255;
+    const bleedAlpha = blurred.data[i + 3]! / 255;
 
-    // Source-over compositing: original on top of bleed
     const outAlpha = origAlpha + bleedAlpha * (1 - origAlpha);
 
     if (outAlpha > 0) {
       result[i] =
-        (imageData.data[i] * origAlpha +
-          blurred.data[i] * bleedAlpha * (1 - origAlpha)) /
+        (imageData.data[i]! * origAlpha +
+          blurred.data[i]! * bleedAlpha * (1 - origAlpha)) /
         outAlpha;
       result[i + 1] =
-        (imageData.data[i + 1] * origAlpha +
-          blurred.data[i + 1] * bleedAlpha * (1 - origAlpha)) /
+        (imageData.data[i + 1]! * origAlpha +
+          blurred.data[i + 1]! * bleedAlpha * (1 - origAlpha)) /
         outAlpha;
       result[i + 2] =
-        (imageData.data[i + 2] * origAlpha +
-          blurred.data[i + 2] * bleedAlpha * (1 - origAlpha)) /
+        (imageData.data[i + 2]! * origAlpha +
+          blurred.data[i + 2]! * bleedAlpha * (1 - origAlpha)) /
         outAlpha;
     }
 

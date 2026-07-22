@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { PageHero } from "@/components/content";
+import { accentColorMap } from "@/lib/constants/color-maps";
 
 interface LegalHeroProps {
   headline: string;
@@ -12,11 +13,6 @@ interface LegalHeroProps {
   description?: string;
   className?: string;
 }
-
-const dotColorMap = {
-  sage: "bg-ink-sage shadow-[0_0_6px_rgba(107,124,94,0.4)]",
-  rust: "bg-ink-rust shadow-[0_0_6px_rgba(193,68,14,0.4)]",
-};
 
 const LegalHero = React.forwardRef<HTMLElement, LegalHeroProps>(
   (
@@ -46,7 +42,7 @@ const LegalHero = React.forwardRef<HTMLElement, LegalHeroProps>(
           <span
             className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0",
-              dotColorMap[accentColor]
+              accentColorMap[accentColor]
             )}
           />
           <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink-cream/40">

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { cn, formatRating } from "@/lib/utils";
+import { cn, formatStarRating, profilePath } from "@/lib/utils";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { Button } from "@/components/ui/button";
 import { badgeColorMap } from "@/lib/data/discover";
@@ -8,6 +8,7 @@ import type { Badge } from "@/lib/data/discover";
 
 interface ZineSpreadProps {
   id: string;
+  slug?: string;
   type: "studio" | "artist";
   name: string;
   image: string;
@@ -31,6 +32,7 @@ const ZineSpread = React.forwardRef<HTMLDivElement, ZineSpreadProps>(
   (
     {
       id,
+      slug,
       type,
       name,
       image,
@@ -50,7 +52,7 @@ const ZineSpread = React.forwardRef<HTMLDivElement, ZineSpreadProps>(
     ref
   ) => {
     const isDark = panelVariant === "dark";
-    const href = `/${type}s/${id}`;
+    const href = profilePath(type, { id, slug });
 
     const imagePanel = (
       <div
@@ -105,7 +107,7 @@ const ZineSpread = React.forwardRef<HTMLDivElement, ZineSpreadProps>(
               isDark ? "text-ink-cream/35" : "text-ink-black/40"
             )}
           >
-            {location} &middot; &#9733; {formatRating(rating)} &middot;{" "}
+            {location} &middot; {formatStarRating(rating)} &middot;{" "}
             {reviewCount} reviews
           </p>
           <p

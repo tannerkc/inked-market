@@ -1,15 +1,14 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { SetupProgressChip } from "@/components/builder/setup-progress-chip";
 
 export function MobileTopBar() {
-  const router = useRouter();
-  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio } =
+  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, requestLeave, publish, isPublishing, isPublished, hasUnpublishedChanges } =
     useBuilder();
+  const isLiveAndCurrent = isPublished && !hasUnpublishedChanges;
 
   return (
     <div className="flex h-11 shrink-0 items-center justify-between border-b border-chrome-border bg-ink-black/95 px-3 backdrop-blur-xl">
@@ -17,7 +16,7 @@ export function MobileTopBar() {
       <div className="flex items-center gap-2 min-w-0">
         <button
           type="button"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => requestLeave("/dashboard")}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-chrome-text-secondary transition-colors active:bg-white/5"
           title="Back to dashboard"
         >
@@ -81,9 +80,17 @@ export function MobileTopBar() {
         </button>
         <button
           type="button"
-          className="rounded-lg bg-ink-red px-2.5 py-1 text-[11px] font-semibold text-white transition-colors active:brightness-90"
+          onClick={publish}
+          disabled={isPublishing || isLiveAndCurrent}
+          className={cn(
+            "rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors",
+            isLiveAndCurrent
+              ? "border border-chrome-border-hover text-chrome-text-dim"
+              : "bg-ink-red text-white active:brightness-90",
+            isPublishing && "opacity-70",
+          )}
         >
-          Publish
+          {isPublishing ? "Publishing…" : isLiveAndCurrent ? "Published" : "Publish"}
         </button>
       </div>
     </div>

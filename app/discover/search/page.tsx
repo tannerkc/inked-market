@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, Suspense } from "react";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { FilmGrainOverlay } from "@/components/ui/film-grain";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -13,16 +13,15 @@ import {
   SortSelect,
 } from "@/components/search";
 import { useTheme } from "@/components/providers/theme-provider";
-import { searchArtists, searchStudios } from "@/lib/data/search";
-import type { SearchFilters, SearchResultItem } from "@/lib/data/search";
+import type { SearchFilters, SearchResultItem, SearchResponse } from "@/lib/data/search";
 
 function SearchPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
+  // useTheme is required here for the inline ThemeToggle UI (mode + setMode).
   const { mode, setMode } = useTheme();
-  const isDark = mode === "dark";
 
   const tab = searchParams.get("tab") || "artists";
   const filters: SearchFilters = useMemo(() => {
@@ -42,42 +41,83 @@ function SearchPageInner() {
     };
   }, [searchParams]);
 
-  const [loadedPages, setLoadedPages] = useState(1);
+  const [allResults, setAllResults] = useState<SearchResultItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const buildSearchUrl = useCallback(
+    (page: number): string => {
+      const params = new URLSearchParams();
+      params.set("tab", tab);
+      params.set("page", String(page));
+      if (filters.q) params.set("q", filters.q);
+      if (filters.styles?.length) params.set("styles", filters.styles.join(","));
+      if (filters.location) params.set("location", filters.location);
+      if (filters.rating !== undefined) params.set("rating", String(filters.rating));
+      if (filters.exp) params.set("experience", filters.exp);
+      if (filters.verified) params.set("verified", "true");
+      if (filters.booking) params.set("booking", "true");
+      if (filters.sort) params.set("sort", filters.sort);
+      return `/api/search?${params.toString()}`;
+    },
+    [tab, filters]
+  );
 
   const filterKey = useMemo(
-    () => JSON.stringify({ ...filters, page: undefined }),
-    [filters]
+    () => JSON.stringify({ tab, ...filters, page: undefined }),
+    [tab, filters]
   );
-  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-  if (filterKey !== prevFilterKey) {
-    setPrevFilterKey(filterKey);
-    setLoadedPages(1);
-  }
 
-  const { allResults, total, hasMore } = useMemo(() => {
-    const searchFn = tab === "studios" ? searchStudios : searchArtists;
-    let all: SearchResultItem[] = [];
-    let totalCount = 0;
-    let more = false;
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setCurrentPage(1);
 
-    for (let p = 1; p <= loadedPages; p++) {
-      const response = searchFn({ ...filters, page: p });
-      all = [...all, ...response.results];
-      totalCount = response.total;
-      more = response.hasMore;
-    }
+    fetch(buildSearchUrl(1))
+      .then((res) => res.json())
+      .then((data: SearchResponse) => {
+        if (cancelled) return;
+        setAllResults(data.results);
+        setTotal(data.total);
+        setHasMore(data.hasMore);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAllResults([]);
+        setTotal(0);
+        setHasMore(false);
+        setLoading(false);
+      });
 
-    return { allResults: all, total: totalCount, hasMore: more };
-  }, [tab, filters, loadedPages]);
+    return () => { cancelled = true; };
+  }, [filterKey, buildSearchUrl]);
+
+  const handleLoadMore = useCallback(() => {
+    const nextPage = currentPage + 1;
+    setLoading(true);
+
+    fetch(buildSearchUrl(nextPage))
+      .then((res) => res.json())
+      .then((data: SearchResponse) => {
+        setAllResults((prev) => [...prev, ...data.results]);
+        setTotal(data.total);
+        setHasMore(data.hasMore);
+        setCurrentPage(nextPage);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [currentPage, buildSearchUrl]);
 
   const handleSearch = useCallback(
     (q: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (q) {
-        params.set("q", q);
-      } else {
-        params.delete("q");
-      }
+      if (q) params.set("q", q);
+      else params.delete("q");
       params.delete("page");
       router.replace(`${pathname}?${params.toString()}`);
     },
@@ -85,115 +125,89 @@ function SearchPageInner() {
   );
 
   return (
-    <>
-      <div
-        className={`min-h-screen pt-16 transition-colors duration-500 ${
-          isDark ? "bg-ink-black" : "bg-ink-cream"
-        }`}
-      >
-        <FilmGrainOverlay
-          className={isDark ? "opacity-[0.035]" : "opacity-[0.02]"}
-        />
+    <div className="min-h-screen pt-16 transition-colors duration-500 bg-ink-cream dark:bg-ink-black">
+      <FilmGrainOverlay className="opacity-[0.02] dark:opacity-[0.035]" />
 
-        {/*
-          Sticky header. <main> has transform:translate3d which makes IT
-          the containing block for sticky, not the viewport. So top-0
-          means top of <main>'s scroll area. pt-16/-mt-16 reserves space
-          for the fixed nav without adding visual gap.
-        */}
-        <div
-          className={`sticky top-0 z-40 pt-16 -mt-16 ${
-            isDark ? "bg-ink-black" : "bg-ink-cream"
-          }`}
-        >
-          <div className="max-w-4xl mx-auto px-6 pt-4 pb-3">
-            <ThemeToggle mode={mode} onToggle={setMode} className="mb-3" />
+      <div className="sticky top-0 z-40 pt-16 -mt-16 bg-ink-cream dark:bg-ink-black">
+        <div className="max-w-4xl mx-auto px-6 pt-4 pb-3">
+          <ThemeToggle mode={mode} onToggle={setMode} className="mb-3" />
 
-            <DiscoverSearch
-              variant={mode}
-              defaultValue={filters.q}
-              onSearch={handleSearch}
-              className="mb-6"
-            />
+          <DiscoverSearch
+            defaultValue={filters.q}
+            onSearch={handleSearch}
+            className="mb-6"
+          />
 
-            <SearchTabs variant={mode} className="mb-1.5" />
+          <SearchTabs className="mb-1.5" />
 
-            <FilterBar variant={mode} />
-          </div>
-        </div>
-
-        {/* Results — flows directly below the sticky header, same background */}
-        <div className="max-w-5xl mx-auto px-6 pt-5 pb-16">
-          <div className="flex items-center justify-between mb-4">
-            <span
-              className={`font-mono text-[9px] tracking-[0.15em] uppercase ${
-                isDark ? "text-ink-cream/20" : "text-ink-black/40"
-              }`}
-            >
-              Showing {allResults.length} of {total}{" "}
-              {tab === "studios" ? "studios" : "artists"}
-            </span>
-            <SortSelect variant={mode} />
-          </div>
-
-          {allResults.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[3px]">
-              {allResults.map((item) => (
-                <SearchResultCard
-                  key={`${item.type}-${item.id}`}
-                  type={item.type}
-                  id={item.id}
-                  name={item.name}
-                  avatar={item.avatar}
-                  images={item.images}
-                  location={item.location}
-                  rating={item.rating}
-                  reviewCount={item.reviewCount}
-                  specialties={item.specialties}
-                  verified={item.verified}
-                  artistCount={item.artistCount}
-                  variant={mode}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <p
-                className={`font-mono text-[11px] tracking-wide ${
-                  isDark ? "text-ink-cream/30" : "text-ink-black/30"
-                }`}
-              >
-                No {tab === "studios" ? "studios" : "artists"} found matching
-                your filters.
-              </p>
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  params.set("tab", tab);
-                  router.replace(`${pathname}?${params.toString()}`);
-                }}
-                className="mt-3 font-mono text-[10px] tracking-wide text-ink-red hover:text-ink-red/80 transition-colors"
-              >
-                Clear all filters
-              </button>
-            </div>
-          )}
-
-          {hasMore && (
-            <div className="text-center mt-8">
-              <Button
-                variant={isDark ? "ink-outline" : "ink-light-outline"}
-                size="sm"
-                statusDot="bg-ink-red shadow-ink-red-glow"
-                onClick={() => setLoadedPages((prev) => prev + 1)}
-              >
-                Load More
-              </Button>
-            </div>
-          )}
+          <FilterBar />
         </div>
       </div>
-    </>
+
+      {/* Results */}
+      <div className="max-w-5xl mx-auto px-6 pt-5 pb-16">
+        <div className="flex items-center justify-between mb-4">
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-black/40 dark:text-ink-cream/20">
+            Showing {allResults.length} of {total}{" "}
+            {tab === "studios" ? "studios" : "artists"}
+          </span>
+          <SortSelect />
+        </div>
+
+        {allResults.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[3px]">
+            {allResults.map((item) => (
+              <SearchResultCard
+                key={`${item.type}-${item.id}`}
+                type={item.type}
+                id={item.id}
+                slug={item.slug}
+                name={item.name}
+                avatar={item.avatar}
+                images={item.images}
+                location={item.location}
+                rating={item.rating}
+                reviewCount={item.reviewCount}
+                specialties={item.specialties}
+                verified={item.verified}
+                artistCount={item.artistCount}
+                badges={item.badges}
+              />
+            ))}
+          </div>
+        ) : !loading ? (
+          <div className="text-center py-20">
+            <p className="font-mono text-[11px] tracking-wide text-ink-black/30 dark:text-ink-cream/30">
+              No {tab === "studios" ? "studios" : "artists"} found matching your filters.
+            </p>
+            <button
+              onClick={() => {
+                const params = new URLSearchParams();
+                params.set("tab", tab);
+                router.replace(`${pathname}?${params.toString()}`);
+              }}
+              className="mt-3 font-mono text-[10px] tracking-wide text-ink-red hover:text-ink-red/80 transition-colors"
+            >
+              Clear all filters
+            </button>
+          </div>
+        ) : null}
+
+        {hasMore && (
+          <div className="text-center mt-8">
+            <Button
+              variant="ink-outline"
+              size="sm"
+              statusDot="bg-ink-red shadow-ink-red-glow"
+              onClick={handleLoadMore}
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "Load More"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

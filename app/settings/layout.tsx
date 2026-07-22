@@ -1,9 +1,6 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Settings | Inked Market",
-  description: "Manage your account settings and preferences",
-};
+export const metadata = createMetadata("Settings", "Manage your account settings and preferences");
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return children;

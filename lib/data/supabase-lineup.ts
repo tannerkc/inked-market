@@ -84,11 +84,12 @@ export async function getAllEventsFromDb(
 
 /** A DiscoverProfile narrowed + retyped as a LineupProfile (quick card). */
 function toLineupProfile(
-  profile: { id: string; name: string; image: string; location: string; specialties: string[]; badges: LineupProfile["badges"] },
+  profile: { id: string; slug?: string; name: string; image: string; location: string; specialties: string[]; badges: LineupProfile["badges"] },
   type: LineupProfile["type"]
 ): LineupProfile {
   return {
     id: profile.id,
+    slug: profile.slug,
     type,
     name: profile.name,
     image: profile.image,

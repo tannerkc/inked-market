@@ -1,5 +1,3 @@
-"use client";
-
 import { ContentSidebar } from "@/components/content";
 import type { SidebarSection } from "@/components/content";
 

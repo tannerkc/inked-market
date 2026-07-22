@@ -1,21 +1,21 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "@/components/builder/builder-provider";
 import { SetupProgressChip } from "@/components/builder/setup-progress-chip";
 
 export function BuilderTopBar() {
-  const router = useRouter();
-  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, useMockData, toggleMockData, setIsPreviewing } = useBuilder();
+  const { isDirty, canUndo, canRedo, undo, redo, saveDraft, studio, useMockData, toggleMockData, setIsPreviewing, requestLeave, publish, isPublishing, isPublished, hasUnpublishedChanges } = useBuilder();
+  const liveHref = studio ? `/studios/${studio.slug ?? studio.id}` : null;
+  const isLiveAndCurrent = isPublished && !hasUnpublishedChanges;
 
   return (
     <div className="fixed top-0 right-0 left-0 z-[200] flex h-12 items-center justify-between border-b border-chrome-border bg-ink-black/92 px-5 backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => requestLeave("/dashboard")}
           className="flex h-7 w-7 items-center justify-center rounded-lg border border-chrome-border-hover text-chrome-text-secondary transition-colors hover:border-chrome-text-dim hover:text-white"
           title="Back to dashboard"
         >
@@ -101,11 +101,35 @@ export function BuilderTopBar() {
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1.5 -mt-px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>Preview
         </button>
+        {isPublished && liveHref ? (
+          <a
+            href={liveHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open your live site in a new tab"
+            className="rounded-lg border border-chrome-border-hover bg-transparent px-3.5 py-1.5 text-xs font-medium text-chrome-text-secondary transition-colors hover:border-chrome-text-dim hover:text-white"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1.5 -mt-px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><path d="M15 3h6v6" /><path d="M10 14L21 3" /></svg>View site
+          </a>
+        ) : null}
         <button
           type="button"
-          className="rounded-lg border border-ink-red bg-ink-red px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:brightness-110"
+          onClick={publish}
+          disabled={isPublishing || isLiveAndCurrent}
+          title={
+            isLiveAndCurrent
+              ? "Your live site is up to date"
+              : "Put this design live on your public studio page"
+          }
+          className={cn(
+            "rounded-lg border px-3.5 py-1.5 text-xs font-medium transition-colors",
+            isLiveAndCurrent
+              ? "cursor-default border-chrome-border-hover text-chrome-text-dim"
+              : "border-ink-red bg-ink-red text-white hover:brightness-110",
+            isPublishing && "opacity-70",
+          )}
         >
-          Publish
+          {isPublishing ? "Publishing…" : isLiveAndCurrent ? "Published" : "Publish"}
         </button>
       </div>
     </div>

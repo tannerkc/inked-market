@@ -24,6 +24,7 @@ export async function confirmDepositPaid(
     if (row.artist_id) {
       await notifyUser(admin, await artistUserId(admin, row.artist_id), "deposit_paid", {
         actorName: row.customer_name ?? undefined,
+        recipientContext: "artist",
       });
     }
     return "confirmed";

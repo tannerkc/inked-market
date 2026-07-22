@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { FaqAccordion } from "@/components/help/faq-accordion";
 import type { HelpFaqItem } from "@/lib/data/help-types";
@@ -77,27 +75,16 @@ const PRICING_FAQ_ITEMS: HelpFaqItem[] = [
 ];
 
 interface PricingFaqProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
-function PricingFaq({ variant = "dark", className }: PricingFaqProps) {
+function PricingFaq({ className }: PricingFaqProps) {
   return (
     <div className={className}>
-      <h2
-        className={
-          variant === "dark"
-            ? "font-mono text-[10px] tracking-[0.2em] uppercase text-ink-cream/25 mb-6 text-center"
-            : "font-mono text-[10px] tracking-[0.2em] uppercase text-ink-black/25 mb-6 text-center"
-        }
-      >
+      <h2 className="font-mono text-[10px] tracking-[0.2em] uppercase mb-6 text-center text-ink-black/25 dark:text-ink-cream/25">
         Frequently Asked Questions
       </h2>
-      <FaqAccordion
-        items={PRICING_FAQ_ITEMS}
-        accentColor="rust"
-        variant={variant}
-      />
+      <FaqAccordion items={PRICING_FAQ_ITEMS} accentColor="rust" />
     </div>
   );
 }

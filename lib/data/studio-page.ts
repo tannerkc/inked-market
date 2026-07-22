@@ -1,4 +1,5 @@
 import { defaultThemeConfig } from "@/lib/data/theme-presets";
+import { bookPath, profilePath } from "@/lib/utils";
 import { remapLegacyTemplate } from "@/lib/utils/legacy-template";
 import type { StudioThemeConfig } from "@/lib/types/builder";
 import type { Studio, Review } from "@/lib/types";
@@ -95,7 +96,7 @@ export async function getStudioForPage(
             styles: a.specialties.slice(0, 3),
             photoCount: thumbs.length,
             photos: thumbs,
-            profileHref: `/artists/${a.slug ?? a.id}`,
+            profileHref: profilePath("artist", a),
             bookHref: bookHrefs.get(a.id),
           };
         });
@@ -111,7 +112,7 @@ export async function getStudioForPage(
         const studioBookingLink = !studioSettings
           ? undefined
           : studioCta.kind === "inbuilt"
-            ? { url: `/book/${studio.id}`, platformName: "Inked Market" }
+            ? { url: bookPath(studio), platformName: "Inked Market" }
             : studioCta.kind === "external"
               ? { url: studioCta.url, platformName: studioCta.domain }
               : null;
@@ -143,7 +144,7 @@ export async function getStudioForPage(
     styles: a.specialty ? [a.specialty] : [],
     photoCount: 0,
     photos: [],
-    profileHref: `/artists/${a.id}`,
+    profileHref: profilePath("artist", a),
     // Mock artists have no live booking settings — no Book link.
   }));
   const mockReviews = getStudioReviews(id);

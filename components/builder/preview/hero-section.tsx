@@ -5,19 +5,23 @@ import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import { PromptChip } from "@/components/studio-site/empty-states";
 import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
 import type { CtaStyle } from "@/lib/types/builder";
+import type { CoverFocal } from "@/lib/types";
 import { PLACEHOLDER_PATTERN } from "@/lib/utils/placeholder-pattern";
+import { focalPosition } from "@/lib/utils/cover-crop";
+import { heroCollagePhotos } from "@/lib/utils/studio-content";
 
 /** Real cover photo when set; the designed placeholder texture otherwise. */
-function heroImageStyle(coverImage?: string): React.CSSProperties {
+function heroImageStyle(coverImage?: string, focal?: CoverFocal): React.CSSProperties {
   if (coverImage) {
     return {
       backgroundImage: `url("${coverImage}")`,
       backgroundSize: "cover",
-      backgroundPosition: "center",
+      backgroundPosition: focalPosition(focal),
     };
   }
   return { backgroundColor: "var(--bg-sunken)", backgroundImage: PLACEHOLDER_PATTERN };
 }
+
 
 
 const CTA_STYLES: Record<CtaStyle, { className: string; style: React.CSSProperties }> = {
@@ -119,7 +123,7 @@ function SplitHero() {
       <div
         data-hero-image
         className="relative min-h-[280px] @lg:min-h-full"
-        style={heroImageStyle(data?.coverImage)}
+        style={heroImageStyle(data?.coverImage, data?.coverFocal)}
       >
         {!data?.coverImage ? <div className="absolute bottom-4 left-4">
             <PromptChip group="photos" label="Add cover photo" />
@@ -141,7 +145,7 @@ function FullbleedHero() {
     <div
       data-hero-image
       className="relative min-h-[520px]"
-      style={heroImageStyle(data?.coverImage)}
+      style={heroImageStyle(data?.coverImage, data?.coverFocal)}
     >
       <div
         className="absolute inset-0"
@@ -213,7 +217,7 @@ function MastheadHero() {
       <div
         data-hero-image
         className="relative min-h-[240px] flex-1"
-        style={heroImageStyle(data?.coverImage)}
+        style={heroImageStyle(data?.coverImage, data?.coverFocal)}
       >
         {!data?.coverImage ? (
           <div className="absolute bottom-4 left-4">
@@ -227,8 +231,8 @@ function MastheadHero() {
 
 /** Studio Minimal signature: the hero IS a photo grid; name floats on a quiet panel. */
 function GridOverlayHero() {
-  const { data } = useStudioSite();
-  const tiles = (data?.images ?? []).slice(0, 6);
+  const { config, data } = useStudioSite();
+  const tiles = heroCollagePhotos(data, config).slice(0, 6);
   const cells: (string | undefined)[] =
     tiles.length > 0 ? tiles : Array.from({ length: 6 }, () => undefined);
 
@@ -267,7 +271,7 @@ function GridOverlayHero() {
 /** Gutter Punk signature: zine collage — rotated tiles, tape corners, stamped name. */
 function ZineHero() {
   const { config, data } = useStudioSite();
-  const photos = data?.images ?? [];
+  const photos = heroCollagePhotos(data, config);
   const tiles: (string | undefined)[] = [0, 1, 2].map((i) => photos[i]);
 
   return (

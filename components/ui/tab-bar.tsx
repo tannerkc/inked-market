@@ -15,7 +15,6 @@ export interface TabBarProps<T extends string = string> {
   onTabChange: (tab: T) => void;
   /** Always show count badge, even when 0 */
   showZeroCounts?: boolean;
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -25,20 +24,17 @@ function TabBarInner<T extends string>(
     activeTab,
     onTabChange,
     showZeroCounts = false,
-    variant = "dark",
     className,
   }: TabBarProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  const isLight = variant === "light";
-
   return (
     <div
       ref={ref}
       role="tablist"
       className={cn(
         "flex items-center gap-0 border-b overflow-x-auto scrollbar-hide transition-colors duration-500",
-        isLight ? "border-ink-black/[0.08]" : "border-ink-cream/[0.06]",
+        "border-ink-black/[0.08] dark:border-ink-cream/[0.06]",
         className
       )}
     >
@@ -57,12 +53,8 @@ function TabBarInner<T extends string>(
             className={cn(
               "px-5 py-3.5 font-mono text-[10px] tracking-[0.15em] uppercase border-b-2 transition-colors duration-200 whitespace-nowrap cursor-pointer",
               isActive
-                ? isLight
-                  ? "text-ink-black border-ink-black"
-                  : "text-ink-red border-ink-red"
-                : isLight
-                  ? "text-ink-black/30 border-transparent hover:text-ink-black/50"
-                  : "text-ink-cream/25 border-transparent hover:text-ink-cream/40"
+                ? "text-ink-black border-ink-black dark:text-ink-red dark:border-ink-red"
+                : "border-transparent text-ink-black/30 hover:text-ink-black/50 dark:text-ink-cream/25 dark:hover:text-ink-cream/40"
             )}
           >
             {label}
@@ -71,12 +63,8 @@ function TabBarInner<T extends string>(
                 className={cn(
                   "ml-1.5 text-[9px] px-1.5 py-px rounded-full",
                   isActive
-                    ? isLight
-                      ? "bg-ink-black/10 text-ink-black/60"
-                      : "bg-ink-red/15 text-ink-red"
-                    : isLight
-                      ? "bg-ink-black/5 text-ink-black/30"
-                      : "bg-ink-cream/5 text-ink-cream/25"
+                    ? "bg-ink-black/10 text-ink-black/60 dark:bg-ink-red/15 dark:text-ink-red"
+                    : "bg-ink-black/5 text-ink-black/30 dark:bg-ink-cream/5 dark:text-ink-cream/25"
                 )}
               >
                 {count}

@@ -1,5 +1,3 @@
-"use client";
-
 import { AuthGuard } from "@/components/providers/auth-guard";
 import { SettingsShell } from "@/components/settings";
 

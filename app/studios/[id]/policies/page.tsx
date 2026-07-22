@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getStudioForPage } from "@/lib/data/studio-page";
 import { studioSiteDataFromStudio } from "@/components/studio-site/studio-site-data";
@@ -27,6 +27,11 @@ export default async function PoliciesPage({ params }: PageProps) {
   const result = await getStudioForPage(id);
   // Policies is a subpage of the custom site — no published site, no policies.
   if (!result || !result.hasPublishedSite) notFound();
+
+  // Canonicalize: id-based URLs forward to the pretty slug.
+  if (result.fromDb && result.studio.slug && id !== result.studio.slug) {
+    redirect(`/studios/${result.studio.slug}/policies`);
+  }
 
   const { studio, config, artists, reviews } = result;
   const data = studioSiteDataFromStudio(studio, { artists, reviews });

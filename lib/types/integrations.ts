@@ -11,6 +11,7 @@ export type IntegrationPlatform =
   | "yelp"
   | "trustpilot"
   | "facebook"
+  | "instagram"
   | "square"
   | "acuity"
   | "calendly"
@@ -48,6 +49,8 @@ export interface IntegrationRecord {
   connectedAt?: string;
   lastSyncAt?: string;
   errorMessage?: string;
+  /** Display name of the linked external account (OAuth connections only). */
+  accountName?: string;
 
   // Import summary
   importedCount?: number;
@@ -74,6 +77,22 @@ export interface IntegrationPlatformMeta {
   urlPattern: RegExp;
   /** Minimum tier required. null = available to all. */
   minTier: TierSlug | null;
+  /**
+   * Official no-JS iframe embedding, for the few vendors that document it
+   * (Calendly, Acuity). `hosts` is the allowlist of registrable domains a
+   * stored URL must resolve to before it is ever used as an iframe src —
+   * re-checked at render time, never trusted from storage.
+   */
+  embed?: { hosts: string[] };
+  /**
+   * True when the platform supports linking an account via OAuth
+   * (server routes at /api/integrations/[platform]/...). Tokens live in the
+   * service-role-only studio_connections table; the client only ever sees
+   * the IntegrationRecord projection.
+   */
+  oauth?: boolean;
+  /** Label for the post-connect data pull button (platforms with an import route). */
+  oauthImportLabel?: string;
 }
 
 // ─── Category display metadata ──────────────────────────────────────────────

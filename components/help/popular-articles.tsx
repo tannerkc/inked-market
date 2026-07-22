@@ -2,29 +2,22 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/section-label";
+import { dotColorMap } from "@/lib/constants/color-maps";
 import type { HelpArticle } from "@/lib/data/help-types";
 
 interface PopularArticlesProps {
   articles: HelpArticle[];
-  variant?: "light" | "dark";
   className?: string;
 }
 
-const dotColorMap: Record<string, string> = {
-  red: "bg-ink-red shadow-[0_0_5px_color-mix(in_srgb,var(--ink-red)_30%,transparent)]",
-  rust: "bg-ink-rust shadow-[0_0_5px_rgba(183,118,74,0.3)]",
-  sage: "bg-ink-sage shadow-[0_0_5px_rgba(122,140,110,0.3)]",
-};
-
-function PopularArticles({ articles, variant = "dark", className }: PopularArticlesProps) {
+function PopularArticles({ articles, className }: PopularArticlesProps) {
   if (articles.length === 0) return null;
-  const isDark = variant === "dark";
 
   return (
     <div className={cn("", className)}>
       <SectionLabel
         label="Popular Right Now"
-        variant={isDark ? "dark-muted" : "parchment"}
+        variant="muted"
         stretch
         className="mb-6"
       />
@@ -35,9 +28,8 @@ function PopularArticles({ articles, variant = "dark", className }: PopularArtic
             href={`/help/${article.categorySlug}/${article.slug}`}
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl border text-xs transition-all",
-              isDark
-                ? "border-ink-cream/[0.05] text-ink-cream/35 hover:bg-ink-cream/[0.03] hover:border-ink-cream/[0.1] hover:text-ink-cream/60"
-                : "border-ink-black/[0.05] text-ink-black/35 hover:bg-ink-black/[0.03] hover:border-ink-black/[0.1] hover:text-ink-black/60"
+              "border-ink-black/[0.05] text-ink-black/35 hover:bg-ink-black/[0.03] hover:border-ink-black/[0.1] hover:text-ink-black/60",
+              "dark:border-ink-cream/[0.05] dark:text-ink-cream/35 dark:hover:bg-ink-cream/[0.03] dark:hover:border-ink-cream/[0.1] dark:hover:text-ink-cream/60"
             )}
           >
             <span

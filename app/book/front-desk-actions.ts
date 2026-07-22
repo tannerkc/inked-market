@@ -79,6 +79,7 @@ export async function frontDeskCreateAppointment(input: unknown): Promise<Action
       actorName: `Front desk (${d.customerName})`,
       apptType: d.type,
       whenIso: new Date(startMs).toISOString(),
+      recipientContext: "artist",
     });
   }
   return { success: true };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Headline } from "@/components/ui/headline";
@@ -16,12 +17,14 @@ import { tattooStyleOptions } from "@/lib/data/signup-styles";
 import { useAuth } from "@/components/providers/auth-provider";
 
 export default function ArtistProfilePage() {
+  const router = useRouter();
   const { updateSignupProgress, signupProgress } = useAuth();
   const [selectedStyles, setSelectedStyles] = useState<string[]>(signupProgress.styles || []);
 
   const handleComplete = () => {
     updateSignupProgress({ styles: selectedStyles });
-    window.location.href = "/signup/artist/plan";
+    // Client-side nav keeps the in-memory password (never persisted)
+    router.push("/signup/artist/plan");
   };
 
   return (

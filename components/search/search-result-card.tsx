@@ -3,11 +3,12 @@
  * Maps search result data shape to ProfileCard props.
  */
 import React from "react";
-import { ProfileCard } from "@/components/ui/profile-card";
+import { ProfileCard, type CardBadge } from "@/components/ui/profile-card";
 
 export interface SearchResultCardProps {
   type: "artist" | "studio";
   id: string;
+  slug?: string;
   name: string;
   avatar: string;
   images: string[];
@@ -16,19 +17,20 @@ export interface SearchResultCardProps {
   reviewCount: number;
   specialties: string[];
   verified: boolean;
-  variant?: "light" | "dark";
   artistCount?: number;
+  badges?: CardBadge[];
   className?: string;
 }
 
 const SearchResultCard = React.forwardRef<HTMLAnchorElement, SearchResultCardProps>(
-  ({ images, avatar, verified, ...props }, ref) => (
+  ({ images, avatar, verified, badges, ...props }, ref) => (
     <ProfileCard
       ref={ref}
       image={images[0] || ""}
       images={images}
       avatar={avatar}
       verified={verified}
+      badges={badges}
       aspect="3/5"
       {...props}
     />

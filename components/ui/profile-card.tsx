@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn, formatRating } from "@/lib/utils";
+import { cn, formatStarRating, profilePath } from "@/lib/utils";
+import { PLACEHOLDER_PATTERN } from "@/lib/utils/placeholder-pattern";
 import type { InkAccentColor } from "@/lib/types";
 
 // ─── Badge ───────────────────────────────────────────────────────────────────
@@ -19,10 +20,43 @@ const badgeStyles: Record<BadgeColor, string> = {
   red: "bg-ink-black/80 text-ink-red border-ink-red/30",
 };
 
+/** Frosted chip overlaid on card imagery (entity badges, type badges). */
+function OverlayBadge({
+  label,
+  color,
+  className,
+}: {
+  label: string;
+  color?: BadgeColor;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-[3px] font-mono text-[7px] tracking-[0.12em] uppercase leading-none backdrop-blur-md border",
+        color && badgeStyles[color],
+        className
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** Prepend a Verified badge unless the list already carries one. */
+function withVerifiedBadge(badges: CardBadge[], verified: boolean): CardBadge[] {
+  if (!verified || badges.some((b) => b.label.toLowerCase() === "verified")) {
+    return badges;
+  }
+  return [{ label: "Verified", color: "sage" }, ...badges];
+}
+
 // ─── Props ───────────────────────────────────────────────────────────────────
 
 export interface ProfileCardProps {
   id: string;
+  /** Pretty URL slug — used for the profile link when present. */
+  slug?: string;
   type: "artist" | "studio";
   name: string;
   image: string;
@@ -48,6 +82,7 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
   (
     {
       id,
+      slug,
       type,
       name,
       image,
@@ -65,13 +100,9 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
     },
     ref
   ) => {
-    const href = `/${type}s/${id}`;
-
-    // Build badge list — add verified as a badge if not already present
-    const allBadges: CardBadge[] = [...badges];
-    if (verified && !badges.some((b) => b.label.toLowerCase() === "verified")) {
-      allBadges.unshift({ label: "Verified", color: "sage" });
-    }
+    const href = profilePath(type, { id, slug });
+    const thumbs = images.filter(Boolean);
+    const allBadges = withVerifiedBadge(badges, verified);
 
     return (
       <Link
@@ -83,36 +114,35 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
           className
         )}
       >
-        {/* Main image — full bleed */}
-        <Image
-          src={image}
-          alt={name}
-          fill
-          className="object-cover transition-all duration-500 saturate-[0.85] contrast-[1.05] group-hover:scale-[1.04] group-hover:saturate-100 group-hover:contrast-100"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {/* Main image — full bleed; placeholder pattern when no photo exists */}
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-cover transition-all duration-500 saturate-[0.85] contrast-[1.05] group-hover:scale-[1.04] group-hover:saturate-100 group-hover:contrast-100"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 bg-ink-black/[0.06] dark:bg-ink-cream/[0.04]"
+            style={{ backgroundImage: PLACEHOLDER_PATTERN }}
+          />
+        )}
 
         {/* Badges — top-left, inline row */}
         {allBadges.length > 0 && (
           <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1">
             {allBadges.map((badge) => (
-              <span
-                key={badge.label}
-                className={cn(
-                  "inline-flex items-center rounded-full px-2 py-[3px] font-mono text-[7px] tracking-[0.12em] uppercase leading-none backdrop-blur-md border",
-                  badgeStyles[badge.color]
-                )}
-              >
-                {badge.label}
-              </span>
+              <OverlayBadge key={badge.label} label={badge.label} color={badge.color} />
             ))}
           </div>
         )}
 
         {/* Portfolio thumbnails — top-right (only when images provided) */}
-        {images.length > 1 && (
+        {thumbs.length > 1 && (
           <div className="absolute top-2.5 right-2.5 z-10 flex gap-[2px] rounded-md overflow-hidden opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-            {images.slice(1, 4).map((src, i) => (
+            {thumbs.slice(1, 4).map((src, i) => (
               <div key={i} className="relative w-9 h-9 overflow-hidden">
                 <Image
                   src={src}
@@ -154,9 +184,7 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
             </p>
             {rating !== undefined && reviewCount !== undefined && (
               <p className="font-mono text-[9px]">
-                <span className="text-ink-red">
-                  &#9733; {formatRating(rating)}
-                </span>
+                <span className="text-ink-red">{formatStarRating(rating)}</span>
                 <span className="text-ink-cream/35 ml-1">({reviewCount})</span>
               </p>
             )}
@@ -182,5 +210,5 @@ const ProfileCard = React.forwardRef<HTMLAnchorElement, ProfileCardProps>(
 );
 ProfileCard.displayName = "ProfileCard";
 
-export { ProfileCard };
+export { ProfileCard, OverlayBadge, withVerifiedBadge };
 export type { CardBadge, BadgeColor };

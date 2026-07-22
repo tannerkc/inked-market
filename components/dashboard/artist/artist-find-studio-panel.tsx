@@ -4,6 +4,8 @@ import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Input } from "@/components/ui/input";
 import { SectionLabel } from "@/components/ui/section-label";
 import { AffiliationRow } from "@/components/dashboard/affiliation-row";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { ListGroup } from "@/components/dashboard/list-group";
 import type { Affiliation } from "@/lib/types";
 
 interface ArtistFindStudioPanelProps {
@@ -39,13 +41,11 @@ export function ArtistFindStudioPanel({
           placeholder="Search studios by name or location..."
         />
 
-        <div>
-          {filteredStudios.length === 0 ? (
-            <p className="text-[12px] text-center py-4 text-ink-black/25 dark:text-ink-cream/25">
-              No studios found
-            </p>
-          ) : (
-            filteredStudios.map((studio) => (
+        {filteredStudios.length === 0 ? (
+          <EmptyState message="No studios found" />
+        ) : (
+          <ListGroup>
+            {filteredStudios.map((studio) => (
               <AffiliationRow
                 key={studio.id}
                 name={studio.name}
@@ -56,19 +56,21 @@ export function ArtistFindStudioPanel({
                 onAction={() => onRequestToJoin(studio)}
                 actionLabel={studioAffiliation?.id === studio.id ? "Requested" : "Request to Join"}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </ListGroup>
+        )}
 
         {studioAffiliation && (
           <>
             <SectionLabel label="your request" variant="muted" stretch />
-            <AffiliationRow
-              name={studioAffiliation.name}
-              avatarUrl={studioAffiliation.avatarUrl}
-              avatarShape="rounded"
-              status={studioAffiliation.status}
-            />
+            <ListGroup>
+              <AffiliationRow
+                name={studioAffiliation.name}
+                avatarUrl={studioAffiliation.avatarUrl}
+                avatarShape="rounded"
+                status={studioAffiliation.status}
+              />
+            </ListGroup>
           </>
         )}
       </div>

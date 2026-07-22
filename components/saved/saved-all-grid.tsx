@@ -20,7 +20,6 @@ export interface SavedAllGridProps {
   removingIds?: Set<string>;
   onUnsave?: (id: string, type: "studio" | "artist" | "design") => void;
   onNavigateTab?: (tab: SavedTabValue) => void;
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -35,12 +34,10 @@ interface SectionRowProps {
   count: number;
   tab: SavedTabValue;
   onNavigateTab?: (tab: SavedTabValue) => void;
-  variant: "light" | "dark";
   children: React.ReactNode;
 }
 
-function SectionRow({ title, count, tab, onNavigateTab, variant, children }: SectionRowProps) {
-  const isLight = variant === "light";
+function SectionRow({ title, count, tab, onNavigateTab, children }: SectionRowProps) {
   const hasMore = count > ROW_LIMIT;
 
   return (
@@ -48,21 +45,10 @@ function SectionRow({ title, count, tab, onNavigateTab, variant, children }: Sec
       {/* Section header */}
       <div className="flex items-baseline justify-between mb-4">
         <div className="flex items-baseline gap-3">
-          <h2
-            className={cn(
-              bebasNeue.className,
-              "text-xl sm:text-2xl tracking-[0.06em] leading-none transition-colors duration-500",
-              isLight ? "text-ink-black" : "text-ink-cream"
-            )}
-          >
+          <h2 className={`${bebasNeue.className} text-xl sm:text-2xl tracking-[0.06em] leading-none transition-colors duration-500 text-ink-black dark:text-ink-cream`}>
             {title}
           </h2>
-          <span
-            className={cn(
-              "font-mono text-[9px] tracking-[0.15em] uppercase transition-colors duration-500",
-              isLight ? "text-ink-black/30" : "text-ink-cream/25"
-            )}
-          >
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase transition-colors duration-500 text-ink-black/30 dark:text-ink-cream/25">
             {count}
           </span>
         </div>
@@ -70,12 +56,7 @@ function SectionRow({ title, count, tab, onNavigateTab, variant, children }: Sec
         {hasMore && (
           <button
             onClick={() => onNavigateTab?.(tab)}
-            className={cn(
-              "font-mono text-[9px] tracking-[0.12em] uppercase transition-colors duration-200 cursor-pointer",
-              isLight
-                ? "text-ink-black/40 hover:text-ink-red"
-                : "text-ink-cream/30 hover:text-ink-red"
-            )}
+            className="font-mono text-[9px] tracking-[0.12em] uppercase transition-colors duration-200 cursor-pointer text-ink-black/40 hover:text-ink-red dark:text-ink-cream/30 dark:hover:text-ink-red"
           >
             View all &rarr;
           </button>
@@ -91,7 +72,7 @@ function SectionRow({ title, count, tab, onNavigateTab, variant, children }: Sec
 // ─── Component ──────────────────────────────────────────────────────────────
 
 const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
-  ({ items, removingIds, onUnsave, onNavigateTab, variant = "dark", className }, ref) => {
+  ({ items, removingIds, onUnsave, onNavigateTab, className }, ref) => {
     // Split items by type
     const studios = items.filter((i): i is Extract<SavedAllItem, { entityType: "studio" }> => i.entityType === "studio");
     const artists = items.filter((i): i is Extract<SavedAllItem, { entityType: "artist" }> => i.entityType === "artist");
@@ -101,18 +82,13 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
       <div ref={ref} className={cn("space-y-0", className)}>
         {/* Studios row */}
         {studios.length > 0 && (
-          <SectionRow
-            title="Studios"
-            count={studios.length}
-            tab="studios"
-            onNavigateTab={onNavigateTab}
-            variant={variant}
-          >
+          <SectionRow title="Studios" count={studios.length} tab="studios" onNavigateTab={onNavigateTab}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
               {studios.slice(0, ROW_LIMIT).map(({ data: s }) => (
                 <SavedCard
                   key={`studio-${s.id}`}
                   id={s.id}
+                  slug={s.slug}
                   type="studio"
                   name={s.name}
                   image={s.image}
@@ -126,7 +102,6 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
                   savedAt={s.savedAt}
                   removing={removingIds?.has(`studio-${s.id}`)}
                   onUnsave={(id) => onUnsave?.(id, "studio")}
-                  variant={variant}
                 />
               ))}
             </div>
@@ -135,18 +110,13 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
 
         {/* Artists row */}
         {artists.length > 0 && (
-          <SectionRow
-            title="Artists"
-            count={artists.length}
-            tab="artists"
-            onNavigateTab={onNavigateTab}
-            variant={variant}
-          >
+          <SectionRow title="Artists" count={artists.length} tab="artists" onNavigateTab={onNavigateTab}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
               {artists.slice(0, ROW_LIMIT).map(({ data: a }) => (
                 <SavedCard
                   key={`artist-${a.id}`}
                   id={a.id}
+                  slug={a.slug}
                   type="artist"
                   name={a.name}
                   image={a.image}
@@ -160,7 +130,6 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
                   savedAt={a.savedAt}
                   removing={removingIds?.has(`artist-${a.id}`)}
                   onUnsave={(id) => onUnsave?.(id, "artist")}
-                  variant={variant}
                 />
               ))}
             </div>
@@ -169,13 +138,7 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
 
         {/* Designs row */}
         {designs.length > 0 && (
-          <SectionRow
-            title="Designs"
-            count={designs.length}
-            tab="portfolio"
-            onNavigateTab={onNavigateTab}
-            variant={variant}
-          >
+          <SectionRow title="Designs" count={designs.length} tab="portfolio" onNavigateTab={onNavigateTab}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {designs.slice(0, ROW_LIMIT).map(({ data: p }) => (
                 <SavedPieceCard
@@ -183,7 +146,6 @@ const SavedAllGrid = React.forwardRef<HTMLDivElement, SavedAllGridProps>(
                   piece={p}
                   removing={removingIds?.has(p.id)}
                   onUnsave={(id) => onUnsave?.(id, "design")}
-                  variant={variant}
                 />
               ))}
             </div>

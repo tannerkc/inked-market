@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
 import { AffiliationRow } from "@/components/dashboard/affiliation-row";
 import { EmptyState } from "@/components/dashboard/empty-state";
-import { useTheme } from "@/components/providers/theme-provider";
+import { ListGroup } from "@/components/dashboard/list-group";
 import { cn } from "@/lib/utils";
 import type { Affiliation } from "@/lib/types";
 
@@ -45,9 +45,6 @@ export function StudioManageArtistsPanel({
   onAcceptRequest,
   onDeclineOrRemove,
 }: StudioManageArtistsPanelProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   return (
     <SlideOverPanel
       open={open}
@@ -65,12 +62,8 @@ export function StudioManageArtistsPanel({
               className={cn(
                 "font-mono text-[9px] tracking-[0.15em] uppercase px-4 py-2 rounded-full border cursor-pointer transition-all",
                 inviteTab === tab
-                  ? isDark
-                    ? "bg-ink-cream/[0.06] border-ink-cream/[0.12] text-ink-cream"
-                    : "bg-ink-black/[0.06] border-ink-black/[0.12] text-ink-black"
-                  : isDark
-                    ? "border-ink-cream/[0.08] text-ink-cream/35"
-                    : "border-ink-black/[0.08] text-ink-black/35"
+                  ? "bg-ink-black/[0.06] border-ink-black/[0.12] text-ink-black dark:bg-ink-cream/[0.06] dark:border-ink-cream/[0.12] dark:text-ink-cream"
+                  : "border-ink-black/[0.08] text-ink-black/35 dark:border-ink-cream/[0.08] dark:text-ink-cream/35"
               )}
             >
               {tab === "invite" ? "Invite" : "Roster"}
@@ -88,7 +81,6 @@ export function StudioManageArtistsPanel({
               <div className="flex-1">
                 <Input
                   label="Email"
-                  variant={isDark ? "dark" : "light"}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="artist@email.com"
@@ -100,24 +92,26 @@ export function StudioManageArtistsPanel({
                 </Button>
               </div>
             </div>
+            <p className="text-[10px] -mt-3 text-ink-black/60 dark:text-ink-cream/60">
+              Opens your email app with an invite ready to send
+            </p>
 
-            <SectionLabel label="or search artists" variant={isDark ? "dark-muted" : "parchment"} stretch />
+            <SectionLabel label="or search artists" variant="muted" stretch />
 
             <Input
               label="Search"
-              variant={isDark ? "dark" : "light"}
               value={artistSearch}
               onChange={(e) => setArtistSearch(e.target.value)}
               placeholder="Search by name or style..."
             />
 
-            <div>
-              {filteredArtists.length === 0 ? (
-                <p className={`text-[12px] text-center py-4 ${isDark ? "text-ink-cream/25" : "text-ink-black/25"}`}>
-                  No artists found
-                </p>
-              ) : (
-                filteredArtists.map((artist) => (
+            {filteredArtists.length === 0 ? (
+              <p className="text-[12px] text-center py-4 text-ink-black/60 dark:text-ink-cream/60">
+                No artists found
+              </p>
+            ) : (
+              <ListGroup>
+                {filteredArtists.map((artist) => (
                   <AffiliationRow
                     key={artist.id}
                     name={artist.name}
@@ -126,11 +120,11 @@ export function StudioManageArtistsPanel({
                     subtitle={artist.styles.join(", ")}
                     status="active"
                     onAction={() => onInviteArtist(artist)}
-                    actionLabel={roster.find((r) => r.id === artist.id) ? "Invited" : "Invite"}
+                    actionLabel={roster.some((r) => r.artistId === artist.id) ? "Invited" : "Invite"}
                   />
-                ))
-              )}
-            </div>
+                ))}
+              </ListGroup>
+            )}
           </>
         ) : (
           <div>
@@ -140,19 +134,26 @@ export function StudioManageArtistsPanel({
                 description="Invite artists or accept requests to build your team"
               />
             ) : (
-              roster.map((affiliation) => (
-                <AffiliationRow
+              <ListGroup>
+                {roster.map((affiliation) => (
+                  <AffiliationRow
                   key={affiliation.id}
                   name={affiliation.name}
                   avatarUrl={affiliation.avatarUrl}
                   avatarShape="circle"
                   status={affiliation.status}
+                  subtitle={affiliation.styles?.slice(0, 3).join(" · ")}
                   onAccept={affiliation.status === "pending-request" ? () => onAcceptRequest(affiliation.id) : undefined}
                   onDecline={affiliation.status === "pending-request" ? () => onDeclineOrRemove(affiliation.id) : undefined}
-                  onAction={affiliation.status === "active" ? () => onDeclineOrRemove(affiliation.id) : undefined}
-                  actionLabel={affiliation.status === "active" ? "Remove" : undefined}
+                  onAction={
+                    affiliation.status === "active" && !affiliation.linked
+                      ? () => onDeclineOrRemove(affiliation.id)
+                      : undefined
+                  }
+                  actionLabel={affiliation.status === "active" && !affiliation.linked ? "Remove" : undefined}
                 />
-              ))
+              ))}
+              </ListGroup>
             )}
           </div>
         )}

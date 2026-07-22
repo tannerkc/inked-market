@@ -1,14 +1,12 @@
 "use client";
 
-import { useBuilder } from "@/components/builder/builder-provider";
-import { MOCK_STUDIO_DATA } from "@/lib/data/mock-studio";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import { PoliciesTabsLayout } from "@/components/policies/policies-tabs-layout";
 import { PoliciesSidebarLayout } from "@/components/policies/policies-sidebar-layout";
 
 export function PoliciesPagePreview() {
-  const { config, setPreviewPage, studio, useMockData } = useBuilder();
-  const data = useMockData ? MOCK_STUDIO_DATA : studio;
-  const studioName = data?.name || "Your Studio";
+  const { config, data, onNavigatePage } = useStudioSite();
+  const studioName = data.name || "Your Studio";
   const policies = (config.policies ?? []).filter((p) => p.enabled);
   const layout = config.policiesPageLayout ?? "tabs";
 
@@ -26,7 +24,7 @@ export function PoliciesPagePreview() {
       >
         <button
           type="button"
-          onClick={() => setPreviewPage("studio")}
+          onClick={() => onNavigatePage("studio")}
           style={{
             color: "var(--accent)",
             fontSize: "12px",

@@ -17,12 +17,10 @@ const CONTACT_TOPICS = [
 ];
 
 interface ContactFormProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
-export function ContactForm({ variant = "dark", className }: ContactFormProps) {
-  const isDark = variant === "dark";
+export function ContactForm({ className }: ContactFormProps) {
   const [state, formAction, pending] = useActionState(submitContactForm, null);
 
   if (state?.success) {
@@ -30,18 +28,12 @@ export function ContactForm({ variant = "dark", className }: ContactFormProps) {
       <div
         className={cn(
           "rounded-2xl border p-8 sm:p-10 text-center",
-          isDark
-            ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]"
-            : "border-ink-black/[0.06] bg-ink-black/[0.02]",
+          "border-ink-black/[0.06] bg-ink-black/[0.02]",
+          "dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]",
           className
         )}
       >
-        <div
-          className={cn(
-            "mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full",
-            isDark ? "bg-ink-sage/10" : "bg-ink-sage/15"
-          )}
-        >
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-ink-sage/15 dark:bg-ink-sage/10">
           <svg
             className="h-6 w-6 text-ink-sage"
             fill="none"
@@ -52,20 +44,10 @@ export function ContactForm({ variant = "dark", className }: ContactFormProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3
-          className={cn(
-            "text-lg font-semibold mb-2",
-            isDark ? "text-ink-cream" : "text-ink-black"
-          )}
-        >
+        <h3 className="text-lg font-semibold mb-2 text-ink-black dark:text-ink-cream">
           Message Sent
         </h3>
-        <p
-          className={cn(
-            "text-sm mb-6",
-            isDark ? "text-ink-cream/40" : "text-ink-black/40"
-          )}
-        >
+        <p className="text-sm mb-6 text-ink-black/40 dark:text-ink-cream/40">
           We&apos;ll get back to you within 24 hours.
         </p>
         <Button
@@ -84,26 +66,18 @@ export function ContactForm({ variant = "dark", className }: ContactFormProps) {
       action={formAction}
       className={cn(
         "rounded-2xl border p-6 sm:p-8 space-y-4",
-        isDark
-          ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]"
-          : "border-ink-black/[0.06] bg-ink-black/[0.02]",
+        "border-ink-black/[0.06] bg-ink-black/[0.02]",
+        "dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]",
         className
       )}
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          name="name"
-          label="Your Name"
-          placeholder="Full name"
-          variant={variant}
-          required
-        />
+        <Input name="name" label="Your Name" placeholder="Full name" required />
         <Input
           name="email"
           label="Email Address"
           placeholder="you@example.com"
           type="email"
-          variant={variant}
           required
         />
       </div>
@@ -113,7 +87,6 @@ export function ContactForm({ variant = "dark", className }: ContactFormProps) {
         label="What can we help with?"
         placeholder="Select a topic…"
         options={CONTACT_TOPICS}
-        variant={variant}
         required
         defaultValue=""
       />
@@ -122,7 +95,6 @@ export function ContactForm({ variant = "dark", className }: ContactFormProps) {
         name="message"
         label="Message"
         placeholder="Tell us more…"
-        variant={variant}
         required
       />
 

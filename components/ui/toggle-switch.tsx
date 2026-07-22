@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 
 export interface ToggleSwitchProps {
   checked: boolean;
@@ -13,17 +12,12 @@ export interface ToggleSwitchProps {
 
 const ToggleSwitch = React.forwardRef<HTMLButtonElement, ToggleSwitchProps>(
   ({ checked, onChange, size = "md", className }, ref) => {
-    const { mode } = useTheme();
-    const isDark = mode === "dark";
-
     const trackClass = cn(
       "relative rounded-full transition-all duration-200",
       size === "md" ? "w-[36px] h-[20px]" : "w-[32px] h-[18px]",
       checked
         ? "bg-ink-rust"
-        : isDark
-          ? "bg-ink-cream/[0.08]"
-          : "bg-ink-black/[0.08]"
+        : "bg-ink-black/[0.08] dark:bg-ink-cream/[0.08]"
     );
 
     const thumbClass = cn(
@@ -36,9 +30,7 @@ const ToggleSwitch = React.forwardRef<HTMLButtonElement, ToggleSwitchProps>(
         : "left-[2px]",
       checked
         ? "bg-ink-cream"
-        : isDark
-          ? "bg-ink-cream/40"
-          : "bg-ink-black/40"
+        : "bg-ink-black/40 dark:bg-ink-cream/40"
     );
 
     return (

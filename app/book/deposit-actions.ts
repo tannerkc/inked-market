@@ -4,7 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CancelAppointmentSchema } from "@/lib/validation/schemas";
 import { refundDecision } from "@/lib/booking/lifecycle";
-import { artistUserId, notifyUser } from "@/lib/booking/notify";
+import {
+  bookingTargetUserId,
+  notificationContextForTarget,
+  notifyUser,
+} from "@/lib/booking/notify";
 import type { DepositStatus } from "@/lib/types/booking";
 
 interface ActionResult {
@@ -211,13 +215,15 @@ export async function cancelAppointment(
   const admin = createAdminClient();
   const targetUserId =
     cancelledBy === "customer"
-      ? appt.artist_id
-        ? await artistUserId(admin, appt.artist_id)
-        : null
+      ? await bookingTargetUserId(admin, { artistId: appt.artist_id, studioId: appt.studio_id })
       : appt.customer_id;
   await notifyUser(admin, targetUserId, "appointment_cancelled", {
     actorName: cancelledBy === "customer" ? "Your client" : "The artist",
     whenIso: appt.start_at,
+    recipientContext:
+      cancelledBy === "customer"
+        ? notificationContextForTarget({ artistId: appt.artist_id, studioId: appt.studio_id })
+        : "customer",
   });
   return { success: true, refund };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SlideOverPanel } from "@/components/ui/slide-over-panel";
 import { Button } from "@/components/ui/button";
 import { FieldLabel } from "./form-rows";
@@ -45,6 +46,14 @@ export function CustomerRequestPanel({
   if (!request) return null;
   const status = effectiveRequestStatus(request, new Date());
   const quote = fmtQuote(request.quoteMinCents, request.quoteMaxCents);
+  // Existing thread when the artist has responded; otherwise start one fresh.
+  const messagesHref = request.conversationId
+    ? `/messages?c=${request.conversationId}`
+    : request.artistId
+      ? `/messages?to=artist:${request.artistId}`
+      : request.studioId
+        ? `/messages?to=studio:${request.studioId}`
+        : null;
 
   const close = () => {
     setError(null);
@@ -88,7 +97,9 @@ export function CustomerRequestPanel({
       <div className="flex flex-col gap-4 p-4">
         <div>
           <p className="text-[13px] font-medium text-ink-black dark:text-ink-cream">
-            {request.artistName ?? "Artist"}
+            {request.artistName ??
+              request.preferredArtistName ??
+              (request.studioId ? "Any Artist" : "Artist")}
           </p>
           <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-black/30 dark:text-ink-cream/30">
             {status}
@@ -184,6 +195,12 @@ export function CustomerRequestPanel({
         ) : null}
 
         {error ? <p className="text-[12px] text-red-600 dark:text-red-400">{error}</p> : null}
+
+        {messagesHref ? (
+          <Button variant="ink-outline" className="min-h-[44px]" as={Link} href={messagesHref}>
+            Message {request.artistName ?? request.studioName ?? "the artist"}
+          </Button>
+        ) : null}
 
         {status === "pending" ? (
           <Button

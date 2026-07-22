@@ -4,15 +4,9 @@ import { useBuilder } from "@/components/builder/builder-provider";
 import { tagOptions } from "@/lib/data/builder-options";
 import type { TagStyle } from "@/lib/types/builder";
 import { cn } from "@/lib/utils";
-import { PickerCheckmark } from "./picker-checkmark";
+import { ThumbnailPicker } from "./thumbnail-picker";
 
-function TagThumbnail({
-  style,
-  accent,
-}: {
-  style: TagStyle;
-  accent: string;
-}) {
+function TagThumbnail({ style, accent }: { style: TagStyle; accent: string }) {
   const tagBase = "px-2 py-0.5 text-[9px] font-medium";
 
   const renderTag = (label: string) => {
@@ -52,50 +46,14 @@ export function TagStylePicker() {
   const accent = config.accentColor ?? resolvedVars["--accent"];
 
   return (
-    <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        Tag Style
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {tagOptions.map((opt) => {
-          const selected = config.tagStyle === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ tagStyle: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              <div className="aspect-[4/3] w-full p-1.5">
-                <TagThumbnail style={opt.value} accent={accent} />
-              </div>
-
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <ThumbnailPicker<TagStyle>
+      title="Tag Style"
+      columns={3}
+      options={tagOptions}
+      selectedValue={config.tagStyle}
+      onSelect={(value) => applyChange({ tagStyle: value })}
+      renderThumbnail={(value) => <TagThumbnail style={value} accent={accent} />}
+    />
   );
 }
 

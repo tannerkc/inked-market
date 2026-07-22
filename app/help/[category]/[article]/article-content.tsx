@@ -1,6 +1,3 @@
-"use client";
-
-import { useTheme } from "@/components/providers/theme-provider";
 import {
   PageHero,
   ContentSidebar,
@@ -17,9 +14,6 @@ interface ArticleContentProps {
 }
 
 export function ArticleContent({ article, categorySlug }: ArticleContentProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
   const accentColor =
     article.accentColor === "red"
       ? ("red" as const)
@@ -34,21 +28,19 @@ export function ArticleContent({ article, categorySlug }: ArticleContentProps) {
   }));
 
   return (
-    <div className={isDark ? "min-h-screen bg-ink-black" : "min-h-screen bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark"}>
+    <div className="min-h-screen bg-gradient-to-br from-ink-parchment-light via-ink-cream to-ink-parchment-dark dark:bg-ink-black dark:bg-none">
       <ReadingProgress accentColor={accentColor} />
 
       <PageHero
         headline={article.headline}
         subtitle={article.subtitle}
         accentColor={accentColor}
-        variant={mode}
       />
 
       <div className="flex max-w-7xl mx-auto px-6 md:px-12 gap-12 pb-32">
         <ContentSidebar
           sections={sidebarSections}
           accentColor={accentColor}
-          variant={mode}
           hubHref={`/help/${categorySlug}`}
           hubLabel="Back to Category"
         />
@@ -62,17 +54,16 @@ export function ArticleContent({ article, categorySlug }: ArticleContentProps) {
               title={section.title}
               personalityIntro={section.personalityIntro}
               accentColor={accentColor}
-              variant={mode}
             >
               {section.content}
             </ContentSection>
           ))}
 
-          <ContactBanner variant={mode} className="mt-16" />
+          <ContactBanner className="mt-16" />
         </main>
       </div>
 
-      <BackToTop variant={mode} />
+      <BackToTop />
     </div>
   );
 }

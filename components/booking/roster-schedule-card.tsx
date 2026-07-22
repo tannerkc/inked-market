@@ -1,5 +1,7 @@
 "use client";
 
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { GroupLabel } from "@/components/dashboard/group-label";
 import { useRosterSchedule } from "./use-roster-schedule";
 
 const DOT_COLORS = [
@@ -31,22 +33,16 @@ export function RosterScheduleCard() {
 
   return (
     <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
-      <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">
-        Studio Schedule
-      </p>
+      <GroupLabel className="mb-3">Studio Schedule</GroupLabel>
       {loading ? (
         <p className="py-4 text-center text-[12px] text-ink-black/40 dark:text-ink-cream/40">
           Loading...
         </p>
       ) : entries.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">
-            Nothing on the books
-          </p>
-          <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
-            Roster bookings and walk-ins show up here
-          </p>
-        </div>
+        <EmptyState
+          message="Nothing on the books"
+          description="Roster bookings and walk-ins show up here"
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {Array.from(byDay.entries()).map(([day, dayEntries]) => (

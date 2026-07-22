@@ -5,7 +5,6 @@ import type { LineupEvent } from "@/lib/types/lineup";
 export interface BlastCardProps {
   event: LineupEvent;
   past?: boolean;
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -17,8 +16,7 @@ const eventTypeLabels: Record<LineupEvent["type"], string> = {
 };
 
 const BlastCard = React.forwardRef<HTMLDivElement, BlastCardProps>(
-  ({ event, past = false, variant = "dark", className }, ref) => {
-    const isLight = variant === "light";
+  ({ event, past = false, className }, ref) => {
     const { type, title, details, date, ctaLabel } = event;
 
     return (
@@ -27,9 +25,7 @@ const BlastCard = React.forwardRef<HTMLDivElement, BlastCardProps>(
         className={cn(
           "rounded-2xl border p-6 transition-colors duration-200",
           past
-            ? isLight
-              ? "border-ink-black/[0.06] opacity-50"
-              : "border-ink-cream/[0.04] opacity-50"
+            ? "border-ink-black/[0.06] opacity-50 dark:border-ink-cream/[0.04]"
             : "border-ink-red/15 bg-gradient-to-br from-ink-red/[0.04] to-transparent hover:border-ink-red/25 hover:from-ink-red/[0.07]",
           className
         )}
@@ -43,42 +39,20 @@ const BlastCard = React.forwardRef<HTMLDivElement, BlastCardProps>(
               </span>
             )}
             {past && (
-              <span
-                className={cn(
-                  "px-1.5 py-px rounded text-[8px]",
-                  isLight
-                    ? "bg-ink-black/10 text-ink-black/40"
-                    : "bg-ink-cream/10 text-ink-cream/40"
-                )}
-              >
+              <span className="px-1.5 py-px rounded text-[8px] bg-ink-black/10 text-ink-black/40 dark:bg-ink-cream/10 dark:text-ink-cream/40">
                 Past
               </span>
             )}
             {eventTypeLabels[type]}
           </span>
-          <span
-            className={cn(
-              "font-mono text-[11px] tracking-wider",
-              isLight ? "text-ink-black/30" : "text-ink-cream/30"
-            )}
-          >
+          <span className="font-mono text-[11px] tracking-wider text-ink-black/30 dark:text-ink-cream/30">
             {date}
           </span>
         </div>
-        <h4
-          className={cn(
-            "text-lg font-bold mb-1.5 transition-colors duration-500",
-            isLight ? "text-ink-black" : "text-ink-cream"
-          )}
-        >
+        <h4 className="text-lg font-bold mb-1.5 transition-colors duration-500 text-ink-black dark:text-ink-cream">
           {title}
         </h4>
-        <p
-          className={cn(
-            "text-sm mb-4 transition-colors duration-500",
-            isLight ? "text-ink-black/50" : "text-ink-cream/45"
-          )}
-        >
+        <p className="text-sm mb-4 transition-colors duration-500 text-ink-black/50 dark:text-ink-cream/45">
           {details}
         </p>
         {!past && (

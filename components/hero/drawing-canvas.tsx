@@ -36,10 +36,12 @@ function drawStrokeToCtx(
   ctx.lineJoin = "round";
 
   for (let i = 1; i < points.length; i++) {
-    ctx.lineWidth = points[i].width;
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
+    ctx.lineWidth = curr.width;
     ctx.beginPath();
-    ctx.moveTo(points[i - 1].x, points[i - 1].y);
-    ctx.lineTo(points[i].x, points[i].y);
+    ctx.moveTo(prev.x, prev.y);
+    ctx.lineTo(curr.x, curr.y);
     ctx.stroke();
   }
 }
@@ -265,7 +267,7 @@ export function DrawingCanvas() {
     if (points.length >= 2) {
       const ctx = activeCanvas.getContext("2d");
       if (ctx) {
-        const prev = points[points.length - 2];
+        const prev = points[points.length - 2]!;
         ctx.strokeStyle = colorRef.current;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";

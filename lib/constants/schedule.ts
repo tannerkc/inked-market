@@ -45,10 +45,11 @@ export const STUDIO_HOUR_OPTIONS: string[] = (() => {
 })();
 
 /** Shared class for time-select dropdowns across schedule components */
-export const getScheduleSelectClass = (isDark: boolean) =>
-  cn(
-    "appearance-none bg-transparent font-mono text-[10px] outline-none focus:border-ink-rust/40 rounded-lg px-2 py-1.5 flex-1 min-w-0",
-    isDark
-      ? "text-ink-cream/60 bg-ink-cream/[0.04] border border-ink-cream/[0.08]"
-      : "text-ink-black/60 bg-ink-black/[0.04] border border-ink-black/[0.08]"
-  );
+export const SCHEDULE_SELECT_CLASS = cn(
+  "appearance-none bg-transparent font-mono text-[10px] outline-none focus:border-ink-rust/40 rounded-lg px-2 py-1.5 flex-1 min-w-0",
+  "text-ink-black/60 bg-ink-black/[0.04] border border-ink-black/[0.08]",
+  "dark:text-ink-cream/60 dark:bg-ink-cream/[0.04] dark:border-ink-cream/[0.08]"
+);
+
+/** @deprecated Use `SCHEDULE_SELECT_CLASS` directly. */
+export const getScheduleSelectClass = (_isDark?: boolean) => SCHEDULE_SELECT_CLASS;

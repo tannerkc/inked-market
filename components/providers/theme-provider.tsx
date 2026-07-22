@@ -7,6 +7,8 @@ type ThemeMode = "light" | "dark";
 interface ThemeContextValue {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
+  isDark: boolean;
+  isLight: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -30,8 +32,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.theme = mode;
   }, [mode]);
 
+  const isDark = mode === "dark";
+  const isLight = mode === "light";
+
   return (
-    <ThemeContext.Provider value={{ mode, setMode }}>
+    <ThemeContext.Provider value={{ mode, setMode, isDark, isLight }}>
       {children}
     </ThemeContext.Provider>
   );

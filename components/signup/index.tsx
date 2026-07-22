@@ -7,3 +7,7 @@ export { IgImportCard } from "./ig-import-card";
 export { PhotoUploadGrid } from "./photo-upload-grid";
 export { BillingToggle } from "./billing-toggle";
 export { SignupTierCard } from "./signup-tier-card";
+export { SignupPageLayout } from "./signup-page-layout";
+export { ConfirmEmailNotice } from "./confirm-email-notice";
+export { useSignupCompletion } from "./use-signup-completion";
+export { useAccountStep } from "./use-account-step";

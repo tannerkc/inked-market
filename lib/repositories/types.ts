@@ -1,3 +1,4 @@
+import type { CoverCrop, CoverFocal } from "@/lib/types";
 import type { StudioIntegrations } from "@/lib/types/integrations";
 import type { StudioThemeConfig } from "@/lib/types/builder";
 
@@ -48,9 +49,18 @@ export interface StudioData {
   /** About / story text shown in the About section. */
   bio?: string;
   profileImage?: string;
+  /** Displayed cover — a derived (cropped) asset once framing has been applied. */
   coverImage?: string;
+  /** Pristine cover upload, kept for non-destructive re-editing. */
+  coverImageOriginal?: string;
+  /** Crop rect normalized against the original (restores the framing editor). */
+  coverCrop?: CoverCrop;
+  /** Focal point within the displayed cover (drives background-position). */
+  coverFocal?: CoverFocal;
   /** Gallery photo URLs (studios.images), display order = array order. */
   images?: string[];
+  /** Dedicated cover photos for multi-photo heroes (studios.cover_images). */
+  coverImages?: string[];
 
   // Business
   specialties: string[];
@@ -70,8 +80,23 @@ export interface StudioData {
   // Source tracking (populated by Supabase, optional for backwards compat)
   source?: "google" | "organic";
   claimedBy?: string;
+  /** Listed on the marketplace (studios.is_visible). False = draft — the
+   *  public page 404s and the studio is excluded from discover/search. */
+  isVisible?: boolean;
+  /** Public URL path (/studios/[slug]). Writable — owners can customize it ONCE
+   *  (LinkedIn-style; DB trigger enforces); generated as name-city-state on
+   *  first save (see lib/utils/studio-slug). */
   slug?: string;
+  /** ISO timestamp of the one-shot slug customization (slug_customized_at).
+   *  Read-only — the DB trigger stamps it; set = URL is locked. */
+  slugCustomizedAt?: string;
+  /** Google place id (studios.google_place_id). Read-only — powers review/maps deep links, never written back. */
+  googlePlaceId?: string;
 
   // Builder — the whole studio website template config (persisted as theme_config jsonb).
   themeConfig?: StudioThemeConfig;
+  /** Live site theme (published_theme_config) — Publish copies the draft here. */
+  publishedThemeConfig?: StudioThemeConfig;
+  /** ISO timestamp of the last publish (published_at). */
+  publishedAt?: string;
 }

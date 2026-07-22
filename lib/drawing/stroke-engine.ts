@@ -62,7 +62,7 @@ export function createStrokeEngine(
     let width = cfg.baseWidth;
 
     if (currentPoints.length > 0) {
-      const prev = currentPoints[currentPoints.length - 1];
+      const prev = currentPoints[currentPoints.length - 1]!;
       const dx = x - prev.x;
       const dy = y - prev.y;
       const distance = Math.sqrt(dx * dx + dy * dy);

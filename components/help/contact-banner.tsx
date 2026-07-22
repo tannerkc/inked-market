@@ -4,34 +4,24 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface ContactBannerProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
-function ContactBanner({ variant = "dark", className }: ContactBannerProps) {
-  const isDark = variant === "dark";
-
+function ContactBanner({ className }: ContactBannerProps) {
   return (
     <div
       className={cn(
         "flex flex-col sm:flex-row items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl border",
-        isDark
-          ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]"
-          : "border-ink-black/[0.06] bg-ink-black/[0.02]",
+        "border-ink-black/[0.06] bg-ink-black/[0.02]",
+        "dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]",
         className
       )}
     >
       <div className="text-center sm:text-left">
-        <h4 className={cn(
-          "text-sm font-semibold mb-1",
-          isDark ? "text-ink-cream" : "text-ink-black"
-        )}>
+        <h4 className="text-sm font-semibold mb-1 text-ink-black dark:text-ink-cream">
           Can&apos;t find what you&apos;re looking for?
         </h4>
-        <p className={cn(
-          "text-xs",
-          isDark ? "text-ink-cream/30" : "text-ink-black/35"
-        )}>
+        <p className="text-xs text-ink-black/35 dark:text-ink-cream/30">
           Our team is here to help &mdash; reach out and we&apos;ll get back to
           you within 24 hours.
         </p>

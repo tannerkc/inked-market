@@ -8,6 +8,10 @@ import {
   markNoShow,
   waiveDeposit,
 } from "@/app/book/deposit-actions";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { GroupLabel } from "@/components/dashboard/group-label";
+import { InitialsAvatar } from "@/components/dashboard/initials-avatar";
+import { ListGroup } from "@/components/dashboard/list-group";
 import { useArtistUpcoming } from "./use-artist-upcoming";
 import type { AppointmentRecord } from "@/lib/types/booking";
 
@@ -31,7 +35,7 @@ function LifecycleActions({
     "rounded-full border border-ink-black/[0.1] px-2.5 py-1 font-mono text-[10px] text-ink-black/40 disabled:opacity-40 dark:border-ink-cream/[0.1] dark:text-ink-cream/40";
 
   return (
-    <div className="mt-1 flex gap-2">
+    <div className="mt-1.5 flex gap-2 pl-10">
       <button
         type="button"
         disabled={busy}
@@ -77,7 +81,7 @@ function DepositActions({
   };
 
   return (
-    <div className="mt-1 flex gap-2">
+    <div className="mt-1.5 flex gap-2 pl-10">
       <button
         type="button"
         disabled={busy}
@@ -104,31 +108,26 @@ export function UpcomingAppointmentsCard() {
 
   return (
     <div className="rounded-[20px] p-5 border bg-ink-black/[0.02] border-ink-black/[0.06] dark:bg-ink-cream/[0.02] dark:border-ink-cream/[0.06]">
-      <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-3 text-ink-black/35 dark:text-ink-cream/35">
-        Upcoming
-      </p>
+      <GroupLabel className="mb-3">Upcoming</GroupLabel>
       {loading ? (
         <p className="py-4 text-center text-[12px] text-ink-black/40 dark:text-ink-cream/40">
           Loading...
         </p>
       ) : appointments.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">
-            No upcoming bookings
-          </p>
-          <p className="text-[11px] mt-1 text-ink-black/20 dark:text-ink-cream/20">
-            Bookings appear once clients find you
-          </p>
-        </div>
+        <EmptyState
+          message="No upcoming bookings"
+          description="Bookings appear once clients find you"
+        />
       ) : (
-        <div>
+        <ListGroup>
           {appointments.map((a) => (
-            <div
-              key={a.id}
-              className="border-b border-ink-black/[0.04] py-2 last:border-0 dark:border-ink-cream/[0.04]"
-            >
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
+            <div key={a.id} className="px-3 py-2.5">
+              <div className="flex items-center gap-3">
+                <InitialsAvatar
+                  name={a.customerName ?? "Customer"}
+                  tone={a.status === "pending_deposit" ? "accent" : "muted"}
+                />
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-[12px] font-medium text-ink-black dark:text-ink-cream">
                     {a.customerName ?? "Customer"}
                   </p>
@@ -156,7 +155,7 @@ export function UpcomingAppointmentsCard() {
               ) : null}
             </div>
           ))}
-        </div>
+        </ListGroup>
       )}
     </div>
   );

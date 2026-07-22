@@ -1,10 +1,6 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "The Line Up | Inked Market",
-  description:
-    "Your weekly tattoo briefing. Spotlights, news, events, and the artists we can't stop watching.",
-};
+export const metadata = createMetadata("The Line Up", "Your weekly tattoo briefing. Spotlights, news, events, and the artists we can't stop watching.");
 
 export default function LineupLayout({
   children,

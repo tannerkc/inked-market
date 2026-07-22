@@ -9,21 +9,42 @@ import {
   ProgressBar,
   BillingToggle,
   SignupTierCard,
+  ConfirmEmailNotice,
+  useSignupCompletion,
 } from "@/components/signup";
 import { Button } from "@/components/ui/button";
 import { studioTiers } from "@/lib/data/signup-tiers";
 import { useAuth } from "@/components/providers/auth-provider";
 
 export default function StudioPlanPage() {
-  const { updateSignupProgress, completeSignup, signupProgress } = useAuth();
+  const { signupProgress } = useAuth();
+  const { complete, error, confirmEmail, pending } = useSignupCompletion("/dashboard");
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedTier, setSelectedTier] = useState(signupProgress.plan || "Liner");
 
   const handleActivate = () => {
-    updateSignupProgress({ plan: selectedTier });
-    completeSignup();
-    window.location.href = "/dashboard";
+    void complete({ plan: selectedTier });
   };
+
+  if (confirmEmail) {
+    return (
+      <div className="text-center">
+        <ProgressBar currentStep={4} totalSteps={4} />
+        <Eyebrow text="One Last Thing" color="rust" />
+        <Headline
+          variant="mixed"
+          size="sm"
+          words={[
+            { text: "Confirm", font: "pirata" },
+            { text: "Your", font: "rye" },
+            { text: "Email", font: "cook", color: "text-ink-rust" },
+          ]}
+        />
+        <Subtitle text="Your studio account is created — verify your email to unlock the dashboard." className="mb-6" />
+        <ConfirmEmailNotice email={confirmEmail} />
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
@@ -62,6 +83,10 @@ export default function StudioPlanPage() {
         ))}
       </div>
 
+      {error ? (
+        <p className="text-ink-red text-[11px] font-mono tracking-[0.1em] text-left mb-3">{error}</p>
+      ) : null}
+
       <Button
         type="button"
         variant="ink"
@@ -69,8 +94,9 @@ export default function StudioPlanPage() {
         statusDot
         className="w-full"
         onClick={handleActivate}
+        disabled={pending}
       >
-        Activate Studio
+        {pending ? "Creating Account…" : "Activate Studio"}
       </Button>
 
       <Link

@@ -6,6 +6,7 @@ import { fetchBookingSettings, resolveBookingEntity } from "@/lib/data/supabase-
 import { setBookingMode } from "@/app/book/actions";
 import { Button } from "@/components/ui/button";
 import { FieldLabel } from "./form-rows";
+import type { BookingMode } from "@/lib/types/booking";
 
 interface BookingModePromptProps {
   /** Open the Booking Settings panel after choosing inbuilt. */
@@ -16,6 +17,7 @@ interface BookingModePromptProps {
 export function BookingModePrompt({ onOpenSettings }: BookingModePromptProps) {
   const supabaseRef = useRef(createClient());
   const [visible, setVisible] = useState(false);
+  const [hasStudio, setHasStudio] = useState(false);
   const [externalOpen, setExternalOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [suggestedUrl, setSuggestedUrl] = useState<string | null>(null);
@@ -32,6 +34,21 @@ export function BookingModePrompt({ onOpenSettings }: BookingModePromptProps) {
       if (cancelled) return;
       if (!settings || settings.bookingMode === null) {
         setVisible(true);
+        // Affiliated artists default to "through studio page" — the prompt
+        // offers to keep that instead of an off switch that would hide them.
+        if (entity.artistId) {
+          const [{ data: artistRow }, { data: aff }] = await Promise.all([
+            supabase.from("artists").select("studio_id").eq("id", entity.artistId).maybeSingle(),
+            supabase
+              .from("affiliations")
+              .select("id")
+              .eq("artist_id", entity.artistId)
+              .eq("status", "active")
+              .limit(1),
+          ]);
+          if (cancelled) return;
+          setHasStudio(Boolean(artistRow?.studio_id || (aff && aff.length > 0)));
+        }
         // Studios with a connected scheduling tool get their link prefilled.
         if (entity.studioId) {
           const { data: studio } = await supabase
@@ -56,7 +73,7 @@ export function BookingModePrompt({ onOpenSettings }: BookingModePromptProps) {
 
   if (!visible) return null;
 
-  const choose = async (mode: "inbuilt" | "external" | "off", externalUrl?: string) => {
+  const choose = async (mode: BookingMode, externalUrl?: string) => {
     setBusy(true);
     setError(null);
     const result = await setBookingMode({ mode, externalUrl });
@@ -73,8 +90,9 @@ export function BookingModePrompt({ onOpenSettings }: BookingModePromptProps) {
     <div className="mb-4 rounded-[14px] border border-dashed border-ink-rust/40 bg-ink-rust/[0.04] p-4">
       <FieldLabel>How do you want to take bookings?</FieldLabel>
       <p className="mt-1 text-[11px] text-ink-black/40 dark:text-ink-cream/40">
-        This controls the Book button on your public page. You can change it any time in Booking
-        Settings.
+        {hasStudio
+          ? "Right now clients can pick you on your studio's booking page and the front desk handles the rest. You can change this any time in Booking Settings."
+          : "This controls the Book button on your public page. You can change it any time in Booking Settings."}
       </p>
 
       {externalOpen ? (
@@ -122,9 +140,25 @@ export function BookingModePrompt({ onOpenSettings }: BookingModePromptProps) {
           >
             I use another tool
           </Button>
-          <Button variant="ink-ghost" size="sm" disabled={busy} onClick={() => void choose("off")}>
-            Not now
-          </Button>
+          {hasStudio ? (
+            <Button
+              variant="ink-ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() => void choose("studio")}
+            >
+              Keep studio booking
+            </Button>
+          ) : (
+            <Button
+              variant="ink-ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() => void choose("off")}
+            >
+              Not now
+            </Button>
+          )}
         </div>
       )}
       {error ? <p className="mt-2 text-[12px] text-red-600 dark:text-red-400">{error}</p> : null}

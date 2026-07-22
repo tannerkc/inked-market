@@ -234,10 +234,12 @@ export interface DbBookingRequest {
   session_duration_min: number | null;
   proposed_times: ProposedTime[] | null;
   conversation_id: string | null;
+  preferred_artist_id: string | null;
   created_at: string;
   updated_at: string;
   artists?: EmbeddedName | null;
   studios?: EmbeddedName | null;
+  preferred_artist?: EmbeddedName | null;
 }
 
 export interface DbAppointment {
@@ -281,6 +283,8 @@ export function mapDbBookingRequest(row: DbBookingRequest): BookingRequestRecord
     studioId: row.studio_id ?? undefined,
     artistName: row.artists?.name,
     studioName: row.studios?.name,
+    preferredArtistId: row.preferred_artist_id ?? undefined,
+    preferredArtistName: row.preferred_artist?.name,
     description: row.description,
     placement: row.placement,
     sizeCategory: row.size_category,
@@ -297,6 +301,7 @@ export function mapDbBookingRequest(row: DbBookingRequest): BookingRequestRecord
     quoteMinCents: row.quote_min_cents,
     quoteMaxCents: row.quote_max_cents,
     depositCents: row.deposit_cents,
+    conversationId: row.conversation_id,
     schedulingMode: row.scheduling_mode,
     sessionDurationMin: row.session_duration_min,
     proposedTimes: row.proposed_times ?? [],
@@ -402,7 +407,8 @@ export function requestToViewModel(r: BookingRequestRecord): BookingRequest {
     updatedAt: new Date(r.createdAt),
     customerId: r.customerId,
     artistId: r.artistId ?? "",
-    artistName: r.artistName ?? "Artist",
+    // Studio-level requests: show who the customer asked for, else "Any Artist".
+    artistName: r.artistName ?? r.preferredArtistName ?? (r.studioId ? "Any Artist" : "Artist"),
     studioId: r.studioId,
     studioName: r.studioName,
     flexibleDates: r.flexibleDates,

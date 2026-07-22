@@ -1,6 +1,7 @@
 "use client";
 
 import { EditProfilePanel } from "@/components/dashboard/edit-profile-panel";
+import { ArtistUrlField } from "@/components/dashboard/artist/artist-url-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { tattooStyleOptions } from "@/lib/data/signup-styles";
@@ -51,6 +52,7 @@ export function ArtistEditProfilePanel({ open, onClose, profileForm, setProfileF
         <Input label="Last Name" value={profileForm.lastName} onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })} placeholder="Last name" />
       </div>
       <Input label="Location" value={profileForm.location} onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })} placeholder="City, State" />
+      <ArtistUrlField />
       <Textarea label="Bio" value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="Tell clients about your work, style, and experience..." rows={4} />
     </EditProfilePanel>
   );

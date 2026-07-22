@@ -3,7 +3,6 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 
 export interface SlideOverPanelProps {
   open: boolean;
@@ -15,9 +14,6 @@ export interface SlideOverPanelProps {
 
 const SlideOverPanel = React.forwardRef<HTMLDivElement, SlideOverPanelProps>(
   ({ open, onClose, title, children, className }, ref) => {
-    const { mode } = useTheme();
-    const isDark = mode === "dark";
-
     // SSR guard: only mount portal after client hydration
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => {
@@ -77,7 +73,7 @@ const SlideOverPanel = React.forwardRef<HTMLDivElement, SlideOverPanelProps>(
             // Shape
             "rounded-t-2xl lg:rounded-none",
             // Colors
-            isDark ? "bg-ink-black" : "bg-ink-cream",
+            "bg-ink-cream dark:bg-ink-black",
             // Layout
             "flex flex-col",
             // Transition
@@ -90,18 +86,8 @@ const SlideOverPanel = React.forwardRef<HTMLDivElement, SlideOverPanelProps>(
           )}
         >
           {/* Sticky header */}
-          <div
-            className={cn(
-              "sticky top-0 flex items-center justify-between px-6 py-4 border-b shrink-0",
-              isDark ? "border-ink-cream/[0.06]" : "border-ink-black/[0.06]"
-            )}
-          >
-            <span
-              className={cn(
-                "font-mono text-[9px] tracking-[0.2em] uppercase",
-                isDark ? "text-ink-cream/50" : "text-ink-black/50"
-              )}
-            >
+          <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b shrink-0 border-ink-black/[0.06] dark:border-ink-cream/[0.06]">
+            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-black/50 dark:text-ink-cream/50">
               {title}
             </span>
 
@@ -111,9 +97,8 @@ const SlideOverPanel = React.forwardRef<HTMLDivElement, SlideOverPanelProps>(
               aria-label="Close panel"
               className={cn(
                 "flex items-center justify-center w-[28px] h-[28px] rounded-lg border transition-colors",
-                isDark
-                  ? "border-ink-cream/[0.08] bg-ink-cream/[0.04] text-ink-cream/60 hover:bg-ink-cream/[0.08] hover:text-ink-cream"
-                  : "border-ink-black/[0.08] bg-ink-black/[0.04] text-ink-black/60 hover:bg-ink-black/[0.08] hover:text-ink-black"
+                "border-ink-black/[0.08] bg-ink-black/[0.04] text-ink-black/60 hover:bg-ink-black/[0.08] hover:text-ink-black",
+                "dark:border-ink-cream/[0.08] dark:bg-ink-cream/[0.04] dark:text-ink-cream/60 dark:hover:bg-ink-cream/[0.08] dark:hover:text-ink-cream"
               )}
             >
               <span className="text-[14px] leading-none select-none">×</span>

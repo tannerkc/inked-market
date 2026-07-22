@@ -35,7 +35,8 @@ export function MobileControlSheet() {
       if (sectionIdx < 0) return;
       const nextIdx =
         (sectionIdx + delta + SECTION_IDS.length) % SECTION_IDS.length;
-      openSection(SECTION_IDS[nextIdx]);
+      const next = SECTION_IDS[nextIdx];
+      if (next) openSection(next);
     },
     [sectionIdx, openSection],
   );

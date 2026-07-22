@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getStudioForPage } from "@/lib/data/studio-page";
 import { studioSiteDataFromStudio } from "@/components/studio-site/studio-site-data";
@@ -30,6 +30,11 @@ export default async function StudioPage({ params }: PageProps) {
   const result = await getStudioForPage(id);
   if (!result) notFound();
 
+  // Canonicalize: id-based URLs forward to the pretty slug.
+  if (result.fromDb && result.studio.slug && id !== result.studio.slug) {
+    redirect(`/studios/${result.studio.slug}`);
+  }
+
   const { studio, config, hasPublishedSite, artists, reviews, rawReviews, fromDb } = result;
   const data = studioSiteDataFromStudio(studio, {
     artists,
@@ -42,6 +47,13 @@ export default async function StudioPage({ params }: PageProps) {
       {!fromDb ? (
         <div className="fixed bottom-4 right-4 z-[60]">
           <SampleBadge label="Sample studio" />
+        </div>
+      ) : null}
+      {/* RLS hides is_visible=false rows from everyone but the owner, so
+          receiving one here means the viewer owns this draft. */}
+      {fromDb && studio.isVisible === false ? (
+        <div className="fixed bottom-4 right-4 z-[60]">
+          <SampleBadge label="Draft — only you can see this" />
         </div>
       ) : null}
       {hasPublishedSite ? (

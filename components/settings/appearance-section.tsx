@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/providers/theme-provider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PillToggle } from "@/components/ui/pill-toggle";
@@ -36,7 +35,6 @@ const BUILDER_TIER_OPTIONS = [
 
 export function AppearanceSection() {
   const { mode, setMode } = useTheme();
-  const isDark = mode === "dark";
   const [builderMode, setBuilderMode] = useState<BuilderMode>("inline");
   const [builderTier, setBuilderTier] = useState<BuilderTier>("flash");
 
@@ -88,12 +86,8 @@ export function AppearanceSection() {
     }
   }
 
-  const rowClass = cn(
-    "rounded-[16px] border p-5",
-    isDark
-      ? "border-ink-cream/[0.06] bg-ink-cream/[0.02]"
-      : "border-ink-black/[0.06] bg-ink-black/[0.02]"
-  );
+  const rowClass =
+    "rounded-[16px] border p-5 border-ink-black/[0.06] bg-ink-black/[0.02] dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.02]";
 
   return (
     <SettingsSection title="Appearance" description="Choose how Inked Market looks to you">
@@ -101,10 +95,10 @@ export function AppearanceSection() {
         <div className={rowClass}>
           <div className="flex items-center justify-between">
             <div>
-              <p className={cn("text-[12px] font-medium", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+              <p className="text-[12px] font-medium text-ink-black/60 dark:text-ink-cream/60">
                 Theme
               </p>
-              <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/25" : "text-ink-black/25")}>
+              <p className="text-[10px] mt-0.5 text-ink-black/25 dark:text-ink-cream/25">
                 Switch between light and dark mode
               </p>
             </div>
@@ -115,10 +109,10 @@ export function AppearanceSection() {
         <div className={rowClass}>
           <div className="flex items-center justify-between">
             <div>
-              <p className={cn("text-[12px] font-medium", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+              <p className="text-[12px] font-medium text-ink-black/60 dark:text-ink-cream/60">
                 Page Builder Style
               </p>
-              <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/25" : "text-ink-black/25")}>
+              <p className="text-[10px] mt-0.5 text-ink-black/25 dark:text-ink-cream/25">
                 Choose your preferred editing experience
               </p>
             </div>
@@ -126,7 +120,6 @@ export function AppearanceSection() {
               options={BUILDER_MODE_OPTIONS}
               value={builderMode}
               onChange={handleBuilderModeChange}
-              isDark={isDark}
             />
           </div>
         </div>
@@ -134,10 +127,10 @@ export function AppearanceSection() {
         <div className={rowClass}>
           <div className="flex items-center justify-between">
             <div>
-              <p className={cn("text-[12px] font-medium", isDark ? "text-ink-cream/60" : "text-ink-black/60")}>
+              <p className="text-[12px] font-medium text-ink-black/60 dark:text-ink-cream/60">
                 Customization Depth
               </p>
-              <p className={cn("text-[10px] mt-0.5", isDark ? "text-ink-cream/25" : "text-ink-black/25")}>
+              <p className="text-[10px] mt-0.5 text-ink-black/25 dark:text-ink-cream/25">
                 Flash is quick; Custom unlocks full control
               </p>
             </div>
@@ -145,7 +138,6 @@ export function AppearanceSection() {
               options={BUILDER_TIER_OPTIONS}
               value={builderTier}
               onChange={handleBuilderTierChange}
-              isDark={isDark}
             />
           </div>
         </div>

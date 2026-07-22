@@ -1,4 +1,4 @@
-import type { Studio, Artist, PortfolioImage, Review, TattooStyle } from "@/lib/types";
+import type { Studio, Artist, PortfolioImage, Review, TattooStyle, CoverCrop, CoverFocal } from "@/lib/types";
 import type { StudioData, BusinessHours } from "@/lib/repositories/types";
 import type { StudioIntegrations } from "@/lib/types/integrations";
 import type {
@@ -17,6 +17,7 @@ export interface DbStudio {
   id: string;
   name: string;
   slug: string;
+  slug_customized_at: string | null;
   source: "google" | "organic";
   google_place_id: string | null;
   claimed_by: string | null;
@@ -41,10 +42,16 @@ export interface DbStudio {
   auto_specialties: boolean;
   integrations: StudioIntegrations | null;
   theme_config: Record<string, unknown> | null;
+  published_theme_config: Record<string, unknown> | null;
+  published_at: string | null;
   rating: number | null;
   review_count: number;
   profile_image: string | null;
   cover_image: string | null;
+  cover_image_original: string | null;
+  cover_crop: CoverCrop | null;
+  cover_focal: CoverFocal | null;
+  cover_images: string[];
   images: string[];
   is_visible: boolean;
   created_at: string;
@@ -62,7 +69,7 @@ export interface DbSeedConfig {
 
 /** Columns selected for card rendering — avoids fetching full images[] array */
 export const STUDIO_CARD_COLUMNS =
-  "id, name, slug, city, state, rating, review_count, profile_image, source, claimed_by, specialties, is_visible" as const;
+  "id, name, slug, city, state, rating, review_count, profile_image, cover_image, source, claimed_by, specialties, is_visible" as const;
 
 /** Columns selected for detail page rendering */
 export const STUDIO_DETAIL_COLUMNS = "*" as const;
@@ -71,32 +78,52 @@ export const STUDIO_DETAIL_COLUMNS = "*" as const;
 
 const UNCLAIMED_BADGE: Badge = { label: "Unclaimed", color: "sage" };
 
+/** A theme jsonb only counts as a real config once the builder stamped a template. */
+function themeFromJson<T>(json: Record<string, unknown> | null): T | undefined {
+  return json && (json as { template?: string }).template
+    ? (json as unknown as T)
+    : undefined;
+}
+
+// DB columns are nullable; these fold nulls into the app-side defaults so each
+// mapper states the convention once instead of a `??` branch per field.
+const str = (v: string | null): string => v ?? "";
+const opt = <T>(v: T | null): T | undefined => v ?? undefined;
+const arr = <T>(v: T[] | null): T[] => v ?? [];
+const dateOpt = (v: string | null): Date | undefined => (v ? new Date(v) : undefined);
+
 /** Map a DB row to the app's Studio interface */
 export function mapDbStudioToStudio(row: DbStudio): Studio {
   return {
     id: row.id,
     name: row.name,
     description: "",
-    bio: row.bio ?? "",
+    bio: str(row.bio),
     location: {
-      address: row.address ?? "",
+      address: str(row.address),
       city: row.city,
       state: row.state,
-      zipCode: row.zip_code ?? "",
+      zipCode: str(row.zip_code),
       country: "US",
       coordinates: row.latitude && row.longitude
         ? { lat: row.latitude, lng: row.longitude }
         : undefined,
     },
-    phone: row.phone ?? "",
-    email: row.email ?? "",
+    phone: str(row.phone),
+    email: str(row.email),
     socialLinks: {
-      website: row.website ?? undefined,
+      instagram: opt(row.instagram),
+      tiktok: opt(row.tiktok),
+      facebook: opt(row.facebook),
+      website: opt(row.website),
     },
-    coverImage: row.cover_image ?? "",
-    profileImage: row.profile_image ?? "",
-    images: row.images ?? [],
-    specialties: row.specialties ?? [],
+    integrations: opt(row.integrations),
+    coverImage: str(row.cover_image),
+    coverFocal: opt(row.cover_focal),
+    coverImages: arr(row.cover_images),
+    profileImage: str(row.profile_image),
+    images: arr(row.images),
+    specialties: arr(row.specialties),
     rating: row.rating ?? 0,
     reviewCount: row.review_count,
     verified: row.claimed_by !== null,
@@ -106,15 +133,15 @@ export function mapDbStudioToStudio(row: DbStudio): Studio {
     updatedAt: new Date(row.updated_at),
     slug: row.slug,
     source: row.source,
-    googlePlaceId: row.google_place_id ?? undefined,
-    claimedBy: row.claimed_by ?? undefined,
-    claimedAt: row.claimed_at ? new Date(row.claimed_at) : undefined,
-    latitude: row.latitude ?? undefined,
-    longitude: row.longitude ?? undefined,
-    themeConfig:
-      row.theme_config && (row.theme_config as { template?: string }).template
-        ? (row.theme_config as unknown as Studio["themeConfig"])
-        : undefined,
+    googlePlaceId: opt(row.google_place_id),
+    claimedBy: opt(row.claimed_by),
+    claimedAt: dateOpt(row.claimed_at),
+    latitude: opt(row.latitude),
+    longitude: opt(row.longitude),
+    themeConfig: themeFromJson<Studio["themeConfig"]>(row.theme_config),
+    publishedThemeConfig: themeFromJson<Studio["themeConfig"]>(row.published_theme_config),
+    publishedAt: dateOpt(row.published_at),
+    isVisible: row.is_visible,
   };
 }
 
@@ -122,65 +149,94 @@ export function mapDbStudioToStudio(row: DbStudio): Studio {
 export function mapDbStudioToStudioData(row: DbStudio): StudioData {
   return {
     id: row.id,
-    images: row.images ?? [],
+    images: arr(row.images),
     name: row.name,
-    phone: row.phone ?? undefined,
-    email: row.email ?? undefined,
+    phone: opt(row.phone),
+    email: opt(row.email),
     city: row.city,
     state: row.state,
-    address: row.address ?? undefined,
-    zipCode: row.zip_code ?? undefined,
-    bio: row.bio ?? "",
-    profileImage: row.profile_image ?? undefined,
-    coverImage: row.cover_image ?? undefined,
-    specialties: row.specialties ?? [],
+    address: opt(row.address),
+    zipCode: opt(row.zip_code),
+    bio: str(row.bio),
+    profileImage: opt(row.profile_image),
+    coverImage: opt(row.cover_image),
+    coverImageOriginal: opt(row.cover_image_original),
+    coverCrop: opt(row.cover_crop),
+    coverFocal: opt(row.cover_focal),
+    coverImages: arr(row.cover_images),
+    specialties: arr(row.specialties),
     services: (row.services as StudioData["services"]) ?? [],
     hours: (row.hours as BusinessHours) ?? {},
     autoSpecialties: row.auto_specialties ?? false,
-    instagram: row.instagram ?? undefined,
-    tiktok: row.tiktok ?? undefined,
-    facebook: row.facebook ?? undefined,
-    website: row.website ?? undefined,
-    integrations: row.integrations ?? undefined,
-    themeConfig:
-      row.theme_config && (row.theme_config as { template?: string }).template
-        ? (row.theme_config as unknown as StudioData["themeConfig"])
-        : undefined,
+    instagram: opt(row.instagram),
+    tiktok: opt(row.tiktok),
+    facebook: opt(row.facebook),
+    website: opt(row.website),
+    integrations: opt(row.integrations),
+    googlePlaceId: opt(row.google_place_id),
+    themeConfig: themeFromJson<StudioData["themeConfig"]>(row.theme_config),
+    publishedThemeConfig: themeFromJson<StudioData["themeConfig"]>(row.published_theme_config),
+    publishedAt: opt(row.published_at),
     source: row.source,
-    claimedBy: row.claimed_by ?? undefined,
+    claimedBy: opt(row.claimed_by),
     slug: row.slug,
+    slugCustomizedAt: opt(row.slug_customized_at),
+    isVisible: row.is_visible,
   };
 }
+
+/** camelCase → snake_case columns written only when defined
+ *  (partial-update semantics: absent fields are left untouched). */
+const STUDIO_UPDATE_COLUMNS = {
+  name: "name",
+  phone: "phone",
+  email: "email",
+  city: "city",
+  state: "state",
+  address: "address",
+  zipCode: "zip_code",
+  bio: "bio",
+  profileImage: "profile_image",
+  images: "images",
+  coverImages: "cover_images",
+  specialties: "specialties",
+  hours: "hours",
+  website: "website",
+  instagram: "instagram",
+  tiktok: "tiktok",
+  facebook: "facebook",
+  services: "services",
+  autoSpecialties: "auto_specialties",
+  integrations: "integrations",
+  themeConfig: "theme_config",
+  slug: "slug",
+  isVisible: "is_visible",
+} as const satisfies Partial<Record<keyof StudioData, string>>;
+
+/** Columns mapped on key-PRESENCE so an explicit `field: undefined` clears the
+ *  DB column (removeCover / reset-framing / un-publish must actually clear). */
+const STUDIO_CLEARABLE_COLUMNS = {
+  coverImage: "cover_image",
+  coverImageOriginal: "cover_image_original",
+  coverCrop: "cover_crop",
+  coverFocal: "cover_focal",
+  publishedThemeConfig: "published_theme_config",
+  publishedAt: "published_at",
+} as const satisfies Partial<Record<keyof StudioData, string>>;
 
 /** Map StudioData (partial) to DB row shape for inserts/updates */
 export function mapStudioDataToDbStudio(
   data: Partial<StudioData>
 ): Record<string, unknown> {
   const mapped: Record<string, unknown> = {};
-
-  if (data.name !== undefined) mapped.name = data.name;
-  if (data.phone !== undefined) mapped.phone = data.phone;
-  if (data.email !== undefined) mapped.email = data.email;
-  if (data.city !== undefined) mapped.city = data.city;
-  if (data.state !== undefined) mapped.state = data.state;
-  if (data.address !== undefined) mapped.address = data.address;
-  if (data.zipCode !== undefined) mapped.zip_code = data.zipCode;
-  if (data.bio !== undefined) mapped.bio = data.bio;
-  if (data.profileImage !== undefined) mapped.profile_image = data.profileImage;
-  if (data.coverImage !== undefined) mapped.cover_image = data.coverImage;
-  if (data.images !== undefined) mapped.images = data.images;
-  if (data.specialties !== undefined) mapped.specialties = data.specialties;
-  if (data.hours !== undefined) mapped.hours = data.hours;
-  if (data.website !== undefined) mapped.website = data.website;
-  if (data.instagram !== undefined) mapped.instagram = data.instagram;
-  if (data.tiktok !== undefined) mapped.tiktok = data.tiktok;
-  if (data.facebook !== undefined) mapped.facebook = data.facebook;
-  if (data.services !== undefined) mapped.services = data.services;
-  if (data.autoSpecialties !== undefined) mapped.auto_specialties = data.autoSpecialties;
-  if (data.integrations !== undefined) mapped.integrations = data.integrations;
-  if (data.themeConfig !== undefined) mapped.theme_config = data.themeConfig;
+  for (const [key, column] of Object.entries(STUDIO_UPDATE_COLUMNS)) {
+    const value = data[key as keyof StudioData];
+    if (value !== undefined) mapped[column] = value;
+  }
+  for (const [key, column] of Object.entries(STUDIO_CLEARABLE_COLUMNS)) {
+    if (key in data) mapped[column] = data[key as keyof StudioData] ?? null;
+  }
   mapped.updated_at = new Date().toISOString();
-
   return mapped;
 }
 
@@ -196,8 +252,9 @@ export function mapDbStudioToDiscoverProfile(row: DbStudio): DiscoverProfile {
 
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
-    image: row.profile_image ?? "",
+    image: row.cover_image ?? row.profile_image ?? "",
     location: `${row.city}, ${row.state}`,
     rating: row.rating ?? 0,
     reviewCount: row.review_count,
@@ -217,6 +274,7 @@ export function mapDbStudioToSearchResult(row: DbStudio): SearchResultItem {
 
   return {
     id: row.id,
+    slug: row.slug,
     type: "studio",
     name: row.name,
     avatar: row.profile_image ?? "",
@@ -238,6 +296,7 @@ export interface DbArtist {
   user_id: string | null;
   name: string;
   slug: string;
+  slug_customized_at: string | null;
   bio: string | null;
   profile_image: string | null;
   cover_image: string | null;
@@ -300,26 +359,27 @@ export function mapDbArtistToArtist(
   return {
     id: row.id,
     name: row.name,
-    bio: row.bio ?? "",
-    profileImage: row.profile_image ?? "",
-    coverImage: row.cover_image ?? undefined,
-    studioId: row.studio_id ?? undefined,
-    specialties: row.specialties ?? [],
+    bio: str(row.bio),
+    profileImage: str(row.profile_image),
+    coverImage: opt(row.cover_image),
+    studioId: opt(row.studio_id),
+    specialties: arr(row.specialties),
     styles: (row.styles ?? []) as TattooStyle[],
     portfolioImages: portfolio.map(mapDbPortfolioImageToPortfolioImage),
     socialLinks: {
-      instagram: row.instagram ?? undefined,
-      website: row.website ?? undefined,
-      facebook: row.facebook ?? undefined,
+      instagram: opt(row.instagram),
+      website: opt(row.website),
+      facebook: opt(row.facebook),
     },
     rating: row.rating ?? 0,
     reviewCount: row.review_count,
     verified: row.verified,
     yearsOfExperience: row.years_experience ?? 0,
-    certifications: row.certifications ?? [],
-    location: { city: row.city ?? "", state: row.state ?? "" },
+    certifications: arr(row.certifications),
+    location: { city: str(row.city), state: str(row.state) },
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
+    slug: row.slug,
   };
 }
 
@@ -333,6 +393,7 @@ function artistBadges(row: DbArtist): Badge[] {
 export function mapDbArtistToDiscoverProfile(row: DbArtist): DiscoverProfile {
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     image: row.profile_image ?? "",
     location: `${row.city ?? ""}, ${row.state ?? ""}`,
@@ -347,6 +408,7 @@ export function mapDbArtistToDiscoverProfile(row: DbArtist): DiscoverProfile {
 export function mapDbArtistToSearchResult(row: DbArtist): SearchResultItem {
   return {
     id: row.id,
+    slug: row.slug,
     type: "artist",
     name: row.name,
     avatar: row.profile_image ?? "",

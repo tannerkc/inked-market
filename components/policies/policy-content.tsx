@@ -1,5 +1,3 @@
-"use client";
-
 import type { PolicyConfig, StandardPolicyId } from "@/lib/types/policies";
 import { standardPolicies } from "@/lib/data/policy-templates";
 
@@ -14,7 +12,8 @@ function StructuredFieldCallout({ policy }: { policy: PolicyConfig }) {
   const fields = policy.structuredFields ?? {};
   const filledFields = def.structuredFields.filter((f) => {
     if (f.showWhen && !f.showWhen(fields)) return false;
-    return fields[f.key] && fields[f.key].length > 0;
+    const value = fields[f.key];
+    return value !== undefined && value.length > 0;
   });
 
   if (filledFields.length === 0) return null;

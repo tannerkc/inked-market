@@ -1,7 +1,8 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn, formatRating } from "@/lib/utils";
+import { cn, formatRating, profilePath } from "@/lib/utils";
+import { StarIcon } from "./star-rating";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
@@ -80,6 +81,7 @@ CardFooter.displayName = "CardFooter";
 // Specialized Profile Card for Studios and Artists
 interface ProfileCardProps {
   id: string;
+  slug?: string;
   type: "studio" | "artist";
   name: string;
   image: string;
@@ -92,6 +94,7 @@ interface ProfileCardProps {
 
 const ProfileCard = ({
   id,
+  slug,
   type,
   name,
   image,
@@ -101,7 +104,7 @@ const ProfileCard = ({
   specialties = [],
   verified = false,
 }: ProfileCardProps) => {
-  const href = `/${type}s/${id}`;
+  const href = profilePath(type, { id, slug });
 
   return (
     <Link href={href} className="block group">
@@ -141,12 +144,7 @@ const ProfileCard = ({
 
           {rating !== undefined && reviewCount !== undefined && (
             <div className="flex items-center gap-1 mb-3">
-              <svg
-                className="w-4 h-4 text-yellow-400 fill-current"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
+              <StarIcon className="w-4 h-4 text-yellow-400" />
               <span className="text-sm font-medium text-gray-900">
                 {formatRating(rating)}
               </span>

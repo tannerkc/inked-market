@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  getConversationParticipants,
-  getCustomerConversations,
   getCustomerDesignBriefs,
   getCustomerHealedPhotos,
   getCustomerInvoices,
   getCustomerReviews,
 } from "@/lib/data/customer-dashboard";
+import { fetchInbox } from "@/app/messages/actions";
 import { createClient } from "@/lib/supabase/client";
 import {
   fetchCustomerAppointments,
@@ -19,28 +18,34 @@ import {
   requestToViewModel,
 } from "@/lib/supabase/booking-types";
 import type { AppointmentRecord, BookingRequestRecord } from "@/lib/types/booking";
-import type {
-  Conversation,
-  DesignBrief,
-  HealedPhoto,
-  Invoice,
-  Review,
-} from "@/lib/types";
+import type { InboxConversation } from "@/lib/types/messaging";
+import type { DesignBrief, HealedPhoto, Invoice, Review } from "@/lib/types";
 
 const byDateAsc = (a: { date: string | Date }, b: { date: string | Date }) =>
   new Date(a.date).getTime() - new Date(b.date).getTime();
 const byDateDesc = (a: { date: string | Date }, b: { date: string | Date }) =>
   new Date(b.date).getTime() - new Date(a.date).getTime();
-const byMessagedDesc = (a: Conversation, b: Conversation) =>
-  new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+const byMessagedDesc = (a: InboxConversation, b: InboxConversation) =>
+  Date.parse(b.lastMessageAt) - Date.parse(a.lastMessageAt);
 const byCreatedDesc = (a: Invoice, b: Invoice) =>
   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
 export function useCustomerData(userId: string | undefined) {
-  const [conversations] = useState<Conversation[]>(getCustomerConversations);
-  // Live booking data (requests + appointments); the rest is still mock.
+  // Live conversations + booking data (requests + appointments); the rest is still mock.
+  const [conversations, setConversations] = useState<InboxConversation[] | null>(null);
   const [appointmentRecords, setAppointmentRecords] = useState<AppointmentRecord[]>([]);
   const [requestRecords, setRequestRecords] = useState<BookingRequestRecord[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    void fetchInbox().then((res) => {
+      if (!cancelled) setConversations(res.ok ? res.conversations : []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const refreshBooking = useCallback(async () => {
     if (!userId) return;
@@ -84,7 +89,6 @@ export function useCustomerData(userId: string | undefined) {
   const [reviews] = useState<Review[]>(getCustomerReviews);
   const [designBriefs] = useState<DesignBrief[]>(getCustomerDesignBriefs);
   const [healedPhotos] = useState<HealedPhoto[]>(getCustomerHealedPhotos);
-  const [participants] = useState(getConversationParticipants);
 
   const upcomingAppointments = useMemo(
     () => appointments.filter((a) => a.status === "confirmed" || a.status === "pending").sort(byDateAsc),
@@ -107,7 +111,7 @@ export function useCustomerData(userId: string | undefined) {
   }, [completedAppointments, reviews]);
 
   const sortedConversations = useMemo(
-    () => [...conversations].sort(byMessagedDesc),
+    () => (conversations ? [...conversations].sort(byMessagedDesc) : null),
     [conversations]
   );
 
@@ -117,8 +121,8 @@ export function useCustomerData(userId: string | undefined) {
   );
 
   const unreadCount = useMemo(
-    () => conversations.reduce((sum, c) => sum + (c.unreadCount[userId ?? ""] ?? 0), 0),
-    [conversations, userId]
+    () => (conversations ?? []).reduce((sum, c) => sum + c.unread, 0),
+    [conversations]
   );
 
   const pendingBookings = useMemo(
@@ -136,7 +140,6 @@ export function useCustomerData(userId: string | undefined) {
   return {
     conversations,
     sortedConversations,
-    participants,
     appointments,
     appointmentRecords,
     requestRecords,

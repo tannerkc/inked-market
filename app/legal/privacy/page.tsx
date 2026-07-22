@@ -4,7 +4,7 @@ import { LegalHero } from "@/components/legal/legal-hero";
 import { LegalSection } from "@/components/legal/legal-section";
 import { LegalSidebar } from "@/components/legal/legal-sidebar";
 import { ReadingProgress } from "@/components/legal/reading-progress";
-import { BackToTop } from "@/components/legal/back-to-top";
+import { BackToTop } from "@/components/content";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",

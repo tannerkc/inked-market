@@ -3,6 +3,7 @@
 import * as React from "react";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { ListGroup } from "@/components/dashboard/list-group";
 import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
 import type { StatusBadgeColor } from "@/components/ui/status-badge";
 import type { DesignBrief, DesignBriefStatus } from "@/lib/types";
@@ -44,11 +45,11 @@ const CustomerDesignBriefsSection = React.forwardRef<
           action={{ label: "Create Brief", onClick: onNewBrief }}
         />
       ) : (
-        <div className="space-y-1.5">
+        <ListGroup>
           {briefs.map((brief) => (
             <div
               key={brief.id}
-              className="py-2.5 px-3 rounded-lg transition-colors bg-ink-black/[0.03] hover:bg-ink-black/[0.04] dark:bg-ink-cream/[0.03] dark:hover:bg-ink-cream/[0.04]"
+              className="px-3 py-2.5 transition-colors hover:bg-ink-black/[0.03] dark:hover:bg-ink-cream/[0.03]"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="text-[12px] text-ink-black dark:text-ink-cream">
@@ -79,7 +80,7 @@ const CustomerDesignBriefsSection = React.forwardRef<
               )}
             </div>
           ))}
-        </div>
+        </ListGroup>
       )}
     </DashboardSection>
   </div>

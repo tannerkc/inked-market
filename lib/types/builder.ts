@@ -16,6 +16,8 @@ export type ThemePreset =
   | "mono";
 
 export type HeroLayout = "split" | "fullbleed" | "centered" | "masthead" | "grid-overlay" | "zine";
+/** Multi-photo heroes only: whether the collage leads with dedicated cover photos. */
+export type HeroCoverMode = "single" | "multi";
 export type GalleryLayout = "featured" | "uniform" | "masonry" | "carousel" | "film-strip" | "flash-sheet";
 export type GalleryPhotosPerArtist = 3 | 5 | 8;
 export type DetailsLayout = "three-col" | "two-one" | "stacked";
@@ -62,6 +64,7 @@ export interface StudioThemeConfig {
   headingFont: string;
   bodyFont: string;
   heroLayout: HeroLayout;
+  heroCoverMode?: HeroCoverMode;
   showHeroCta: boolean;
   ctaStyle: CtaStyle;
   showHeroSubtext: boolean;

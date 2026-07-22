@@ -1,23 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { SettingsSection } from "./settings-section";
 import { SettingsToggleRow as ToggleRow, SettingsGroupLabel as GroupLabel } from "./settings-toggle-row";
 import { useNotifications } from "./use-notifications";
+import { ListGroup } from "@/components/dashboard";
 import type { NotificationPreferences } from "@/lib/types";
 
 export function NotificationsSection() {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const { prefs, toggle, role } = useNotifications();
-
-  const cardClass = cn(
-    "rounded-[16px] border divide-y",
-    isDark
-      ? "border-ink-cream/[0.06] bg-ink-cream/[0.02] divide-ink-cream/[0.04]"
-      : "border-ink-black/[0.06] bg-ink-black/[0.02] divide-ink-black/[0.04]"
-  );
 
   type ToggleDef = {
     key: keyof NotificationPreferences;
@@ -51,7 +41,7 @@ export function NotificationsSection() {
     <SettingsSection title="Notifications" description="Control what updates you receive">
       {/* Activity */}
       <GroupLabel label="Activity" />
-      <div className={cardClass}>
+      <ListGroup>
         <div className="px-5">
           {activityToggles.map((t) => (
             <ToggleRow
@@ -64,11 +54,11 @@ export function NotificationsSection() {
             />
           ))}
         </div>
-      </div>
+      </ListGroup>
 
       {/* Communications */}
       <GroupLabel label="Communications" />
-      <div className={cardClass}>
+      <ListGroup>
         <div className="px-5">
           <ToggleRow
             label="Marketing Emails"
@@ -83,7 +73,7 @@ export function NotificationsSection() {
             onChange={() => toggle("platformUpdates")}
           />
         </div>
-      </div>
+      </ListGroup>
     </SettingsSection>
   );
 }

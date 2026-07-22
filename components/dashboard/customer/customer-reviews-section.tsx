@@ -3,38 +3,18 @@
 import * as React from "react";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
-import { cn, formatDate } from "@/lib/utils";
+import { GroupLabel } from "@/components/dashboard/group-label";
+import { InitialsAvatar } from "@/components/dashboard/initials-avatar";
+import { ListGroup } from "@/components/dashboard/list-group";
+import { ListRow } from "@/components/dashboard/list-row";
+import { StarRating } from "@/components/ui/star-rating";
+import { formatDate } from "@/lib/utils";
 import type { Review, Appointment } from "@/lib/types";
 
 interface CustomerReviewsSectionProps {
   reviews: Review[];
   pendingReviews: Appointment[];
   className?: string;
-}
-
-function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={className}>
-      <path
-        d="M6 1L7.545 4.13L11 4.635L8.5 7.07L9.09 10.51L6 8.885L2.91 10.51L3.5 7.07L1 4.635L4.455 4.13L6 1Z"
-        fill={filled ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function StarRating({ rating, className }: { rating: number; className?: string }) {
-  return (
-    <div className={cn("flex items-center gap-0.5", className)}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <StarIcon key={i} filled={i < rating} />
-      ))}
-    </div>
-  );
 }
 
 const CustomerReviewsSection = React.forwardRef<
@@ -55,42 +35,36 @@ const CustomerReviewsSection = React.forwardRef<
           <div className="space-y-4">
             {pendingReviews.length > 0 && (
               <div>
-                <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/25 dark:text-ink-cream/25">
-                  Awaiting Your Review
-                </p>
-                <div className="space-y-1.5">
+                <GroupLabel>Awaiting Your Review</GroupLabel>
+                <ListGroup>
                   {pendingReviews.map((appt) => (
-                    <div
-                      key={appt.id}
-                      className="flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors bg-ink-black/[0.03] hover:bg-ink-black/[0.04] dark:bg-ink-cream/[0.03] dark:hover:bg-ink-cream/[0.04]"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-[12px] truncate text-ink-black dark:text-ink-cream">
+                    <ListRow key={appt.id} interactive>
+                      <InitialsAvatar name={appt.artistName} tone="accent" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[12px] font-medium truncate text-ink-black dark:text-ink-cream">
                           {appt.artistName}
                         </p>
-                        <p className="text-[10px] text-ink-black/25 dark:text-ink-cream/25">
+                        <p className="mt-0.5 font-mono text-[9px] text-ink-black/25 dark:text-ink-cream/25">
                           {formatDate(appt.date)}
                         </p>
                       </div>
                       <button className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink-rust hover:text-ink-rust/70 transition-colors cursor-pointer flex-shrink-0">
                         Write Review
                       </button>
-                    </div>
+                    </ListRow>
                   ))}
-                </div>
+                </ListGroup>
               </div>
             )}
 
             {reviews.length > 0 && (
               <div>
-                <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2 text-ink-black/25 dark:text-ink-cream/25">
-                  Your Reviews
-                </p>
-                <div className="space-y-1.5">
+                <GroupLabel>Your Reviews</GroupLabel>
+                <ListGroup>
                   {reviews.map((review) => (
                     <div
                       key={review.id}
-                      className="py-2.5 px-3 rounded-lg transition-colors bg-ink-black/[0.03] hover:bg-ink-black/[0.04] dark:bg-ink-cream/[0.03] dark:hover:bg-ink-cream/[0.04]"
+                      className="px-3 py-2.5 transition-colors hover:bg-ink-black/[0.03] dark:hover:bg-ink-cream/[0.03]"
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <StarRating
@@ -114,7 +88,7 @@ const CustomerReviewsSection = React.forwardRef<
                       </div>
                     </div>
                   ))}
-                </div>
+                </ListGroup>
               </div>
             )}
           </div>

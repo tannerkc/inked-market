@@ -8,6 +8,7 @@ import type { Badge } from "@/lib/data/discover";
 
 interface FlashCardProps {
   id: string;
+  slug?: string;
   type: "studio" | "artist";
   name: string;
   image: string;

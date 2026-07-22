@@ -84,6 +84,9 @@ interface SiteDataExtras {
   bookingLink?: { url: string; platformName: string } | null;
 }
 
+/** Empty-string Studio fields render as absent on the public site. */
+const blank = (v: string): string | undefined => v || undefined;
+
 /** Build site data from a public Studio (real content). */
 export function studioSiteDataFromStudio(
   studio: Studio,
@@ -91,13 +94,13 @@ export function studioSiteDataFromStudio(
 ): StudioSiteData {
   return {
     name: studio.name,
-    bio: studio.bio || undefined,
-    city: studio.location.city || undefined,
-    state: studio.location.state || undefined,
-    address: studio.location.address || undefined,
-    zipCode: studio.location.zipCode || undefined,
-    phone: studio.phone || undefined,
-    email: studio.email || undefined,
+    bio: blank(studio.bio),
+    city: blank(studio.location.city),
+    state: blank(studio.location.state),
+    address: blank(studio.location.address),
+    zipCode: blank(studio.location.zipCode),
+    phone: blank(studio.phone),
+    email: blank(studio.email),
     specialties: studio.specialties ?? [],
     services: [],
     hours: (studio.openHours as BusinessHours) ?? {},
@@ -106,7 +109,7 @@ export function studioSiteDataFromStudio(
     facebook: studio.socialLinks?.facebook,
     tiktok: studio.socialLinks?.tiktok,
     images: studio.images ?? [],
-    coverImage: studio.coverImage || undefined,
+    coverImage: blank(studio.coverImage),
     coverFocal: studio.coverFocal,
     coverImages: studio.coverImages ?? [],
     bookingLink:
@@ -128,30 +131,31 @@ export function studioSiteDataFromStudioData(
   data: StudioData | null,
   extras: SiteDataExtras = {},
 ): StudioSiteData {
+  const d: Partial<StudioData> = data ?? {};
   return {
-    name: data?.name ?? "",
-    bio: data?.bio,
-    city: data?.city,
-    state: data?.state,
-    address: data?.address,
-    zipCode: data?.zipCode,
-    phone: data?.phone,
-    email: data?.email,
-    specialties: data?.specialties ?? [],
-    services: data?.services ?? [],
-    hours: data?.hours ?? {},
-    instagram: data?.instagram,
-    website: data?.website,
-    tiktok: data?.tiktok,
-    facebook: data?.facebook,
-    images: data?.images ?? [],
-    coverImage: data?.coverImage,
-    coverFocal: data?.coverFocal,
-    coverImages: data?.coverImages ?? [],
-    bookingLink: getBookingLink(data?.integrations),
-    bookingEmbed: getBookingEmbed(data?.integrations),
-    reviewLinks: getReviewProfileLinks(data?.integrations, data?.googlePlaceId),
-    googlePlaceId: data?.googlePlaceId,
+    name: d.name ?? "",
+    bio: d.bio,
+    city: d.city,
+    state: d.state,
+    address: d.address,
+    zipCode: d.zipCode,
+    phone: d.phone,
+    email: d.email,
+    specialties: d.specialties ?? [],
+    services: d.services ?? [],
+    hours: d.hours ?? {},
+    instagram: d.instagram,
+    website: d.website,
+    tiktok: d.tiktok,
+    facebook: d.facebook,
+    images: d.images ?? [],
+    coverImage: d.coverImage,
+    coverFocal: d.coverFocal,
+    coverImages: d.coverImages ?? [],
+    bookingLink: getBookingLink(d.integrations),
+    bookingEmbed: getBookingEmbed(d.integrations),
+    reviewLinks: getReviewProfileLinks(d.integrations, d.googlePlaceId),
+    googlePlaceId: d.googlePlaceId,
     artists: extras.artists ?? [],
     reviews: extras.reviews ?? [],
   };

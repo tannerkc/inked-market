@@ -25,6 +25,13 @@ export interface PhotoLightboxProps {
 const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
   ({ photos, activeIndex, onClose, onNavigate, placeholderPattern, className }, ref) => {
     const overlayEl = useOverlayContainer();
+    // SSR guard: only mount portal after client hydration — the server renders
+    // nothing, so the first client render must match (same as SlideOverPanel).
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
     const container = overlayEl ?? (typeof document !== "undefined" ? document.body : null);
     const posClass = overlayEl ? "absolute" : "fixed";
 
@@ -46,7 +53,7 @@ const PhotoLightbox = React.forwardRef<HTMLDivElement, PhotoLightboxProps>(
       return () => document.removeEventListener("keydown", handler);
     }, [open, activeIndex, photos.length, onClose, onNavigate]);
 
-    if (!container) return null;
+    if (!mounted || !container) return null;
 
     const photo = activeIndex !== null ? photos[activeIndex] : null;
 

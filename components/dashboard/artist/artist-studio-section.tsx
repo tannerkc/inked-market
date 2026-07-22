@@ -3,6 +3,7 @@
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { AffiliationRow } from "@/components/dashboard/affiliation-row";
+import { ListGroup } from "@/components/dashboard/list-group";
 import type { Affiliation } from "@/lib/types";
 
 interface ArtistStudioSectionProps {
@@ -18,14 +19,16 @@ export function ArtistStudioSection({ studioAffiliation, onFindStudio, onLeave }
       action={!studioAffiliation ? { label: "+ Find a studio", onClick: onFindStudio } : undefined}
     >
       {studioAffiliation ? (
-        <AffiliationRow
-          name={studioAffiliation.name}
-          avatarUrl={studioAffiliation.avatarUrl}
-          avatarShape="rounded"
-          status={studioAffiliation.status}
-          onAction={onLeave}
-          actionLabel="Leave"
-        />
+        <ListGroup>
+          <AffiliationRow
+            name={studioAffiliation.name}
+            avatarUrl={studioAffiliation.avatarUrl}
+            avatarShape="rounded"
+            status={studioAffiliation.status}
+            onAction={onLeave}
+            actionLabel="Leave"
+          />
+        </ListGroup>
       ) : (
         <EmptyState
           message="Not affiliated with a studio"

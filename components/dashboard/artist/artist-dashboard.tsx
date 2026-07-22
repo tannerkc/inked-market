@@ -7,6 +7,7 @@ import { ProfileCard } from "@/components/dashboard/profile-card";
 import { StatsPanel } from "@/components/dashboard/stats-panel";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
 import { PhotoUploadIcon, CalendarIcon, LinkShareIcon, BookingSettingsIcon } from "@/components/dashboard/dashboard-icons";
+import { MessagesCard } from "@/components/dashboard/messages-card";
 import {
   ArtistRequestsSection,
   BookingModePrompt,
@@ -100,6 +101,7 @@ export function ArtistDashboard() {
               loading={artistRequests.loading}
               onSelect={artistRequests.setSelected}
             />
+            <MessagesCard emptyDescription="Client messages land here — replies keep leads warm" />
             <ArtistBioSection
               bioEditing={dashboard.bioEditing}
               setBioEditing={dashboard.setBioEditing}

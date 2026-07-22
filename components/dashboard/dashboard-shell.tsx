@@ -4,7 +4,6 @@ import * as React from "react";
 import { DashboardLayout } from "./dashboard-layout";
 import { OnboardingBanner } from "./onboarding-banner";
 import { PageHeader } from "@/components/ui/page-header";
-import { NotificationsBell } from "@/components/booking";
 import { permanentMarker } from "@/lib/fonts";
 import type { ChecklistItem } from "@/lib/types";
 
@@ -39,20 +38,18 @@ export function DashboardShell({
 
   return (
     <DashboardLayout>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <PageHeader
-          eyebrow={{ text: eyebrowText, variant: "marker", color: "rust" }}
-          headline={{
-            variant: "mixed",
-            size: "sm",
-            words: [
-              { text: "Your", font: "pirata" },
-              { text: "Dashboard", font: "cook", color: "text-ink-rust dark:text-ink-red" },
-            ],
-          }}
-        />
-        <NotificationsBell />
-      </div>
+      <PageHeader
+        className="mb-6"
+        eyebrow={{ text: eyebrowText, variant: "marker", color: "rust" }}
+        headline={{
+          variant: "mixed",
+          size: "sm",
+          words: [
+            { text: "Your", font: "pirata" },
+            { text: "Dashboard", font: "cook", color: "text-ink-rust dark:text-ink-red" },
+          ],
+        }}
+      />
 
       {!bannerDismissed && onboardingReady ? (
         <OnboardingBanner

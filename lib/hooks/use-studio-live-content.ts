@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { profilePath } from "@/lib/utils";
 import { getReviewsForTarget } from "@/lib/data/supabase-reviews";
 import { getRosterArtistRows } from "@/lib/data/supabase-artists";
 import { fetchBookHrefs } from "@/lib/data/supabase-booking";
@@ -70,7 +71,7 @@ async function fetchLiveContent(studioId: string): Promise<LiveData> {
       styles: (r.specialties ?? []).slice(0, 3),
       photoCount: thumbs.length,
       photos: thumbs.map((t) => ({ id: t.id, url: t.url })),
-      profileHref: `/artists/${r.id}`,
+      profileHref: profilePath("artist", r),
       bookHref: bookHrefs.get(r.id),
     };
   });

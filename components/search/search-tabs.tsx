@@ -6,7 +6,6 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface SearchTabsProps {
-  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -16,12 +15,11 @@ const tabs = [
 ] as const;
 
 const SearchTabsInner = React.forwardRef<HTMLDivElement, SearchTabsProps>(
-  ({ variant = "dark", className, ...props }, ref) => {
+  ({ className, ...props }, ref) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
 
-    const isDark = variant === "dark";
     const activeTab = searchParams.get("tab") || "artists";
 
     const handleTabChange = (tab: string) => {
@@ -48,12 +46,8 @@ const SearchTabsInner = React.forwardRef<HTMLDivElement, SearchTabsProps>(
               className={cn(
                 "px-6 py-2 font-mono text-[10px] tracking-[0.15em] uppercase border-b-2 transition-colors duration-200",
                 isActive
-                  ? isDark
-                    ? "text-ink-red border-ink-red"
-                    : "text-ink-black border-ink-black"
-                  : isDark
-                    ? "text-ink-cream/25 border-transparent hover:text-ink-cream/40"
-                    : "text-ink-black/45 border-transparent hover:text-ink-black/65"
+                  ? "text-ink-black border-ink-black dark:text-ink-red dark:border-ink-red"
+                  : "border-transparent text-ink-black/45 hover:text-ink-black/65 dark:text-ink-cream/25 dark:hover:text-ink-cream/40"
               )}
             >
               {label}

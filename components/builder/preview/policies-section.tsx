@@ -1,6 +1,6 @@
 "use client";
 
-import { useBuilder } from "@/components/builder/builder-provider";
+import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import {
   standardPolicies,
   standardPolicyOrder,
@@ -233,7 +233,7 @@ function EmptyState() {
 }
 
 export function PoliciesSection() {
-  const { config, setPreviewPage } = useBuilder();
+  const { config, onNavigatePage } = useStudioSite();
 
   if (!config.showPoliciesSection) return null;
   if (config.policiesDisplayMode === "footer") return null;
@@ -273,7 +273,7 @@ export function PoliciesSection() {
         <div style={{ textAlign: "center", marginTop: "16px" }}>
           <button
             type="button"
-            onClick={() => setPreviewPage("policies")}
+            onClick={() => onNavigatePage("policies")}
             style={{
               color: "var(--accent)",
               fontSize: "12px",

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import type { SettingsNavItem } from "./use-settings-nav";
 
 interface SettingsTabsProps {
@@ -14,8 +13,6 @@ interface SettingsTabsProps {
 
 const SettingsTabs = React.forwardRef<HTMLDivElement, SettingsTabsProps>(
   ({ sections, activeSection, onSelect, className }, ref) => {
-    const { mode } = useTheme();
-    const isDark = mode === "dark";
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     // Scroll active tab into view on mount and when active changes
@@ -33,7 +30,7 @@ const SettingsTabs = React.forwardRef<HTMLDivElement, SettingsTabsProps>(
         ref={ref}
         className={cn(
           "lg:hidden overflow-x-auto scrollbar-none border-b",
-          isDark ? "border-ink-cream/[0.06]" : "border-ink-black/[0.06]",
+          "border-ink-black/[0.06] dark:border-ink-cream/[0.06]",
           className
         )}
       >
@@ -54,9 +51,7 @@ const SettingsTabs = React.forwardRef<HTMLDivElement, SettingsTabsProps>(
                         "border-transparent",
                         section.danger
                           ? "text-ink-red/40 hover:text-ink-red/60"
-                          : isDark
-                            ? "text-ink-cream/35 hover:text-ink-cream/50"
-                            : "text-ink-black/35 hover:text-ink-black/50"
+                          : "text-ink-black/35 hover:text-ink-black/50 dark:text-ink-cream/35 dark:hover:text-ink-cream/50"
                       )
                 )}
               >

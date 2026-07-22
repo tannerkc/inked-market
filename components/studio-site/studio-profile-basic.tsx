@@ -20,7 +20,7 @@ import {
   MetaHighlight,
 } from "@/components/detail";
 import { bebasNeue, pirataOne, abrilFatface } from "@/lib/fonts";
-import { formatRating } from "@/lib/utils";
+import { formatStarRating } from "@/lib/utils";
 import type { Review, Studio } from "@/lib/types";
 import type { StudioSiteData, StudioSiteArtist } from "./studio-site-data";
 
@@ -108,7 +108,7 @@ export function StudioProfileBasic({ studio, data, reviews }: StudioProfileBasic
         <MetaRow>
           {location ? <MetaItem>{location}</MetaItem> : null}
           {data.rating ? (
-            <MetaHighlight>&#9733; {formatRating(data.rating)}</MetaHighlight>
+            <MetaHighlight>{formatStarRating(data.rating)}</MetaHighlight>
           ) : null}
           {data.reviewCount ? (
             <MetaItem>({data.reviewCount} Reviews)</MetaItem>

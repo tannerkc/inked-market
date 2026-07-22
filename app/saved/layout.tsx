@@ -1,9 +1,6 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Saved | Inked Market",
-  description: "Your saved artists, studios, and design inspiration",
-};
+export const metadata = createMetadata("Saved", "Your saved artists, studios, and design inspiration");
 
 export default function SavedLayout({
   children,

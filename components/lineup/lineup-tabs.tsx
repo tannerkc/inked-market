@@ -10,12 +10,11 @@ export interface LineupTabsProps {
   activeTab: LineupTabValue;
   onTabChange: (tab: LineupTabValue) => void;
   eventCount?: number;
-  variant?: "light" | "dark";
   className?: string;
 }
 
 const LineupTabs = React.forwardRef<HTMLDivElement, LineupTabsProps>(
-  ({ activeTab, onTabChange, eventCount, variant = "dark", className }, ref) => {
+  ({ activeTab, onTabChange, eventCount, className }, ref) => {
     const tabs: TabItem<LineupTabValue>[] = [
       { label: "This Week", value: "this-week" },
       { label: "Spotlights", value: "spotlights" },
@@ -29,7 +28,6 @@ const LineupTabs = React.forwardRef<HTMLDivElement, LineupTabsProps>(
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={onTabChange}
-        variant={variant}
         className={className}
       />
     );

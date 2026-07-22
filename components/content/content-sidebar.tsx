@@ -16,7 +16,6 @@ type SidebarAccentColor = InkAccentColor;
 interface ContentSidebarProps {
   sections: SidebarSection[];
   accentColor?: SidebarAccentColor;
-  variant?: "light" | "dark";
   hubHref?: string;
   hubLabel?: string;
   className?: string;
@@ -31,12 +30,10 @@ const borderColorMap: Record<SidebarAccentColor, string> = {
 function ContentSidebar({
   sections,
   accentColor = "rust",
-  variant = "dark",
   hubHref = "/legal",
   hubLabel = "Legal Hub",
   className,
 }: ContentSidebarProps) {
-  const isDark = variant === "dark";
   const [activeId, setActiveId] = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -76,18 +73,17 @@ function ContentSidebar({
             "text-left font-mono text-[11px] tracking-[0.1em] uppercase transition-colors py-1.5 pl-3 border-l-2",
             activeId === s.id
               ? cn(
-                  isDark ? "text-ink-cream/60" : "text-ink-black/60",
+                  "text-ink-black/60 dark:text-ink-cream/60",
                   borderColorMap[accentColor]
                 )
               : cn(
                   "border-transparent",
-                  isDark
-                    ? "text-ink-cream/30 hover:text-ink-cream/50"
-                    : "text-ink-black/30 hover:text-ink-black/50"
+                  "text-ink-black/30 hover:text-ink-black/50",
+                  "dark:text-ink-cream/30 dark:hover:text-ink-cream/50"
                 )
           )}
         >
-          <span className={isDark ? "text-ink-cream/20" : "text-ink-black/20"}>
+          <span className="text-ink-black/20 dark:text-ink-cream/20">
             {s.number}
           </span>{" "}
           {s.title}
@@ -105,27 +101,20 @@ function ContentSidebar({
           className
         )}
       >
-        <p className={cn(
-          "font-mono text-[9px] tracking-[0.2em] uppercase mb-4",
-          isDark ? "text-ink-cream/20" : "text-ink-black/20"
-        )}>
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase mb-4 text-ink-black/20 dark:text-ink-cream/20">
           Contents
         </p>
         {linkList}
-        <Divider variant={variant} className="my-6" />
-        <p className={cn(
-          "font-mono text-[9px] tracking-[0.2em] uppercase",
-          isDark ? "text-ink-cream/15" : "text-ink-black/15"
-        )}>
+        <Divider className="my-6" />
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-black/15 dark:text-ink-cream/15">
           {sections.length} sections
         </p>
         <a
           href={hubHref}
           className={cn(
             "inline-flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-[0.12em] uppercase transition-colors",
-            isDark
-              ? "text-ink-cream/25 hover:text-ink-cream/45"
-              : "text-ink-black/25 hover:text-ink-black/45"
+            "text-ink-black/25 hover:text-ink-black/45",
+            "dark:text-ink-cream/25 dark:hover:text-ink-cream/45"
           )}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -147,15 +136,11 @@ function ContentSidebar({
           onClick={() => setMobileOpen(!mobileOpen)}
           className={cn(
             "w-full flex items-center justify-between px-5 py-4 rounded-xl border transition-colors",
-            isDark
-              ? "border-ink-cream/[0.06] bg-ink-cream/[0.03] hover:border-ink-cream/[0.1]"
-              : "border-ink-black/[0.06] bg-ink-black/[0.03] hover:border-ink-black/[0.1]"
+            "border-ink-black/[0.06] bg-ink-black/[0.03] hover:border-ink-black/[0.1]",
+            "dark:border-ink-cream/[0.06] dark:bg-ink-cream/[0.03] dark:hover:border-ink-cream/[0.1]"
           )}
         >
-          <span className={cn(
-            "font-mono text-[10px] tracking-[0.15em] uppercase",
-            isDark ? "text-ink-cream/40" : "text-ink-black/40"
-          )}>
+          <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink-black/40 dark:text-ink-cream/40">
             Table of Contents
           </span>
           <svg
@@ -165,7 +150,7 @@ function ContentSidebar({
             fill="none"
             className={cn(
               "transition-transform duration-300",
-              isDark ? "text-ink-cream/30" : "text-ink-black/30",
+              "text-ink-black/30 dark:text-ink-cream/30",
               mobileOpen && "rotate-180"
             )}
           >
@@ -186,9 +171,8 @@ function ContentSidebar({
         >
           <div className={cn(
             "px-4 py-3 rounded-xl border",
-            isDark
-              ? "border-ink-cream/[0.04] bg-ink-cream/[0.02]"
-              : "border-ink-black/[0.04] bg-ink-black/[0.02]"
+            "border-ink-black/[0.04] bg-ink-black/[0.02]",
+            "dark:border-ink-cream/[0.04] dark:bg-ink-cream/[0.02]"
           )}>
             {linkList}
           </div>

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 
 interface ConfirmationDialogProps {
@@ -26,8 +25,6 @@ export function ConfirmationDialog({
   onConfirm,
   requireTyped,
 }: ConfirmationDialogProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
   const [typed, setTyped] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
 
@@ -72,15 +69,8 @@ export function ConfirmationDialog({
       />
 
       {/* Dialog */}
-      <div
-        className={cn(
-          "relative w-full max-w-[420px] rounded-[20px] border p-6",
-          isDark
-            ? "bg-ink-black border-ink-cream/[0.08]"
-            : "bg-ink-cream border-ink-black/[0.08]"
-        )}
-      >
-        <h3 className={cn("text-[16px] font-semibold mb-3", isDark ? "text-ink-cream/80" : "text-ink-black/80")}>
+      <div className="relative w-full max-w-[420px] rounded-[20px] border p-6 bg-ink-cream border-ink-black/[0.08] dark:bg-ink-black dark:border-ink-cream/[0.08]">
+        <h3 className="text-[16px] font-semibold mb-3 text-ink-black/80 dark:text-ink-cream/80">
           {title}
         </h3>
 
@@ -88,7 +78,7 @@ export function ConfirmationDialog({
 
         {requireTyped && (
           <div className="mb-4">
-            <p className={cn("text-[10px] mb-2", isDark ? "text-ink-cream/30" : "text-ink-black/30")}>
+            <p className="text-[10px] mb-2 text-ink-black/30 dark:text-ink-cream/30">
               Type <span className="font-mono font-medium text-ink-red">{requireTyped}</span> to confirm
             </p>
             <input
@@ -98,16 +88,15 @@ export function ConfirmationDialog({
               placeholder={requireTyped}
               className={cn(
                 "w-full rounded-xl px-4 py-3 text-[13px] outline-none font-mono transition-colors",
-                isDark
-                  ? "bg-ink-cream/[0.04] border border-ink-cream/[0.08] text-ink-cream placeholder:text-ink-cream/15 focus:border-ink-red/30"
-                  : "bg-white border border-ink-black/[0.06] text-ink-black placeholder:text-ink-black/15 focus:border-ink-red/30"
+                "bg-white border border-ink-black/[0.06] text-ink-black placeholder:text-ink-black/15 focus:border-ink-red/30",
+                "dark:bg-ink-cream/[0.04] dark:border-ink-cream/[0.08] dark:text-ink-cream dark:placeholder:text-ink-cream/15 dark:focus:border-ink-red/30"
               )}
             />
           </div>
         )}
 
         <div className="flex gap-2 justify-end">
-          <Button variant={isDark ? "ink-light-outline" : "ink-outline"} size="sm" onClick={onClose}>
+          <Button variant="ink-outline" size="sm" onClick={onClose}>
             Cancel
           </Button>
           <Button

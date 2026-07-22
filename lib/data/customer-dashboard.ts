@@ -1,5 +1,4 @@
 import type {
-  Conversation,
   Appointment,
   BookingRequest,
   Invoice,
@@ -7,7 +6,6 @@ import type {
   DesignBrief,
   AftercareTimeline,
   HealedPhoto,
-  ConversationParticipant,
 } from "@/lib/types";
 
 // Helper to create dates relative to now
@@ -19,38 +17,6 @@ function daysFromNow(days: number): Date {
 
 function daysAgo(days: number): Date {
   return daysFromNow(-days);
-}
-
-export function getCustomerConversations(): Conversation[] {
-  return [
-    {
-      id: "conv-1",
-      participantIds: ["customer-1", "artist-1"],
-      lastMessageAt: daysAgo(0),
-      lastMessage: "Hey! I finished the sketch for your sleeve piece. Take a look and let me know your thoughts.",
-      unreadCount: { "customer-1": 2 },
-      createdAt: daysAgo(5),
-      updatedAt: daysAgo(0),
-    },
-    {
-      id: "conv-2",
-      participantIds: ["customer-1", "studio-1"],
-      lastMessageAt: daysAgo(1),
-      lastMessage: "Your appointment is confirmed for next Thursday at 2pm. See you then!",
-      unreadCount: { "customer-1": 1 },
-      createdAt: daysAgo(10),
-      updatedAt: daysAgo(1),
-    },
-    {
-      id: "conv-3",
-      participantIds: ["customer-1", "artist-2"],
-      lastMessageAt: daysAgo(3),
-      lastMessage: "Thanks for sending the reference photos. I'll put together some ideas this week.",
-      unreadCount: { "customer-1": 0 },
-      createdAt: daysAgo(7),
-      updatedAt: daysAgo(3),
-    },
-  ];
 }
 
 export function getCustomerAppointments(): Appointment[] {
@@ -355,27 +321,4 @@ export function getCustomerHealedPhotos(): HealedPhoto[] {
       updatedAt: daysAgo(60),
     },
   ];
-}
-
-export function getConversationParticipants(): Record<string, ConversationParticipant> {
-  return {
-    "artist-1": {
-      id: "artist-1",
-      name: "Sarah Chen",
-      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
-      role: "artist",
-    },
-    "studio-1": {
-      id: "studio-1",
-      name: "Iron Rose Tattoo",
-      avatarUrl: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=200",
-      role: "studio",
-    },
-    "artist-2": {
-      id: "artist-2",
-      name: "Marcus Rivera",
-      avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200",
-      role: "artist",
-    },
-  };
 }

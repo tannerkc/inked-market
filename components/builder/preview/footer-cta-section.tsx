@@ -4,6 +4,15 @@ import { cn } from "@/lib/utils";
 import { useStudioSite } from "@/components/studio-site/studio-site-context";
 import { SectionEmptyState } from "@/components/studio-site/empty-states";
 import { scrollToBuilderSection } from "@/lib/utils/scroll-to-section";
+import {
+  telHref,
+  mailtoHref,
+  instagramDmUrl,
+  instagramHandle,
+  socialUrl,
+  mapsDirectionsUrl,
+  mapsEmbedUrl,
+} from "@/lib/utils/external-links";
 import type { CtaLayout, CtaStyle } from "@/lib/types/builder";
 import type { StudioSiteData } from "@/components/studio-site/studio-site-data";
 
@@ -150,6 +159,9 @@ function SimpleMinimal({ glow, data, ctaStyle }: VariantProps) {
 /*  Layout: contact-form                                              */
 /* ------------------------------------------------------------------ */
 function ContactForm({ glow, data, ctaStyle }: VariantProps) {
+  // Official ig.me DM deep link, falling back to the profile URL; null hides the action.
+  const igHref = instagramDmUrl(data?.instagram) ?? socialUrl("instagram", data?.instagram);
+  const igHandle = instagramHandle(data?.instagram);
   return (
     <section
       className="relative w-full overflow-hidden"
@@ -249,7 +261,7 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
           <div className="flex flex-col justify-center gap-3">
             {data?.phone ? (
               <a
-                href={`tel:${data.phone.replace(/[^+\d]/g, "")}`}
+                href={telHref(data.phone)}
                 className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
                 style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
               >
@@ -258,25 +270,25 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
             ) : null}
             {data?.email ? (
               <a
-                href={`mailto:${data.email}`}
+                href={mailtoHref(data.email)}
                 className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
                 style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
               >
                 Email {data.email}
               </a>
             ) : null}
-            {data?.instagram ? (
+            {igHref ? (
               <a
-                href={`https://instagram.com/${data.instagram.replace(/^@/, "")}`}
+                href={igHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg border px-4 py-3 text-sm transition-colors hover:underline"
                 style={{ borderColor: "var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}
               >
-                DM {data.instagram.startsWith("@") ? data.instagram : `@${data.instagram}`}
+                DM {igHandle ? `@${igHandle}` : "on Instagram"}
               </a>
             ) : null}
-            {!data?.phone && !data?.email && !data?.instagram ? (
+            {!data?.phone && !data?.email && !igHref ? (
               <SectionEmptyState
                 message="Add contact details so clients can reach you."
                 prompt={{ group: "contact-hours", label: "Add contact info" }}
@@ -295,22 +307,37 @@ function ContactForm({ glow, data, ctaStyle }: VariantProps) {
 /* ------------------------------------------------------------------ */
 function MapInfo({ glow, data, ctaStyle }: VariantProps) {
   const cityStateZip = [data?.city, data?.state, data?.zipCode].filter(Boolean).join(', ');
+  const mapsQuery = [data?.address, cityStateZip].filter(Boolean).join(", ");
+  // Real embedded map only with live data + a configured Maps Embed API key;
+  // otherwise the designed placeholder stays (Sample mode always shows it).
+  const mapEmbedSrc = data?.isSample ? null : mapsEmbedUrl(mapsQuery, data?.googlePlaceId);
   return (
     <section className="relative w-full overflow-hidden">
       <div className="grid grid-cols-1 @md:grid-cols-[1.2fr_1fr]">
-        {/* Map placeholder */}
-        <div
-          className="flex min-h-[320px] flex-col items-center justify-center"
-          style={{
-            backgroundColor: "var(--bg-sunken)",
-            borderRight: "1px solid var(--border)",
-          }}
-        >
-          <MapPinIcon className="mb-2" style={{ color: "var(--text-muted)" }} />
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Map
-          </span>
-        </div>
+        {mapEmbedSrc ? (
+          <iframe
+            src={mapEmbedSrc}
+            title={`Map to ${data?.name || "the studio"}`}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            className="min-h-[320px] w-full"
+            style={{ border: 0, borderRight: "1px solid var(--border)" }}
+          />
+        ) : (
+          <div
+            className="flex min-h-[320px] flex-col items-center justify-center"
+            style={{
+              backgroundColor: "var(--bg-sunken)",
+              borderRight: "1px solid var(--border)",
+            }}
+          >
+            <MapPinIcon className="mb-2" style={{ color: "var(--text-muted)" }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Map
+            </span>
+          </div>
+        )}
 
         {/* Info panel */}
         <div className="relative p-8 @lg:p-10" style={{ backgroundColor: "var(--bg-raised)" }}>
@@ -371,9 +398,7 @@ function MapInfo({ glow, data, ctaStyle }: VariantProps) {
 
           {data?.address || cityStateZip ? (
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                [data?.address, cityStateZip].filter(Boolean).join(", "),
-              )}`}
+              href={mapsDirectionsUrl(mapsQuery, data?.googlePlaceId)}
               target="_blank"
               rel="noopener noreferrer"
               className={cn("mt-6 inline-block px-6 py-3 text-center text-sm font-semibold no-underline transition-opacity hover:opacity-90", ctaButtonProps(ctaStyle).radiusClass)}

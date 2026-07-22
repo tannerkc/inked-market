@@ -1,8 +1,6 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/providers/theme-provider";
+import { StatusBadge, BADGE_COLORS } from "@/components/ui/status-badge";
 
 interface ProfileHeaderProps {
   name: string;
@@ -16,8 +14,6 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = React.forwardRef<HTMLDivElement, ProfileHeaderProps>(
   ({ name, subtitle, avatarUrl, avatarShape = "circle", tags, onEdit, className, ...props }, ref) => {
-    const { mode } = useTheme();
-    const isDark = mode === "dark";
     const shapeClass = avatarShape === "circle" ? "rounded-full" : "rounded-xl";
 
     return (
@@ -25,7 +21,7 @@ const ProfileHeader = React.forwardRef<HTMLDivElement, ProfileHeaderProps>(
         ref={ref}
         className={cn(
           "flex flex-row gap-3.5 mb-5 pb-4 border-b",
-          isDark ? "border-ink-cream/[0.06]" : "border-ink-black/[0.06]",
+          "border-ink-black/[0.06] dark:border-ink-cream/[0.06]",
           className
         )}
         {...props}
@@ -42,47 +38,28 @@ const ProfileHeader = React.forwardRef<HTMLDivElement, ProfileHeaderProps>(
           ) : (
             <div className={cn(
               "w-14 h-14 border-[1.5px] border-dashed flex items-center justify-center cursor-pointer transition-all hover:border-solid",
-              isDark ? "border-ink-cream/[0.15]" : "border-ink-black/[0.15]",
+              "border-ink-black/[0.15] dark:border-ink-cream/[0.15]",
               shapeClass
             )}>
-              <span className={cn(
-                "text-xl",
-                isDark ? "text-ink-cream/20" : "text-ink-black/20"
-              )}>+</span>
+              <span className="text-xl text-ink-black/20 dark:text-ink-cream/20">+</span>
             </div>
           )}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className={cn(
-            "text-base font-semibold",
-            isDark ? "text-ink-cream" : "text-ink-black"
-          )}>
+          <p className="text-base font-semibold text-ink-black dark:text-ink-cream">
             {name}
           </p>
           {subtitle && (
-            <p className={cn(
-              "text-[11px] mt-0.5",
-              isDark ? "text-ink-cream/45" : "text-ink-black/45"
-            )}>
+            <p className="text-[11px] mt-0.5 text-ink-black/45 dark:text-ink-cream/45">
               {subtitle}
             </p>
           )}
           {tags && tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-1.5">
               {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className={cn(
-                    "font-mono text-[8px] tracking-[0.1em] uppercase px-2.5 py-0.5 rounded-full border",
-                    isDark
-                      ? "border-ink-red/20 text-ink-red/65"
-                      : "border-ink-rust/20 text-ink-rust/65"
-                  )}
-                >
-                  {tag}
-                </span>
+                <StatusBadge key={tag} label={tag} color={BADGE_COLORS.tagOutline} className="px-2.5" />
               ))}
             </div>
           )}
@@ -93,12 +70,7 @@ const ProfileHeader = React.forwardRef<HTMLDivElement, ProfileHeaderProps>(
           <div className="shrink-0">
             <button
               onClick={onEdit}
-              className={cn(
-                "font-mono text-[8px] tracking-[0.15em] uppercase cursor-pointer transition-colors",
-                isDark
-                  ? "text-ink-cream/35 hover:text-ink-cream/55"
-                  : "text-ink-black/35 hover:text-ink-black/55"
-              )}
+              className="font-mono text-[8px] tracking-[0.15em] uppercase cursor-pointer transition-colors text-ink-black/35 hover:text-ink-black/55 dark:text-ink-cream/35 dark:hover:text-ink-cream/55"
             >
               Edit →
             </button>

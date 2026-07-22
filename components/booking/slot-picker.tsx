@@ -11,12 +11,12 @@ interface SlotPickerProps {
   disabled?: boolean;
 }
 
-function fmtDay(date: string): string {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+function dayParts(date: string): { weekday: string; date: string } {
+  const d = new Date(`${date}T12:00:00Z`);
+  return {
+    weekday: d.toLocaleDateString(undefined, { weekday: "short" }),
+    date: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+  };
 }
 
 function fmtTime(iso: string, timeZone: string): string {
@@ -25,6 +25,10 @@ function fmtTime(iso: string, timeZone: string): string {
     minute: "2-digit",
     timeZone,
   });
+}
+
+function tzLabel(timezone: string): string {
+  return (timezone.split("/").pop() ?? timezone).replace(/_/g, " ");
 }
 
 export function SlotPicker({ entity, durationMin, onPick, disabled }: SlotPickerProps) {
@@ -74,33 +78,66 @@ export function SlotPicker({ entity, durationMin, onPick, disabled }: SlotPicker
   const activeDay = selectedDay ?? days[0] ?? null;
 
   if (loading) {
-    return <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">Loading times...</p>;
+    return (
+      <div className="animate-pulse space-y-3" aria-label="Loading open times">
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-[52px] w-16 shrink-0 rounded-2xl bg-ink-black/[0.05] dark:bg-ink-cream/[0.06]"
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-11 rounded-lg bg-ink-black/[0.05] dark:bg-ink-cream/[0.06]" />
+          ))}
+        </div>
+      </div>
+    );
   }
   if (days.length === 0) {
     return (
-      <p className="text-[12px] text-ink-black/40 dark:text-ink-cream/40">
-        No open times in the next 30 days.
-      </p>
+      <div className="rounded-[14px] border border-dashed border-ink-black/[0.12] p-5 text-center dark:border-ink-cream/[0.12]">
+        <p className="text-[13px] text-ink-black/50 dark:text-ink-cream/50">
+          No open times in the next 30 days.
+        </p>
+        <p className="mt-1 font-mono text-[10px] text-ink-black/30 dark:text-ink-cream/30">
+          Check back soon — the calendar opens on a rolling basis.
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {days.map((day) => (
-          <button
-            key={day}
-            type="button"
-            onClick={() => setSelectedDay(day)}
-            className={`min-h-[44px] shrink-0 rounded-full border px-4 font-mono text-[11px] ${
-              day === activeDay
-                ? "border-ink-rust text-ink-rust"
-                : "border-ink-black/[0.08] text-ink-black/60 dark:border-ink-cream/[0.08] dark:text-ink-cream/60"
-            }`}
-          >
-            {fmtDay(day)}
-          </button>
-        ))}
+        {days.map((day) => {
+          const p = dayParts(day);
+          const active = day === activeDay;
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => setSelectedDay(day)}
+              aria-pressed={active}
+              className={`min-h-[52px] shrink-0 rounded-2xl border px-4 py-2 text-center transition-colors ${
+                active
+                  ? "border-ink-black bg-ink-black text-ink-cream dark:border-ink-cream dark:bg-ink-cream dark:text-ink-black"
+                  : "border-ink-black/[0.08] text-ink-black/60 hover:border-ink-black/30 dark:border-ink-cream/[0.08] dark:text-ink-cream/60 dark:hover:border-ink-cream/30"
+              }`}
+            >
+              <span
+                className={`block font-mono text-[9px] uppercase tracking-[0.15em] ${
+                  active ? "opacity-60" : "opacity-50"
+                }`}
+              >
+                {p.weekday}
+              </span>
+              <span className="block font-mono text-[12px] font-medium">{p.date}</span>
+            </button>
+          );
+        })}
       </div>
       <div className="grid grid-cols-3 gap-2">
         {(activeDay ? byDay.get(activeDay) ?? [] : []).map((slot) => (
@@ -109,12 +146,15 @@ export function SlotPicker({ entity, durationMin, onPick, disabled }: SlotPicker
             type="button"
             disabled={disabled}
             onClick={() => onPick(slot)}
-            className="min-h-[44px] rounded-lg border border-ink-black/[0.08] font-mono text-[11px] transition-colors hover:border-ink-rust disabled:opacity-40 dark:border-ink-cream/[0.08]"
+            className="min-h-[44px] rounded-lg border border-ink-black/[0.08] font-mono text-[11px] text-ink-black/70 transition-colors hover:border-ink-rust hover:text-ink-rust disabled:opacity-40 dark:border-ink-cream/[0.08] dark:text-ink-cream/70 dark:hover:border-ink-rust dark:hover:text-ink-rust"
           >
             {fmtTime(slot.startAt, timezone)}
           </button>
         ))}
       </div>
+      <p className="font-mono text-[10px] text-ink-black/25 dark:text-ink-cream/25">
+        Times shown in {tzLabel(timezone)} time
+      </p>
     </div>
   );
 }

@@ -1,10 +1,17 @@
 "use server";
 
 import { headers } from "next/headers";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { z, ZodType } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { applyDepositToAppointment } from "@/lib/booking/deposits/orchestrate";
-import { artistUserId, bookingTargetUserId, notifyUser } from "@/lib/booking/notify";
+import {
+  artistUserId,
+  bookingTargetUserId,
+  notificationContextForTarget,
+  notifyUser,
+} from "@/lib/booking/notify";
 import { postBookingMessage } from "@/lib/booking/messaging";
 import {
   BookConsultationSchema,
@@ -17,13 +24,17 @@ import {
 import { validateChosenTime } from "@/lib/booking/scheduling";
 import { computeEntitySlotsRange, localDateOf } from "@/lib/booking/server-slots";
 import {
-  type DbBookingSettings,
   type DbFlashItem,
   effectiveRequestStatus,
-  mapDbBookingSettings,
   mapDbFlashItem,
 } from "@/lib/supabase/booking-types";
+import type {
+  BookingEntityRef,
+  BookingRequestRecord,
+  BookingSettings,
+} from "@/lib/types/booking";
 import {
+  fetchBookingSettings,
   fetchProjectByRequest,
   fetchRequestById,
   resolveBookingEntity,
@@ -83,34 +94,170 @@ async function customerNameOf(
   return profile?.name ?? email?.split("@")[0] ?? null;
 }
 
+type Parsed<T> = { ok: true; data: T } | { ok: false; error: string };
+
+/** Validate action input; the first issue message becomes the user-facing error. */
+function parseInput<T>(schema: ZodType<T>, input: unknown): Parsed<T> {
+  const r = schema.safeParse(input);
+  return r.success
+    ? { ok: true, data: r.data }
+    : { ok: false, error: r.error.issues[0]?.message ?? GENERIC_ERROR };
+}
+
+/** True when the target uses inbuilt booking, is accepting, and the flow's flag is on. */
+function acceptsFlow(
+  settings: BookingSettings | null,
+  flag: "customRequestsEnabled" | "consultationsEnabled" | "flashEnabled"
+): settings is BookingSettings {
+  return Boolean(
+    settings &&
+      settings.bookingMode === "inbuilt" &&
+      settings.acceptingBookings &&
+      settings[flag]
+  );
+}
+
+/** Server-side recompute of one local day's open slots for an entity. */
+async function openSlotsForDay(
+  admin: SupabaseClient,
+  opts: {
+    entity: BookingEntityRef;
+    durationMin: number;
+    timezone: string;
+    startAt: string;
+    now: Date;
+  }
+): Promise<{ startAt: string; endAt: string }[]> {
+  const localDate = localDateOf(opts.startAt, opts.timezone);
+  const range = await computeEntitySlotsRange(admin, {
+    entity: opts.entity,
+    durationMin: opts.durationMin,
+    fromDate: localDate,
+    toDate: localDate,
+    now: opts.now,
+  });
+  return range?.slots ?? [];
+}
+
+/** Insert an appointment row; the gist-exclusion race becomes a friendly error. */
+async function insertAppointment(
+  supabase: SupabaseClient,
+  row: Record<string, unknown>
+): Promise<Parsed<{ id: string }>> {
+  const { data, error } = await supabase
+    .from("appointments")
+    .insert(row)
+    .select("id")
+    .single();
+  if (error || !data) {
+    return {
+      ok: false,
+      error:
+        error?.code === "23P01"
+          ? "That time was just taken — pick another."
+          : GENERIC_ERROR,
+    };
+  }
+  return { ok: true, data: { id: (data as { id: string }).id } };
+}
+
+/** Route the deposit: artist targets use provider rails (checkout URL); studio
+ *  targets fall back to the manual mark-received path. */
+async function routeDeposit(
+  admin: SupabaseClient,
+  opts: {
+    appointmentId: string;
+    target: BookingEntityRef;
+    depositCents: number;
+    description: string;
+  }
+): Promise<string | null> {
+  if (opts.target.artistId) {
+    const { checkoutUrl } = await applyDepositToAppointment(admin, {
+      appointmentId: opts.appointmentId,
+      artistId: opts.target.artistId,
+      depositCents: opts.depositCents,
+      description: opts.description,
+      origin: await requestOrigin(),
+    });
+    return checkoutUrl;
+  }
+  if (opts.depositCents > 0) {
+    await admin
+      .from("appointments")
+      .update({ deposit_provider: "manual" })
+      .eq("id", opts.appointmentId);
+  }
+  return null;
+}
+
+/** Only the receiving party may respond: the artist, or (for studio-target
+ *  requests) the studio owner. */
+async function canRespondToRequest(
+  supabase: SupabaseClient,
+  request: BookingRequestRecord,
+  userId: string
+): Promise<boolean> {
+  if (request.artistId) {
+    const { data } = await supabase
+      .from("artists")
+      .select("id")
+      .eq("id", request.artistId)
+      .or(`user_id.eq.${userId},claimed_by.eq.${userId}`)
+      .maybeSingle();
+    return Boolean(data);
+  }
+  if (request.studioId) {
+    const { data } = await supabase
+      .from("studios")
+      .select("id")
+      .eq("id", request.studioId)
+      .eq("claimed_by", userId)
+      .maybeSingle();
+    return Boolean(data);
+  }
+  return false;
+}
+
+/** The system thread line summarizing an accept/decline (with quote). */
+function responseMessageContent(d: z.infer<typeof RespondToRequestSchema>): string {
+  if (d.action !== "accept") {
+    return `[Booking] Declined your request${d.responseMessage ? `: ${d.responseMessage}` : "."}`;
+  }
+  const dollars = (cents: number) => `$${(cents / 100).toFixed(0)}`;
+  const quote =
+    d.quoteMinCents !== undefined || d.quoteMaxCents !== undefined
+      ? ` — quote ${dollars(d.quoteMinCents ?? d.quoteMaxCents ?? 0)}${
+          d.quoteMaxCents !== undefined && d.quoteMinCents !== undefined
+            ? `-${dollars(d.quoteMaxCents)}`
+            : ""
+        }`
+      : "";
+  return `[Booking] Accepted your request${quote}. ${
+    d.schedulingMode === "propose"
+      ? "I offered times — pick one from your dashboard."
+      : "Book a time from your dashboard."
+  }`;
+}
+
 export async function submitBookingRequest(
   input: unknown
 ): Promise<ActionResult & { requestId?: string }> {
-  const parsed = SubmitBookingRequestSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
-  }
+  const parsed = parseInput(SubmitBookingRequestSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in to send a booking request." };
 
+  const d = parsed.data;
   // The target (artist or studio) must use inbuilt booking and take requests.
-  const targetColumn = parsed.data.artistId ? "artist_id" : "studio_id";
-  const targetId = parsed.data.artistId ?? parsed.data.studioId ?? "";
-  const { data: settingsRow } = await supabase
-    .from("booking_settings")
-    .select("booking_mode, accepting_bookings, custom_requests_enabled")
-    .eq(targetColumn, targetId)
-    .maybeSingle();
-  if (
-    !settingsRow ||
-    settingsRow.booking_mode !== "inbuilt" ||
-    !settingsRow.accepting_bookings ||
-    !settingsRow.custom_requests_enabled
-  ) {
+  const settings = await fetchBookingSettings(supabase, {
+    artistId: d.artistId,
+    studioId: d.studioId,
+  });
+  if (!acceptsFlow(settings, "customRequestsEnabled")) {
     return { success: false, error: "Not taking requests right now." };
   }
 
-  const d = parsed.data;
   const customerName = await customerNameOf(supabase, user.id, user.email);
   const { data: created, error } = await supabase
     .from("booking_requests")
@@ -119,6 +266,7 @@ export async function submitBookingRequest(
       customer_name: customerName,
       artist_id: d.artistId ?? null,
       studio_id: d.studioId ?? null,
+      preferred_artist_id: d.preferredArtistId ?? null,
       description: d.description,
       placement: d.placement ?? null,
       size_category: d.sizeCategory ?? null,
@@ -137,20 +285,23 @@ export async function submitBookingRequest(
   const admin = createAdminClient();
   await notifyUser(admin, await bookingTargetUserId(admin, d), "request_received", {
     actorName: customerName ?? undefined,
+    requestId: created.id,
+    recipientContext: notificationContextForTarget(d),
   });
   return { success: true, requestId: created.id };
 }
 
 /** The explicit booking-mode choice: inbuilt, external link-out, or off. */
 export async function setBookingMode(input: unknown): Promise<ActionResult> {
-  const parsed = SetBookingModeSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
-  }
+  const parsed = parseInput(SetBookingModeSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in first." };
   const entity = await resolveBookingEntity(supabase);
   if (!entity) return { success: false, error: "No artist or studio profile found." };
+  if (parsed.data.mode === "studio" && !entity.artistId) {
+    return { success: false, error: "Only artists can book through a studio page." };
+  }
 
   try {
     await saveBookingSettings(supabase, entity, {
@@ -163,41 +314,56 @@ export async function setBookingMode(input: unknown): Promise<ActionResult> {
   return { success: true };
 }
 
-export async function respondToBookingRequest(input: unknown): Promise<ActionResult> {
-  const parsed = RespondToRequestSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+/** Bell quick-view (customer side): own request + scheduling context. */
+export async function getOwnBookingRequest(
+  requestId: string
+): Promise<
+  ActionResult & { request?: BookingRequestRecord; scheduled?: boolean; sessionCount?: number }
+> {
+  const { supabase, user } = await requireUser();
+  if (!user) return { success: false, error: "Sign in first." };
+  const request = await fetchRequestById(supabase, requestId);
+  if (!request || request.customerId !== user.id) {
+    return { success: false, error: "Request not found." };
   }
+  const { data: appts } = await supabase
+    .from("appointments")
+    .select("status")
+    .eq("request_id", requestId);
+  const rows = appts ?? [];
+  return {
+    success: true,
+    request,
+    scheduled: rows.length > 0,
+    sessionCount: rows.filter((a) => a.status !== "cancelled" && a.status !== "no_show").length,
+  };
+}
+
+/** Bell quick-view: fetch one request, gated to whoever may respond to it. */
+export async function getBookingRequestForResponse(
+  requestId: string
+): Promise<ActionResult & { request?: BookingRequestRecord }> {
+  const { supabase, user } = await requireUser();
+  if (!user) return { success: false, error: "Sign in first." };
+  const request = await fetchRequestById(supabase, requestId);
+  if (!request) return { success: false, error: "Request not found." };
+  if (!(await canRespondToRequest(supabase, request, user.id))) {
+    return { success: false, error: "Only the receiving artist or studio can view this." };
+  }
+  return { success: true, request };
+}
+
+export async function respondToBookingRequest(input: unknown): Promise<ActionResult> {
+  const parsed = parseInput(RespondToRequestSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in first." };
 
   const request = await fetchRequestById(supabase, parsed.data.requestId);
   if (!request) return { success: false, error: "Request not found." };
-
-  // Only the receiving party may respond: the artist, or (for studio-target
-  // requests) the studio owner.
-  let authorized = false;
-  if (request.artistId) {
-    const { data: artistRow } = await supabase
-      .from("artists")
-      .select("id")
-      .eq("id", request.artistId)
-      .or(`user_id.eq.${user.id},claimed_by.eq.${user.id}`)
-      .maybeSingle();
-    authorized = Boolean(artistRow);
-  } else if (request.studioId) {
-    const { data: studioRow } = await supabase
-      .from("studios")
-      .select("id")
-      .eq("id", request.studioId)
-      .eq("claimed_by", user.id)
-      .maybeSingle();
-    authorized = Boolean(studioRow);
-  }
-  if (!authorized) {
+  if (!(await canRespondToRequest(supabase, request, user.id))) {
     return { success: false, error: "Only the receiving artist or studio can respond." };
   }
-
   if (effectiveRequestStatus(request, new Date()) !== "pending") {
     return { success: false, error: "This request was already handled or expired." };
   }
@@ -249,30 +415,18 @@ export async function respondToBookingRequest(input: unknown): Promise<ActionRes
     admin,
     request.customerId,
     d.action === "accept" ? "request_accepted" : "request_declined",
-    { otherName: request.artistName ?? request.studioName }
+    {
+      otherName: request.artistName ?? request.studioName,
+      requestId: request.id,
+      recipientContext: "customer",
+    }
   );
   const responderUserId = await bookingTargetUserId(admin, request);
   if (responderUserId) {
-    const quote =
-      d.action === "accept" && (d.quoteMinCents !== undefined || d.quoteMaxCents !== undefined)
-        ? ` — quote $${((d.quoteMinCents ?? d.quoteMaxCents ?? 0) / 100).toFixed(0)}${
-            d.quoteMaxCents !== undefined && d.quoteMinCents !== undefined
-              ? `-$${(d.quoteMaxCents / 100).toFixed(0)}`
-              : ""
-          }`
-        : "";
-    const content =
-      d.action === "accept"
-        ? `[Booking] Accepted your request${quote}. ${
-            d.schedulingMode === "propose"
-              ? "I offered times — pick one from your dashboard."
-              : "Book a time from your dashboard."
-          }`
-        : `[Booking] Declined your request${d.responseMessage ? `: ${d.responseMessage}` : "."}`;
     await postBookingMessage(admin, {
       senderUserId: responderUserId,
       customerId: request.customerId,
-      content,
+      content: responseMessageContent(d),
       requestId: request.id,
     });
   }
@@ -299,10 +453,8 @@ export async function withdrawBookingRequest(requestId: string): Promise<ActionR
 export async function scheduleFromRequest(
   input: unknown
 ): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
-  const parsed = ScheduleFromRequestSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
-  }
+  const parsed = parseInput(ScheduleFromRequestSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in first." };
 
@@ -321,31 +473,23 @@ export async function scheduleFromRequest(
 
   const chosen = { startAt: parsed.data.startAt, endAt: parsed.data.endAt };
   const now = new Date();
+  const admin = createAdminClient();
+  const settings = await fetchBookingSettings(admin, target);
+  const timezone = settings?.timezone ?? "America/New_York";
 
   let openSlots: { startAt: string; endAt: string }[] = [];
-  let timezone = "America/New_York";
-  const admin = createAdminClient();
-  const { data: settingsRow } = await admin
-    .from("booking_settings")
-    .select("*")
-    .eq(target.artistId ? "artist_id" : "studio_id", target.artistId ?? target.studioId ?? "")
-    .maybeSingle();
-  if (settingsRow) timezone = (settingsRow as DbBookingSettings).timezone;
-
   if (request.schedulingMode === "open_calendar") {
-    if (!settingsRow) {
+    if (!settings) {
       return { success: false, error: "No availability is set up yet." };
     }
     // Recompute slots for the chosen local day only, server-side.
-    const localDate = localDateOf(chosen.startAt, timezone);
-    const range = await computeEntitySlotsRange(admin, {
+    openSlots = await openSlotsForDay(admin, {
       entity: target,
       durationMin: request.sessionDurationMin ?? 180,
-      fromDate: localDate,
-      toDate: localDate,
+      timezone,
+      startAt: chosen.startAt,
       now,
     });
-    openSlots = range?.slots ?? [];
   }
 
   const verdict = validateChosenTime({
@@ -358,95 +502,73 @@ export async function scheduleFromRequest(
   if (!verdict.ok) return { success: false, error: verdict.error };
 
   const depositCents = request.depositCents ?? 0;
-  const { data: created, error } = await supabase
-    .from("appointments")
-    .insert({
-      customer_id: user.id,
-      customer_name: request.customerName,
-      artist_id: target.artistId ?? null,
-      studio_id: target.studioId ?? null,
-      request_id: request.id,
-      type: "session",
-      start_at: chosen.startAt,
-      end_at: chosen.endAt,
-      timezone,
-      deposit_cents: depositCents,
-      ...depositInsertFields(depositCents),
-    })
-    .select("id")
-    .single();
-  if (error) {
-    if (error.code === "23P01") {
-      return { success: false, error: "That time was just taken — pick another." };
-    }
-    return { success: false, error: GENERIC_ERROR };
-  }
+  const created = await insertAppointment(supabase, {
+    customer_id: user.id,
+    customer_name: request.customerName,
+    artist_id: target.artistId ?? null,
+    studio_id: target.studioId ?? null,
+    request_id: request.id,
+    type: "session",
+    start_at: chosen.startAt,
+    end_at: chosen.endAt,
+    timezone,
+    deposit_cents: depositCents,
+    ...depositInsertFields(depositCents),
+  });
+  if (!created.ok) return { success: false, error: created.error };
+
   // Link multi-session bookings to their project.
   if (request.isMultiSession) {
     const project = await fetchProjectByRequest(admin, request.id);
     if (project) {
-      await admin.from("appointments").update({ project_id: project.id }).eq("id", created.id);
+      await admin
+        .from("appointments")
+        .update({ project_id: project.id })
+        .eq("id", created.data.id);
     }
   }
-  // Provider deposits are artist-account-scoped; studio-target deposits
-  // collect via the manual mark-received path.
-  let checkoutUrl: string | null = null;
-  if (target.artistId) {
-    ({ checkoutUrl } = await applyDepositToAppointment(admin, {
-      appointmentId: created.id,
-      artistId: target.artistId,
-      depositCents,
-      description: `Tattoo deposit - ${request.artistName ?? "session"}`,
-      origin: await requestOrigin(),
-    }));
-  } else if (depositCents > 0) {
-    await admin.from("appointments").update({ deposit_provider: "manual" }).eq("id", created.id);
-  }
+  const checkoutUrl = await routeDeposit(admin, {
+    appointmentId: created.data.id,
+    target,
+    depositCents,
+    description: `Tattoo deposit - ${request.artistName ?? "session"}`,
+  });
   await notifyUser(admin, await bookingTargetUserId(admin, target), "appointment_booked", {
     actorName: request.customerName ?? undefined,
     apptType: "session",
     whenIso: chosen.startAt,
+    recipientContext: notificationContextForTarget(target),
   });
-  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
+  return { success: true, appointmentId: created.data.id, checkoutUrl: checkoutUrl ?? undefined };
 }
 
 export async function bookConsultation(
   input: unknown
 ): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
-  const parsed = BookConsultationSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
-  }
+  const parsed = parseInput(BookConsultationSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in to book a consultation." };
 
   const target = { artistId: parsed.data.artistId, studioId: parsed.data.studioId };
   const admin = createAdminClient();
-  const { data: settingsRow } = await admin
-    .from("booking_settings")
-    .select("*")
-    .eq(target.artistId ? "artist_id" : "studio_id", target.artistId ?? target.studioId ?? "")
-    .maybeSingle();
-  if (!settingsRow) return { success: false, error: "Not taking consultations right now." };
-  const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
-  if (settings.bookingMode !== "inbuilt" || !settings.acceptingBookings || !settings.consultationsEnabled) {
+  const settings = await fetchBookingSettings(admin, target);
+  if (!acceptsFlow(settings, "consultationsEnabled")) {
     return { success: false, error: "Not taking consultations right now." };
   }
 
   const chosen = { startAt: parsed.data.startAt, endAt: parsed.data.endAt };
   const now = new Date();
-  const localDate = localDateOf(chosen.startAt, settings.timezone);
-  const range = await computeEntitySlotsRange(admin, {
-    entity: target,
-    durationMin: settings.consultDurationMin,
-    fromDate: localDate,
-    toDate: localDate,
-    now,
-  });
   const verdict = validateChosenTime({
     mode: "open_calendar",
     proposedTimes: [],
-    openSlots: range?.slots ?? [],
+    openSlots: await openSlotsForDay(admin, {
+      entity: target,
+      durationMin: settings.consultDurationMin,
+      timezone: settings.timezone,
+      startAt: chosen.startAt,
+      now,
+    }),
     chosen,
     now,
   });
@@ -454,58 +576,43 @@ export async function bookConsultation(
 
   // A paid consult charges its price through the deposit rails (spec).
   const consultDeposit = settings.consultPriceCents;
-  const consultCustomerName = await customerNameOf(supabase, user.id, user.email);
-  const { data: created, error } = await supabase
-    .from("appointments")
-    .insert({
-      customer_id: user.id,
-      customer_name: consultCustomerName,
-      artist_id: target.artistId ?? null,
-      studio_id: target.studioId ?? null,
-      type: "consultation",
-      start_at: chosen.startAt,
-      end_at: chosen.endAt,
-      timezone: settings.timezone,
-      price_cents: settings.consultPriceCents > 0 ? settings.consultPriceCents : null,
-      deposit_cents: consultDeposit,
-      ...depositInsertFields(consultDeposit),
-    })
-    .select("id")
-    .single();
-  if (error) {
-    if (error.code === "23P01") {
-      return { success: false, error: "That time was just taken — pick another." };
-    }
-    return { success: false, error: GENERIC_ERROR };
-  }
+  const customerName = await customerNameOf(supabase, user.id, user.email);
+  const created = await insertAppointment(supabase, {
+    customer_id: user.id,
+    customer_name: customerName,
+    artist_id: target.artistId ?? null,
+    studio_id: target.studioId ?? null,
+    type: "consultation",
+    start_at: chosen.startAt,
+    end_at: chosen.endAt,
+    timezone: settings.timezone,
+    price_cents: settings.consultPriceCents > 0 ? settings.consultPriceCents : null,
+    deposit_cents: consultDeposit,
+    ...depositInsertFields(consultDeposit),
+  });
+  if (!created.ok) return { success: false, error: created.error };
+
   // Provider deposits are artist-account-scoped; studio consults use manual.
-  let checkoutUrl: string | null = null;
-  if (target.artistId) {
-    ({ checkoutUrl } = await applyDepositToAppointment(admin, {
-      appointmentId: created.id,
-      artistId: target.artistId,
-      depositCents: consultDeposit,
-      description: "Consultation booking",
-      origin: await requestOrigin(),
-    }));
-  } else if (consultDeposit > 0) {
-    await admin.from("appointments").update({ deposit_provider: "manual" }).eq("id", created.id);
-  }
+  const checkoutUrl = await routeDeposit(admin, {
+    appointmentId: created.data.id,
+    target,
+    depositCents: consultDeposit,
+    description: "Consultation booking",
+  });
   await notifyUser(admin, await bookingTargetUserId(admin, target), "appointment_booked", {
-    actorName: consultCustomerName ?? undefined,
+    actorName: customerName ?? undefined,
     apptType: "consultation",
     whenIso: chosen.startAt,
+    recipientContext: notificationContextForTarget(target),
   });
-  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
+  return { success: true, appointmentId: created.data.id, checkoutUrl: checkoutUrl ?? undefined };
 }
 
 export async function bookFlash(
   input: unknown
 ): Promise<ActionResult & { appointmentId?: string; checkoutUrl?: string }> {
-  const parsed = BookFlashSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
-  }
+  const parsed = parseInput(BookFlashSchema, input);
+  if (!parsed.ok) return { success: false, error: parsed.error };
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Sign in to book this piece." };
 
@@ -519,31 +626,24 @@ export async function bookFlash(
   const item = mapDbFlashItem(itemRow as DbFlashItem);
   if (!item.active) return { success: false, error: "This piece is no longer available." };
 
-  const { data: settingsRow } = await admin
-    .from("booking_settings")
-    .select("*")
-    .eq("artist_id", item.artistId)
-    .maybeSingle();
-  if (!settingsRow) return { success: false, error: "This artist is not taking flash bookings." };
-  const settings = mapDbBookingSettings(settingsRow as DbBookingSettings);
-  if (settings.bookingMode !== "inbuilt" || !settings.acceptingBookings || !settings.flashEnabled) {
+  const target = { artistId: item.artistId };
+  const settings = await fetchBookingSettings(admin, target);
+  if (!acceptsFlow(settings, "flashEnabled")) {
     return { success: false, error: "This artist is not taking flash bookings." };
   }
 
   const chosen = { startAt: parsed.data.startAt, endAt: parsed.data.endAt };
   const now = new Date();
-  const localDate = localDateOf(chosen.startAt, settings.timezone);
-  const range = await computeEntitySlotsRange(admin, {
-    entity: { artistId: item.artistId },
-    durationMin: item.durationMin,
-    fromDate: localDate,
-    toDate: localDate,
-    now,
-  });
   const verdict = validateChosenTime({
     mode: "open_calendar",
     proposedTimes: [],
-    openSlots: range?.slots ?? [],
+    openSlots: await openSlotsForDay(admin, {
+      entity: target,
+      durationMin: item.durationMin,
+      timezone: settings.timezone,
+      startAt: chosen.startAt,
+      now,
+    }),
     chosen,
     now,
   });
@@ -565,44 +665,38 @@ export async function bookFlash(
     claimed = true;
   }
 
-  const { data: created, error } = await supabase
-    .from("appointments")
-    .insert({
-      customer_id: user.id,
-      customer_name: await customerNameOf(supabase, user.id, user.email),
-      artist_id: item.artistId,
-      flash_item_id: item.id,
-      type: "flash",
-      start_at: chosen.startAt,
-      end_at: chosen.endAt,
-      timezone: settings.timezone,
-      price_cents: item.priceCents,
-      deposit_cents: item.depositCents,
-      ...depositInsertFields(item.depositCents),
-    })
-    .select("id")
-    .single();
-  if (error) {
+  const customerName = await customerNameOf(supabase, user.id, user.email);
+  const created = await insertAppointment(supabase, {
+    customer_id: user.id,
+    customer_name: customerName,
+    artist_id: item.artistId,
+    flash_item_id: item.id,
+    type: "flash",
+    start_at: chosen.startAt,
+    end_at: chosen.endAt,
+    timezone: settings.timezone,
+    price_cents: item.priceCents,
+    deposit_cents: item.depositCents,
+    ...depositInsertFields(item.depositCents),
+  });
+  if (!created.ok) {
     if (claimed) {
       // Compensating: give the piece back.
       await admin.from("flash_items").update({ active: true }).eq("id", item.id);
     }
-    if (error.code === "23P01") {
-      return { success: false, error: "That time was just taken — pick another." };
-    }
-    return { success: false, error: GENERIC_ERROR };
+    return { success: false, error: created.error };
   }
-  const { checkoutUrl } = await applyDepositToAppointment(admin, {
-    appointmentId: created.id,
-    artistId: item.artistId,
+  const checkoutUrl = await routeDeposit(admin, {
+    appointmentId: created.data.id,
+    target,
     depositCents: item.depositCents,
     description: `Deposit: ${item.title}`,
-    origin: await requestOrigin(),
   });
   await notifyUser(admin, await artistUserId(admin, item.artistId), "appointment_booked", {
-    actorName: (await customerNameOf(supabase, user.id, user.email)) ?? undefined,
+    actorName: customerName ?? undefined,
     apptType: "flash",
     whenIso: chosen.startAt,
+    recipientContext: "artist",
   });
-  return { success: true, appointmentId: created.id, checkoutUrl: checkoutUrl ?? undefined };
+  return { success: true, appointmentId: created.data.id, checkoutUrl: checkoutUrl ?? undefined };
 }

@@ -3,8 +3,7 @@
 import { useBuilder } from "@/components/builder/builder-provider";
 import { detailsOptions } from "@/lib/data/builder-options";
 import type { DetailsLayout } from "@/lib/types/builder";
-import { cn } from "@/lib/utils";
-import { PickerCheckmark } from "./picker-checkmark";
+import { ThumbnailPicker } from "./thumbnail-picker";
 
 function DetailsThumbnail({ layout }: { layout: DetailsLayout }) {
   switch (layout) {
@@ -41,50 +40,14 @@ export function DetailsLayoutPicker() {
   const { config, applyChange } = useBuilder();
 
   return (
-    <div>
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-        Details Layout
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {detailsOptions.map((opt) => {
-          const selected = config.detailsLayout === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => applyChange({ detailsLayout: opt.value })}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
-                selected
-                  ? "border-ink-red bg-chrome-surface ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              <div className="aspect-[4/3] w-full p-1.5">
-                <DetailsThumbnail layout={opt.value} />
-              </div>
-
-              <div className="px-2 pb-2.5 pt-0.5">
-                <span
-                  className={cn(
-                    "text-[11px] font-medium transition-colors",
-                    selected ? "text-ink-red" : "text-chrome-text-secondary group-hover:text-chrome-text-light"
-                  )}
-                >
-                  {opt.label}
-                </span>
-              </div>
-
-              {selected && (
-                <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red text-white">
-                  <PickerCheckmark />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <ThumbnailPicker<DetailsLayout>
+      title="Details Layout"
+      columns={3}
+      options={detailsOptions}
+      selectedValue={config.detailsLayout}
+      onSelect={(value) => applyChange({ detailsLayout: value })}
+      renderThumbnail={(value) => <DetailsThumbnail layout={value} />}
+    />
   );
 }
 

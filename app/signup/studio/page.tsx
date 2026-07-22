@@ -1,28 +1,23 @@
 "use client";
 
-import { Eyebrow } from "@/components/ui/eyebrow";
-import { Headline } from "@/components/ui/headline";
-import { Subtitle } from "@/components/ui/subtitle";
-import { ProgressBar, AuthForm } from "@/components/signup";
-import { useAuth } from "@/components/providers/auth-provider";
+import { SignupPageLayout, AuthForm, useAccountStep } from "@/components/signup";
 
 export default function StudioSignupPage() {
-  const { updateSignupProgress, signupProgress } = useAuth();
+  const { onSubmit, error, signupProgress } = useAccountStep("studio", "/signup/studio/setup");
 
   return (
-    <div className="text-center">
-      <ProgressBar currentStep={2} totalSteps={4} />
-      <Eyebrow text="Studio Account" color="rust" />
-      <Headline
-        variant="mixed"
-        size="sm"
-        words={[
-          { text: "Create", font: "pirata" },
-          { text: "Your", font: "rye" },
-          { text: "Account", font: "cook", color: "text-ink-rust" },
-        ]}
-      />
-      <Subtitle text="Set up your studio's presence on Inked Market." className="mb-6" />
+    <SignupPageLayout
+      currentStep={2}
+      totalSteps={4}
+      eyebrow="Studio Account"
+      eyebrowColor="rust"
+      headlineWords={[
+        { text: "Create", font: "pirata" },
+        { text: "Your", font: "rye" },
+        { text: "Account", font: "cook", color: "text-ink-rust" },
+      ]}
+      subtitle="Set up your studio's presence on Inked Market."
+    >
       <AuthForm
         emailPlaceholder="owner@studio.com"
         nameField={{ label: "Your Name", placeholder: "Studio owner name" }}
@@ -31,16 +26,10 @@ export default function StudioSignupPage() {
         defaultEmail={signupProgress.email}
         defaultPassword={signupProgress.password}
         defaultName={signupProgress.name}
-        onSubmit={(data) => {
-          updateSignupProgress({
-            role: "studio",
-            email: data.email,
-            password: data.password,
-            name: data.name,
-          });
-          window.location.href = "/signup/studio/setup";
-        }}
+        requireStrongPassword
+        error={error}
+        onSubmit={onSubmit}
       />
-    </div>
+    </SignupPageLayout>
   );
 }

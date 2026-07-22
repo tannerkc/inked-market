@@ -27,7 +27,7 @@ const EXP_RANGES: Record<string, [number, number]> = {
 };
 
 /** Artist enriched with its primary studio's display name (for the detail page). */
-export type ArtistWithStudio = Artist & { studioName?: string };
+export type ArtistWithStudio = Artist & { studioName?: string; studioSlug?: string };
 
 // ─── Discover ─────────────────────────────────────────────────────────────────
 
@@ -173,16 +173,19 @@ async function loadArtist(
     const artist = mapDbArtistToArtist(row, (portfolio as DbPortfolioImage[]) ?? []);
 
     let studioName: string | undefined;
+    let studioSlug: string | undefined;
     if (row.studio_id) {
       const { data: studio } = await supabase
         .from("studios")
-        .select("name")
+        .select("name, slug")
         .eq("id", row.studio_id)
         .single();
-      studioName = (studio as { name?: string } | null)?.name ?? undefined;
+      const s = studio as { name?: string; slug?: string } | null;
+      studioName = s?.name ?? undefined;
+      studioSlug = s?.slug ?? undefined;
     }
 
-    return { ...artist, studioName };
+    return { ...artist, studioName, studioSlug };
   } catch {
     return null;
   }
@@ -333,6 +336,21 @@ export async function searchArtistsForInvite(
   } catch {
     return [];
   }
+}
+
+/** First few portfolio image urls — cheap hover/preview payload. */
+export async function fetchArtistGalleryPreview(
+  supabase: SupabaseClient,
+  artistId: string,
+  limit = 6,
+): Promise<string[]> {
+  const { data } = await supabase
+    .from("portfolio_images")
+    .select("url")
+    .eq("artist_id", artistId)
+    .order("sort_order", { ascending: true })
+    .limit(limit);
+  return ((data ?? []) as { url: string }[]).map((r) => r.url);
 }
 
 /** Invite an artist — creates a pending affiliation. Returns the new row id. */

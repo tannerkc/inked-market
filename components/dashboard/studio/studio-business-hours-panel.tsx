@@ -1,9 +1,7 @@
 "use client";
 
 import { WeeklySchedulePanel } from "@/components/dashboard/weekly-schedule";
-import { useTheme } from "@/components/providers/theme-provider";
-import { STUDIO_HOUR_OPTIONS, getScheduleSelectClass } from "@/lib/constants/schedule";
-import { cn } from "@/lib/utils";
+import { STUDIO_HOUR_OPTIONS, SCHEDULE_SELECT_CLASS } from "@/lib/constants/schedule";
 
 interface StudioBusinessHoursPanelProps {
   open: boolean;
@@ -22,11 +20,6 @@ export function StudioBusinessHoursPanel({
   onUpdateHour,
   onSave,
 }: StudioBusinessHoursPanelProps) {
-  const { mode } = useTheme();
-  const isDark = mode === "dark";
-
-  const selectClass = getScheduleSelectClass(isDark);
-
   return (
     <WeeklySchedulePanel
       open={open}
@@ -39,13 +32,14 @@ export function StudioBusinessHoursPanel({
       onSave={onSave}
       renderDayContent={(day) => {
         const h = businessHours[day];
+        if (!h) return null;
         return (
           <div className="flex items-center gap-2">
-            <select value={h.open} onChange={(e) => onUpdateHour(day, "open", e.target.value)} aria-label={`${day} open time`} className={selectClass}>
+            <select value={h.open} onChange={(e) => onUpdateHour(day, "open", e.target.value)} aria-label={`${day} open time`} className={SCHEDULE_SELECT_CLASS}>
               {STUDIO_HOUR_OPTIONS.map((t) => <option key={t} value={t} className="text-black">{t}</option>)}
             </select>
-            <span className={cn("text-[10px] shrink-0", isDark ? "text-ink-cream/15" : "text-ink-black/15")}>–</span>
-            <select value={h.close} onChange={(e) => onUpdateHour(day, "close", e.target.value)} aria-label={`${day} close time`} className={selectClass}>
+            <span className="text-[10px] shrink-0 text-ink-black/15 dark:text-ink-cream/15">–</span>
+            <select value={h.close} onChange={(e) => onUpdateHour(day, "close", e.target.value)} aria-label={`${day} close time`} className={SCHEDULE_SELECT_CLASS}>
               {STUDIO_HOUR_OPTIONS.map((t) => <option key={t} value={t} className="text-black">{t}</option>)}
             </select>
           </div>

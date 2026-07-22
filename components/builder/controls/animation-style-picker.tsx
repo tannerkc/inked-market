@@ -3,11 +3,12 @@
 import { useBuilder } from "@/components/builder/builder-provider";
 import { animationStyleOptions } from "@/lib/data/builder-options";
 import type { AnimationStyle } from "@/lib/types/builder";
-import { cn } from "@/lib/utils";
+import { OptionGridPicker } from "./option-grid-picker";
 
 export function AnimationStylePicker() {
   const { config, applyChange, triggerReplay } = useBuilder();
-  const hasAnimation = (config.animationStyle ?? "none") !== "none";
+  const selected = config.animationStyle ?? "none";
+  const hasAnimation = selected !== "none";
 
   const handleSelect = (value: AnimationStyle) => {
     applyChange({ animationStyle: value });
@@ -17,12 +18,13 @@ export function AnimationStylePicker() {
   };
 
   return (
-    <div>
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-chrome-text-dim">
-          Animation Style
-        </span>
-        {hasAnimation && (
+    <OptionGridPicker<AnimationStyle>
+      title="Animation Style"
+      options={animationStyleOptions}
+      selectedValue={selected}
+      onSelect={handleSelect}
+      headerActions={
+        hasAnimation && (
           <button
             type="button"
             title="Replay animations in preview"
@@ -35,39 +37,9 @@ export function AnimationStylePicker() {
             </svg>
             Replay
           </button>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {animationStyleOptions.map((opt) => {
-          const selected = (config.animationStyle ?? "none") === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => handleSelect(opt.value as AnimationStyle)}
-              className={cn(
-                "relative flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors",
-                selected
-                  ? "border-ink-red bg-ink-red/10 ring-1 ring-ink-red/30"
-                  : "border-chrome-border bg-chrome-surface hover:border-chrome-border-hover hover:bg-chrome-surface-hover"
-              )}
-            >
-              {selected && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-red">
-                  <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" fill="none" stroke="white" strokeWidth={2}>
-                    <path d="M2 5.5 4.5 8 8.5 3" />
-                  </svg>
-                </span>
-              )}
-              <span className="text-[11px] font-semibold text-chrome-text-light">{opt.label}</span>
-              {opt.description && (
-                <span className="text-[10px] leading-tight text-chrome-text-dim">{opt.description}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+        )
+      }
+    />
   );
 }
 

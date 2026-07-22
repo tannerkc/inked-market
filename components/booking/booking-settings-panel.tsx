@@ -6,7 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { FieldLabel, SelectRow, ToggleRow } from "./form-rows";
 import { useBookingSettings } from "./use-booking-settings";
 import { usePaymentStatus, type ProviderStatus } from "./use-payment-status";
-import type { BookingSettingsInput, ConsultLocation, SlotGranularity } from "@/lib/types/booking";
+import type {
+  BookingMode,
+  BookingSettingsInput,
+  ConsultLocation,
+  SlotGranularity,
+} from "@/lib/types/booking";
 
 const US_TIMEZONES = [
   "America/New_York",
@@ -94,17 +99,32 @@ export function BookingSettingsPanel({ open, onClose }: BookingSettingsPanelProp
         <div className="flex flex-col gap-5 p-4">
           <SelectRow
             label="Bookings"
-            value={settings.bookingMode ?? ""}
+            value={settings.bookingMode ?? (isStudio ? "" : "studio")}
             options={[
-              ...(settings.bookingMode === null ? [{ value: "", label: "Choose..." }] : []),
+              ...(isStudio && settings.bookingMode === null
+                ? [{ value: "", label: "Choose..." }]
+                : []),
+              ...(isStudio ? [] : [{ value: "studio", label: "Through studio page" }]),
               { value: "inbuilt", label: "Inked booking" },
               { value: "external", label: "External link" },
               { value: "off", label: "Off" },
             ]}
-            onChange={(v) =>
-              update("bookingMode", v === "" ? null : (v as "inbuilt" | "external" | "off"))
-            }
+            onChange={(v) => update("bookingMode", v === "" ? null : (v as BookingMode))}
           />
+
+          {!isStudio && (settings.bookingMode ?? "studio") === "studio" ? (
+            <p className="text-[10px] text-ink-black/30 dark:text-ink-cream/30">
+              Clients pick you on your studio&apos;s booking page and the front desk handles
+              requests. This is the default.
+            </p>
+          ) : null}
+
+          {!isStudio && settings.bookingMode === "off" ? (
+            <p className="text-[11px] text-ink-rust">
+              Off also hides you from your studio&apos;s booking page — clients won&apos;t be able
+              to pick you there.
+            </p>
+          ) : null}
 
           {settings.bookingMode === "external" ? (
             <div className="flex flex-col gap-2">

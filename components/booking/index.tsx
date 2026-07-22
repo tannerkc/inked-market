@@ -1,3 +1,4 @@
+export { ArtistPicker } from "./artist-picker";
 export { ArtistRequestsSection } from "./artist-requests-section";
 export { BookingFlow } from "./booking-flow";
 export { BookingModePrompt } from "./booking-mode-prompt";
@@ -15,5 +16,8 @@ export { BookingRequestFlow } from "./request-flow";
 export { FieldLabel, SelectRow, ToggleRow } from "./form-rows";
 export { FlashManagerPanel } from "./flash-manager-panel";
 export { FrontDeskPanel } from "./front-desk-panel";
+export { FlowHeader } from "./flow-header";
 export { RosterScheduleCard } from "./roster-schedule-card";
+export { SignInGate } from "./sign-in-gate";
+export { StepList } from "./step-list";
 export { useBookingSettings } from "./use-booking-settings";

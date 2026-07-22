@@ -51,6 +51,7 @@ export const SubmitBookingRequestSchema = z
   .object({
     artistId: z.string().uuid().optional(),
     studioId: z.string().uuid().optional(),
+    preferredArtistId: z.string().uuid().optional(),
     description: z.string().trim().min(20, "Tell the artist a bit more (20+ characters)").max(3000),
   placement: z.string().trim().max(100).optional(),
   sizeCategory: z.enum(["small", "medium", "large", "xl"]).optional(),
@@ -65,6 +66,9 @@ export const SubmitBookingRequestSchema = z
   .superRefine((d, ctx) => {
     if ((d.artistId === undefined) === (d.studioId === undefined)) {
       ctx.addIssue({ code: "custom", message: "Pick an artist or a studio, not both" });
+    }
+    if (d.preferredArtistId && !d.studioId) {
+      ctx.addIssue({ code: "custom", message: "A requested artist only applies to studio requests" });
     }
   });
 export type SubmitBookingRequestInput = z.infer<typeof SubmitBookingRequestSchema>;
@@ -144,7 +148,7 @@ export type BookFlashInput = z.infer<typeof BookFlashSchema>;
 
 export const SetBookingModeSchema = z
   .object({
-    mode: z.enum(["inbuilt", "external", "off"]),
+    mode: z.enum(["inbuilt", "external", "studio", "off"]),
     externalUrl: z.string().trim().url().startsWith("https://").max(500).optional(),
   })
   .superRefine((d, ctx) => {
@@ -202,3 +206,31 @@ export const SlotsQuerySchema = z
     },
     { message: "Date range must be 0-45 days" }
   );
+
+// ─── Messaging ──────────────────────────────────────────────────────────────
+
+export const ConversationIdSchema = z.string().uuid();
+
+export const SendMessageSchema = z
+  .object({
+    conversationId: z.string().uuid().optional(),
+    toUserId: z.string().uuid().optional(),
+    content: z.string().trim().max(2000, "Keep it under 2,000 characters"),
+    attachments: z.array(z.string().url()).max(4).default([]),
+  })
+  .superRefine((v, ctx) => {
+    if (Boolean(v.conversationId) === Boolean(v.toUserId)) {
+      ctx.addIssue({ code: "custom", message: "Pass exactly one of conversationId or toUserId" });
+    }
+    if (v.content.length === 0 && v.attachments.length === 0) {
+      ctx.addIssue({ code: "custom", message: "Message is empty" });
+    }
+  });
+export type SendMessageInput = z.input<typeof SendMessageSchema>;
+
+export const ThreadQuerySchema = z.object({
+  conversationId: z.string().uuid(),
+  /** Load messages strictly older than this ISO timestamp (pagination cursor). */
+  before: z.string().datetime({ offset: true }).optional(),
+});
+export type ThreadQuery = z.input<typeof ThreadQuerySchema>;
